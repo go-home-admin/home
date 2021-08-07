@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package http;
+
+import "google/protobuf/descriptor.proto";
+
+option go_package = "github.com/go-ex/proto-help/http";
+
+extend google.protobuf.ServiceOptions {
+	// 路由分组名字; (,) 隔开
+	string Route = 50000;
+}

@@ -10,6 +10,8 @@ install:
 	go get -u github.com/golang/protobuf/proto			# proto 工具链
 	go get -u github.com/golang/protobuf/protoc-gen-go	# proto 工具链
 
+make-route:
+	php bin/toolset make:bean ./
 
 # 调试启动
 dev:

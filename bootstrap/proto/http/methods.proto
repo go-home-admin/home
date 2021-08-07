@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package http;
+
+import "google/protobuf/descriptor.proto";
+
+option go_package = "github.com/go-ex/proto-help/http";
+
+extend google.protobuf.MethodOptions {
+	string Get = 50000;
+	string Head = 50001;
+	string Post = 50002;
+	string Put = 50003;
+	string Delete = 50004;
+	string Options = 50005;
+}
