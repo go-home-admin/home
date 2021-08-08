@@ -4,7 +4,7 @@ package http
 
 import (
 	provoders "github.com/go-home-admin/home/app/provoders"
-	"github.com/go-home-admin/home/bootstrap/services"
+	services "github.com/go-home-admin/home/bootstrap/services"
 )
 
 var KernelSingle *Kernel
@@ -20,6 +20,7 @@ func InitializeNewKernelProvider() *Kernel {
 	if KernelSingle == nil {
 		KernelSingle = NewKernelProvider(
 			services.InitializeNewHttpServerProvider(),
+
 			provoders.InitializeNewConfigProvider(),
 		)
 	}

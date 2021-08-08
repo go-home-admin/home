@@ -28,7 +28,7 @@ func (i *Ini) Init() {
 	var err error
 	i.file, err = ini.Load(i.path)
 	if err != nil {
-		panic("无法加载基础配置, path" + i.path)
+		panic("无法加载基础配置, path=" + i.path)
 	}
 }
 

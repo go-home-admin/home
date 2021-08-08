@@ -15,5 +15,5 @@ make-route:
 
 # 调试启动
 dev:make-route
-	go run main.go --path=config.local.ini
+	go run main.go --path=config.ini
 
