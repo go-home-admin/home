@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"github.com/go-home-admin/home/app/provoders"
 	"github.com/go-home-admin/home/bootstrap/constraint"
 	"github.com/go-home-admin/home/bootstrap/services"
@@ -13,7 +14,9 @@ type Kernel struct {
 }
 
 func (k *Kernel) Init() {
+	serviceConfig := k.config.GetServiceConfig("http")
 
+	fmt.Println(serviceConfig)
 }
 
 func (k *Kernel) Run() {

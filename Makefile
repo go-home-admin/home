@@ -14,6 +14,6 @@ make-route:
 	php bin/toolset make:bean ./
 
 # 调试启动
-dev:
+dev:make-route
 	go run main.go --path=config.local.ini
 
