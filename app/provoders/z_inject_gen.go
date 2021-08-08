@@ -3,16 +3,22 @@
 package provoders
 
 var ConfigSingle *Config
-
-func NewConfigProvider() *Config {
-	Config := &Config{}
-	return Config
-}
+var IniSingle *Ini
 
 func InitializeNewConfigProvider() *Config {
 	if ConfigSingle == nil {
-		ConfigSingle = NewConfigProvider()
+		ConfigSingle = NewConfigProvider(
+			InitializeNewIniProvider(),
+		)
 	}
 
 	return ConfigSingle
+}
+
+func InitializeNewIniProvider() *Ini {
+	if IniSingle == nil {
+		IniSingle = NewIniProvider()
+	}
+
+	return IniSingle
 }
