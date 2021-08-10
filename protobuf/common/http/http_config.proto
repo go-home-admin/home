@@ -4,7 +4,12 @@ package http;
 
 import "google/protobuf/descriptor.proto";
 
-option go_package = "github.com/go-ex/proto-help/http";
+option go_package = "github.com/go-home-admin/home/generate/proto/common/http";
+
+extend google.protobuf.ServiceOptions {
+	// 路由分组名字
+	string RouteGroup = 50000;
+}
 
 extend google.protobuf.MethodOptions {
 	string Get = 50000;

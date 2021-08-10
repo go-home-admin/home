@@ -1,0 +1,8 @@
+[
+  {
+    "name": "admin",
+    "security": "api_key",
+    "description": "admin的文档描述",
+    "prefix": ""
+  }
+]

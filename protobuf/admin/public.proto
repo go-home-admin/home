@@ -1,1 +1,18 @@
+syntax = "proto3";
 
+package admin;
+
+import "http_config.proto";
+
+option go_package = "github.com/go-home-admin/home/generate/proto/admin";
+
+service Public {
+	option (http.RouteGroup) = "open";
+
+	rpc Index(IndexRequest)returns(IndexResponse){
+		option (http.Post) = "/admin";
+	}
+}
+
+message IndexRequest {}
+message IndexResponse {}

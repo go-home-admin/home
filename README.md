@@ -14,6 +14,9 @@ git clone git@github.com:go-home-admin/home-toolset-php.git
 go env -w GOPROXY=https://goproxy.io,direct
 ~~~~
 
+### GoLand 编辑器辅助设置
+
+
 # TODO
 - [ ] 框架引导
 - [ ] 基础http server
