@@ -1,7 +1,7 @@
 package http
 
 import (
-	"github.com/go-home-admin/home/app/provoders"
+	"github.com/go-home-admin/home/app/providers"
 	"github.com/go-home-admin/home/bootstrap/constraint"
 	"github.com/go-home-admin/home/bootstrap/services"
 )
@@ -9,7 +9,7 @@ import (
 // Kernel @Bean
 type Kernel struct {
 	httpServer *services.HttpServer `inject:""`
-	config     *provoders.Config    `inject:""`
+	config     *providers.Config    `inject:""`
 }
 
 func (k *Kernel) Init() {

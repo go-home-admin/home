@@ -14,7 +14,7 @@ protoc:
 	php bin/toolset protoc
 
 make-route:
-	php bin/toolset make:route ./
+	php bin/toolset make:route
 
 make-bean:
 	php bin/toolset make:bean ./

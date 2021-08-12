@@ -1,4 +1,4 @@
-package provoders
+package providers
 
 import (
 	"gopkg.in/ini.v1"

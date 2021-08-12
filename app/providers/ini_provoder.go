@@ -1,4 +1,4 @@
-package provoders
+package providers
 
 import (
 	"flag"

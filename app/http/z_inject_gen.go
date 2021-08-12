@@ -3,13 +3,13 @@
 package http
 
 import (
-	"github.com/go-home-admin/home/app/provoders"
+	"github.com/go-home-admin/home/app/providers"
 	"github.com/go-home-admin/home/bootstrap/services"
 )
 
 var KernelSingle *Kernel
 
-func NewKernelProvider(httpServer *services.HttpServer, config *provoders.Config) *Kernel {
+func NewKernelProvider(httpServer *services.HttpServer, config *providers.Config) *Kernel {
 	Kernel := &Kernel{}
 	Kernel.httpServer = httpServer
 	Kernel.config = config
@@ -21,7 +21,7 @@ func InitializeNewKernelProvider() *Kernel {
 		KernelSingle = NewKernelProvider(
 			services.InitializeNewHttpServerProvider(),
 
-			provoders.InitializeNewConfigProvider(),
+			providers.InitializeNewConfigProvider(),
 		)
 	}
 

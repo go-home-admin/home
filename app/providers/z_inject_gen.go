@@ -1,9 +1,10 @@
 // 代码由home-admin生成, 不需要编辑它
 
-package provoders
+package providers
 
 var ConfigSingle *Config
 var IniSingle *Ini
+var ResponseSingle *Response
 
 func InitializeNewConfigProvider() *Config {
 	if ConfigSingle == nil {
@@ -21,4 +22,12 @@ func InitializeNewIniProvider() *Ini {
 	}
 
 	return IniSingle
+}
+
+func InitializeNewResponseProvider() *Response {
+	if ResponseSingle == nil {
+		ResponseSingle = NewResponseProvider()
+	}
+
+	return ResponseSingle
 }
