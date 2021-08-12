@@ -24,11 +24,17 @@ func NewResponseProvider() *Response {
 
 func (r Response) init() {
 	ErrorRequest = func(ctx *gin.Context, err error) {
-
+		Json(ctx, http.StatusOK, gin.H{
+			"code":    1,
+			"message": err.Error(),
+		})
 	}
 
 	ErrorResponse = func(ctx *gin.Context, err error) {
-
+		Json(ctx, http.StatusOK, gin.H{
+			"code":    1,
+			"message": err.Error(),
+		})
 	}
 
 	SuccessResponse = func(ctx *gin.Context, data interface{}) {
