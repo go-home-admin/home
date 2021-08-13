@@ -1,4 +1,4 @@
-package public
+package open2
 
 import (
 	"github.com/gin-gonic/gin"
@@ -6,15 +6,15 @@ import (
 	"github.com/go-home-admin/home/generate/proto/admin"
 )
 
-// Index
-func (receiver *Controller) Index(req *admin.IndexRequest, ctx *gin.Context) (*admin.IndexResponse, error) {
+// PostIndex
+func (receiver *Controller) PostIndex(req *admin.IndexRequest, ctx *gin.Context) (*admin.IndexResponse, error) {
 	// TODO 这里写业务
 	return &admin.IndexResponse{}, nil
 }
 
-// GinHandleIndex gin原始路由处理
-// http.Get(/admin)
-func (receiver *Controller) GinHandleIndex(ctx *gin.Context) {
+// GinHandlePostIndex gin原始路由处理
+// http.Post(/open/admin)
+func (receiver *Controller) GinHandlePostIndex(ctx *gin.Context) {
 	req := &admin.IndexRequest{}
 	err := ctx.ShouldBind(req)
 

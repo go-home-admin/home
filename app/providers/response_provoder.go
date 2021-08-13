@@ -7,11 +7,14 @@ import (
 	"time"
 )
 
-var ErrorRequest func(ctx *gin.Context, err error)
-
-var ErrorResponse func(ctx *gin.Context, err error)
-
-var SuccessResponse func(ctx *gin.Context, data interface{})
+var (
+	// 参数解析错误响应
+	ErrorRequest func(ctx *gin.Context, err error)
+	// 业务错误响应
+	ErrorResponse func(ctx *gin.Context, err error)
+	// 成功响应
+	SuccessResponse func(ctx *gin.Context, data interface{})
+)
 
 // @Bean
 type Response struct{}

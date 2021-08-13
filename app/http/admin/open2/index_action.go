@@ -1,4 +1,4 @@
-package public
+package open2
 
 import (
 	"github.com/gin-gonic/gin"
@@ -13,7 +13,7 @@ func (receiver *Controller) Index(req *admin.IndexRequest, ctx *gin.Context) (*a
 }
 
 // GinHandleIndex gin原始路由处理
-// http.Get(/admin)
+// http.Get(/open/admin)
 func (receiver *Controller) GinHandleIndex(ctx *gin.Context) {
 	req := &admin.IndexRequest{}
 	err := ctx.ShouldBind(req)
