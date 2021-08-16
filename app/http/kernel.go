@@ -25,8 +25,12 @@ func (k *Kernel) Init() {
 		k.httpServer.GetEngine(),
 		[]route_help.GroupConfig{
 			{
-				Name:        "open",
-				Prefix:      "/api",
+				Name:   "admin-public",
+				Prefix: "/admin",
+			},
+			{
+				Name:        "admin-login",
+				Prefix:      "/admin",
 				Middlewares: nil,
 			},
 		},

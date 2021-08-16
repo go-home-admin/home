@@ -13,11 +13,8 @@ type Routes struct {
 // 映射所有组=>地址
 func (r *Routes) GenRoutesConfig() map[string]route_help.GroupMap {
 	return map[string]route_help.GroupMap{
-		"open": route_help.MergerRouteMap(
-			r.AdminRoutes.GetOpenRoutes(),
-		),
-		"test": route_help.MergerRouteMap(
-			r.AdminRoutes.GetTestRoutes(),
+		"admin-public": route_help.MergerRouteMap(
+			r.AdminRoutes.GetAdminPublicRoutes(),
 		),
 	}
 }

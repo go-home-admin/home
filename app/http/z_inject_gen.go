@@ -4,6 +4,7 @@ package http
 
 import (
 	"github.com/go-home-admin/home/app/providers"
+	home_constraint "github.com/go-home-admin/home/bootstrap/constraint"
 	"github.com/go-home-admin/home/bootstrap/services"
 	"github.com/go-home-admin/home/routes"
 )
@@ -27,6 +28,12 @@ func InitializeNewKernelProvider() *Kernel {
 
 			providers.InitializeNewConfigProvider(),
 		)
+
+		var temp interface{} = KernelSingle
+		construct, ok := temp.(home_constraint.Construct)
+		if ok {
+			construct.Init()
+		}
 	}
 
 	return KernelSingle

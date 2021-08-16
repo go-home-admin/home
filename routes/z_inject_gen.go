@@ -3,19 +3,16 @@
 package routes
 
 import (
-	"github.com/go-home-admin/home/app/http/admin/open2"
 	"github.com/go-home-admin/home/app/http/admin/public"
-	"github.com/go-home-admin/home/app/http/admin/test"
+	home_constraint "github.com/go-home-admin/home/bootstrap/constraint"
 )
 
 var AdminRoutesSingle *AdminRoutes
 var RoutesSingle *Routes
 
-func NewAdminRoutesProvider(public *public.Controller, open2 *open2.Controller, test *test.Controller) *AdminRoutes {
+func NewAdminRoutesProvider(public *public.Controller) *AdminRoutes {
 	AdminRoutes := &AdminRoutes{}
 	AdminRoutes.public = public
-	AdminRoutes.open2 = open2
-	AdminRoutes.test = test
 	return AdminRoutes
 }
 
@@ -23,11 +20,13 @@ func InitializeNewAdminRoutesProvider() *AdminRoutes {
 	if AdminRoutesSingle == nil {
 		AdminRoutesSingle = NewAdminRoutesProvider(
 			public.InitializeNewControllerProvider(),
-
-			open2.InitializeNewControllerProvider(),
-
-			test.InitializeNewControllerProvider(),
 		)
+
+		var temp interface{} = AdminRoutesSingle
+		construct, ok := temp.(home_constraint.Construct)
+		if ok {
+			construct.Init()
+		}
 	}
 
 	return AdminRoutesSingle
@@ -44,6 +43,12 @@ func InitializeNewRoutesProvider() *Routes {
 		RoutesSingle = NewRoutesProvider(
 			InitializeNewAdminRoutesProvider(),
 		)
+
+		var temp interface{} = RoutesSingle
+		construct, ok := temp.(home_constraint.Construct)
+		if ok {
+			construct.Init()
+		}
 	}
 
 	return RoutesSingle

@@ -8,7 +8,18 @@ cd go-home-admin
 git clone git@github.com:go-home-admin/home.git
 git clone git@github.com:go-home-admin/home-toolset-php.git
 ~~~~
+#### 代码生成辅助工具需要初始化
+~~~~shell
+cd home-toolset-php
+composer install
+~~~~
+#### 启动`home`
+~~~~shell
+cd home
+make dev
+~~~~
 
+# 其他
 ### 国内代理设置
 ~~~~shell
 go env -w GOPROXY=https://goproxy.io,direct

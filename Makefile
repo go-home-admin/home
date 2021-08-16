@@ -20,6 +20,6 @@ make-bean:
 	php bin/toolset make:bean ./
 
 # 调试启动
-dev:protoc make-bean make-route
+dev:make-route make-bean protoc
 	go run main.go --path=config.ini
 

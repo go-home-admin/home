@@ -13,7 +13,7 @@ func (receiver *Controller) Index(req *admin.IndexRequest, ctx *gin.Context) (*a
 }
 
 // GinHandleIndex gin原始路由处理
-// http.Get(/admin)
+// http.Get(/)
 func (receiver *Controller) GinHandleIndex(ctx *gin.Context) {
 	req := &admin.IndexRequest{}
 	err := ctx.ShouldBind(req)

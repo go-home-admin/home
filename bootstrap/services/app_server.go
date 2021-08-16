@@ -13,9 +13,6 @@ type AppServer struct {
 // Run 统一启动服务
 func (a *AppServer) Run(servers []constraint.KernelServer) {
 	for _, server := range servers {
-		server.Init()
-	}
-	for _, server := range servers {
 		go server.Run()
 	}
 

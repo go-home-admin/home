@@ -13,12 +13,6 @@ type Ini struct {
 	file *ini.File
 }
 
-func NewIniProvider() *Ini {
-	Ini := &Ini{}
-	Ini.Init()
-	return Ini
-}
-
 func (i *Ini) Init() {
 	flag.StringVar(&i.path, "path", "config.ini", "加载的配置文件")
 

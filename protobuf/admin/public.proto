@@ -7,39 +7,11 @@ import "http_config.proto";
 option go_package = "github.com/go-home-admin/home/generate/proto/admin";
 
 service Public {
-	option (http.RouteGroup) = "open";
+  option (http.RouteGroup) = "admin-public";
 
-	rpc Index(IndexRequest)returns(IndexResponse){
-		option (http.Get) = "/admin";
-	}
-
-	rpc PostIndex(IndexRequest)returns(IndexResponse){
-		option (http.Post) = "/admin";
-	}
-}
-
-service Open2 {
-	option (http.RouteGroup) = "open";
-
-	rpc Index(IndexRequest)returns(IndexResponse){
-		option (http.Get) = "/open/admin";
-	}
-
-	rpc PostIndex(IndexRequest)returns(IndexResponse){
-		option (http.Post) = "/open/admin";
-	}
-}
-
-service Test {
-	option (http.RouteGroup) = "test";
-
-	rpc Index(IndexRequest)returns(IndexResponse){
-		option (http.Get) = "/test/admin";
-	}
-
-	rpc PostIndex(IndexRequest)returns(IndexResponse){
-		option (http.Post) = "/test/admin";
-	}
+  rpc Index(IndexRequest)returns(IndexResponse){
+    option (http.Get) = "/";
+  }
 }
 
 message IndexRequest {}
