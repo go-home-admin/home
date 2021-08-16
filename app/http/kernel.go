@@ -3,6 +3,7 @@ package http
 import (
 	"github.com/go-home-admin/home/app/providers"
 	"github.com/go-home-admin/home/bootstrap/constraint"
+	"github.com/go-home-admin/home/bootstrap/http/route_help"
 	"github.com/go-home-admin/home/bootstrap/services"
 	"github.com/go-home-admin/home/routes"
 )
@@ -22,13 +23,14 @@ func (k *Kernel) Init() {
 	// 这里需要注册你的业务前缀, 中间件
 	k.routes.Load(
 		k.httpServer.GetEngine(),
-		[]routes.GroupConfig{
+		[]route_help.GroupConfig{
 			{
 				Name:        "open",
 				Prefix:      "/api",
 				Middlewares: nil,
 			},
 		},
+		&route_help.RouteHelp{},
 	)
 }
 
