@@ -7,7 +7,8 @@ import (
 
 // @Bean
 type Routes struct {
-	AdminRoutes *AdminRoutes `inject:""`
+	AdminRoutes   *AdminRoutes   `inject:""`
+	ToolsetRoutes *ToolsetRoutes `inject:""`
 }
 
 // 映射所有组=>地址
@@ -15,6 +16,9 @@ func (r *Routes) GenRoutesConfig() map[string]route_help.GroupMap {
 	return map[string]route_help.GroupMap{
 		"admin-public": route_help.MergerRouteMap(
 			r.AdminRoutes.GetAdminPublicRoutes(),
+		),
+		"toolset": route_help.MergerRouteMap(
+			r.ToolsetRoutes.GetToolsetRoutes(),
 		),
 	}
 }

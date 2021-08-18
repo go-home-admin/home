@@ -16,6 +16,9 @@ protoc:
 make-route:
 	php bin/toolset make:route
 
+make-swagger:
+	php bin/toolset make:swagger
+
 make-bean:
 	php bin/toolset make:bean ./
 
