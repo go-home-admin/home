@@ -84,5 +84,8 @@ go env -w GOPROXY=https://goproxy.io,direct
 
 
 # TODO
+- [ ] Gorm
+- [ ] Redis
+- [ ] Swagger
 - [ ] 队列服务
 - [ ] 定时服务
