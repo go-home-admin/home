@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package toolset;
+
+import "http_config.proto";
+
+option go_package = "github.com/go-home-admin/home/generate/proto/toolset";
+
+service Public {
+  option (http.RouteGroup) = "toolset";
+
+  // 登陆
+  rpc Login(LoginRequest)returns(LoginResponse){
+    option (http.Get) = "/login";
+  }
+}
+
+message LoginRequest {}
+message LoginResponse {}

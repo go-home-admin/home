@@ -14,5 +14,11 @@ service Public {
   }
 }
 
-message IndexRequest {}
+message IndexRequest {
+  UserInfo user = 1;
+}
 message IndexResponse {}
+
+message UserInfo {
+  int32 user_id = 1;
+}

@@ -1,0 +1,20 @@
+[
+  {
+    "name": "admin-public",
+    "prefix": "/toolset",
+    "security": [
+      {
+        "api_key": []
+      }
+    ]
+  },
+  {
+    "name": "toolset",
+    "prefix": "/toolset",
+    "security": [
+      {
+        "api_key": []
+      }
+    ]
+  }
+]
