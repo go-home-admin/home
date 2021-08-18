@@ -6,26 +6,26 @@ import (
 	home_constraint "github.com/go-home-admin/home/bootstrap/constraint"
 )
 
-var AppServerSingle *AppServer
+var ContainerSingle *Container
 var HttpServerSingle *HttpServer
 
-func NewAppServerProvider() *AppServer {
-	AppServer := &AppServer{}
-	return AppServer
+func NewContainerProvider() *Container {
+	Container := &Container{}
+	return Container
 }
 
-func InitializeNewAppServerProvider() *AppServer {
-	if AppServerSingle == nil {
-		AppServerSingle = NewAppServerProvider()
+func InitializeNewContainerProvider() *Container {
+	if ContainerSingle == nil {
+		ContainerSingle = NewContainerProvider()
 
-		var temp interface{} = AppServerSingle
+		var temp interface{} = ContainerSingle
 		construct, ok := temp.(home_constraint.Construct)
 		if ok {
 			construct.Init()
 		}
 	}
 
-	return AppServerSingle
+	return ContainerSingle
 }
 
 func InitializeNewHttpServerProvider() *HttpServer {

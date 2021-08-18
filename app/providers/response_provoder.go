@@ -19,12 +19,6 @@ var (
 // @Bean
 type Response struct{}
 
-func NewResponseProvider() *Response {
-	Response := &Response{}
-	Response.init()
-	return Response
-}
-
 func (r Response) init() {
 	ErrorRequest = func(ctx *gin.Context, err error) {
 		Json(ctx, http.StatusOK, gin.H{

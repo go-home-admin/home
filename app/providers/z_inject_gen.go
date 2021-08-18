@@ -4,11 +4,38 @@ package providers
 
 import (
 	home_constraint "github.com/go-home-admin/home/bootstrap/constraint"
+	"github.com/go-home-admin/home/bootstrap/services"
 )
 
+var AppSingle *App
 var ConfigSingle *Config
 var IniSingle *Ini
 var ResponseSingle *Response
+
+func NewAppProvider(container *services.Container, resp *Response) *App {
+	App := &App{}
+	App.container = container
+	App.resp = resp
+	return App
+}
+
+func InitializeNewAppProvider() *App {
+	if AppSingle == nil {
+		AppSingle = NewAppProvider(
+			services.InitializeNewContainerProvider(),
+
+			InitializeNewResponseProvider(),
+		)
+
+		var temp interface{} = AppSingle
+		construct, ok := temp.(home_constraint.Construct)
+		if ok {
+			construct.Init()
+		}
+	}
+
+	return AppSingle
+}
 
 func InitializeNewConfigProvider() *Config {
 	if ConfigSingle == nil {
@@ -43,6 +70,11 @@ func InitializeNewIniProvider() *Ini {
 	}
 
 	return IniSingle
+}
+
+func NewResponseProvider() *Response {
+	Response := &Response{}
+	return Response
 }
 
 func InitializeNewResponseProvider() *Response {

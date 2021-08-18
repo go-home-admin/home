@@ -2,12 +2,12 @@ package main
 
 import (
 	"github.com/go-home-admin/home/app/http"
+	"github.com/go-home-admin/home/app/providers"
 	"github.com/go-home-admin/home/bootstrap/constraint"
-	"github.com/go-home-admin/home/bootstrap/services"
 )
 
 func main() {
-	app := services.InitializeNewAppServerProvider()
+	app := providers.InitializeNewAppProvider()
 
 	app.Run([]constraint.KernelServer{
 		// http服务
