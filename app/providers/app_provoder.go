@@ -10,6 +10,7 @@ import (
 type App struct {
 	container *services.Container `inject:""`
 	resp      *Response           `inject:""`
+	log       *Log                `inject:""`
 }
 
 func (a *App) Run(servers []constraint.KernelServer) {

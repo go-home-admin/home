@@ -28,6 +28,11 @@ func InitializeNewContainerProvider() *Container {
 	return ContainerSingle
 }
 
+func NewHttpServerProvider() *HttpServer {
+	HttpServer := &HttpServer{}
+	return HttpServer
+}
+
 func InitializeNewHttpServerProvider() *HttpServer {
 	if HttpServerSingle == nil {
 		HttpServerSingle = NewHttpServerProvider()

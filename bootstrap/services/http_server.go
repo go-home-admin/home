@@ -2,6 +2,7 @@ package services
 
 import (
 	"github.com/gin-gonic/gin"
+	logs "github.com/go-home-admin/home/bootstrap/services/logs"
 	"strconv"
 )
 
@@ -14,14 +15,10 @@ type HttpServer struct {
 	engine  *gin.Engine
 }
 
-func NewHttpServerProvider() *HttpServer {
-	HttpServer := &HttpServer{
-		isDebug: false,
-		port:    "80",
-		host:    "",
-		engine:  gin.New(),
-	}
-	return HttpServer
+func (receiver *HttpServer) Init() {
+	receiver.isDebug = false
+	receiver.port = "80"
+	receiver.engine = gin.New()
 }
 
 func (receiver *HttpServer) SetDebug(isDebug bool) {
@@ -37,5 +34,8 @@ func (receiver *HttpServer) SetPort(port int) {
 }
 
 func (receiver *HttpServer) RunListener() {
-	receiver.GetEngine().Run(":" + receiver.port)
+	err := receiver.GetEngine().Run(":" + receiver.port)
+	if err != nil {
+		logs.Error(err)
+	}
 }

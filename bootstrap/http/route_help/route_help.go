@@ -3,7 +3,7 @@ package route_help
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-home-admin/home/bootstrap/http/api"
-	"log"
+	"github.com/go-home-admin/home/bootstrap/services/logs"
 )
 
 type RouteHelp struct {
@@ -54,7 +54,7 @@ func (r *RouteHelp) Load(engine *gin.Engine, config []GroupConfig, allGroupRoute
 	// 检查未使用的分组
 	for s, b := range isUserConfig {
 		if b == false {
-			log.Println("proto的路由【", s, "】未在kernel配置前缀、中间件等信息, 它的路由信息未能正常加载")
+			logs.Debug("proto的路由【", s, "】未在kernel配置前缀、中间件等信息, 它的路由信息未能正常加载")
 		}
 	}
 }

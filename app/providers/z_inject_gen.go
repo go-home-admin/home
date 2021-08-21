@@ -5,17 +5,20 @@ package providers
 import (
 	home_constraint "github.com/go-home-admin/home/bootstrap/constraint"
 	"github.com/go-home-admin/home/bootstrap/services"
+	"github.com/go-home-admin/home/bootstrap/services/logs"
 )
 
 var AppSingle *App
 var ConfigSingle *Config
 var IniSingle *Ini
+var LogSingle *Log
 var ResponseSingle *Response
 
-func NewAppProvider(container *services.Container, resp *Response) *App {
+func NewAppProvider(container *services.Container, resp *Response, log *Log) *App {
 	App := &App{}
 	App.container = container
 	App.resp = resp
+	App.log = log
 	return App
 }
 
@@ -25,6 +28,8 @@ func InitializeNewAppProvider() *App {
 			services.InitializeNewContainerProvider(),
 
 			InitializeNewResponseProvider(),
+
+			InitializeNewLogProvider(),
 		)
 
 		var temp interface{} = AppSingle
@@ -70,6 +75,28 @@ func InitializeNewIniProvider() *Ini {
 	}
 
 	return IniSingle
+}
+
+func NewLogProvider(ginLog *logs.GinLogrus) *Log {
+	Log := &Log{}
+	Log.ginLog = ginLog
+	return Log
+}
+
+func InitializeNewLogProvider() *Log {
+	if LogSingle == nil {
+		LogSingle = NewLogProvider(
+			logs.InitializeNewGinLogrusProvider(),
+		)
+
+		var temp interface{} = LogSingle
+		construct, ok := temp.(home_constraint.Construct)
+		if ok {
+			construct.Init()
+		}
+	}
+
+	return LogSingle
 }
 
 func NewResponseProvider() *Response {
