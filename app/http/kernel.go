@@ -19,6 +19,7 @@ func (k *Kernel) Init() {
 	serviceConfig := k.config.GetServiceConfig("http")
 
 	k.httpServer.SetPort(serviceConfig.GetInt("port"))
+	k.httpServer.SetDebug(serviceConfig.GetBool("debug") == true)
 
 	// 这里需要注册你的业务前缀, 中间件
 	k.routes.Load(

@@ -14,6 +14,7 @@ type Log struct {
 func (receiver *Log) Init() {
 	// 统重定向gin的log
 	gin.DefaultWriter = receiver.ginLog
-
+	// 设置等级
 	logs.Logger.SetLevel(logrus.TraceLevel)
+	logs.Logger.SetReportCaller(true)
 }

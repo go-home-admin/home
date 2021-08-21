@@ -1,8 +1,8 @@
 package providers
 
 import (
+	"github.com/go-home-admin/home/bootstrap/services/logs"
 	"gopkg.in/ini.v1"
-	"log"
 )
 
 // Config 外部其他服务的配置依赖提供
@@ -34,7 +34,7 @@ func (c *SessionService) GetString(key string) string {
 func (c *SessionService) GetInt(key string) int {
 	i, err := c.session.Key(key).Int()
 	if err != nil {
-		log.Println(err)
+		logs.Error(err)
 		return 0
 	}
 	return i
@@ -43,7 +43,7 @@ func (c *SessionService) GetInt(key string) int {
 func (c *SessionService) GetBool(key string) bool {
 	i, err := c.session.Key(key).Bool()
 	if err != nil {
-		log.Println(err)
+		logs.Error(err)
 		return false
 	}
 	return i
