@@ -41,10 +41,9 @@ func (c *SessionService) GetInt(key string) int {
 }
 
 func (c *SessionService) GetBool(key string) bool {
-	i, err := c.session.Key(key).Bool()
-	if err != nil {
-		logs.Error(err)
-		return false
+	s := c.session.Key(key).String()
+	if s == "true" {
+		return true
 	}
-	return i
+	return false
 }

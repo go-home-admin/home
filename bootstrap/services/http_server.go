@@ -34,6 +34,9 @@ func (receiver *HttpServer) SetPort(port int) {
 }
 
 func (receiver *HttpServer) RunListener() {
+	if !receiver.isDebug {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	err := receiver.GetEngine().Run(":" + receiver.port)
 	if err != nil {
 		logs.Error(err)
