@@ -1,8 +1,18 @@
 package providers
 
 import (
-	"github.com/go-home-admin/home/bootstrap/services/logs"
 	"gopkg.in/ini.v1"
+)
+
+type Environment string
+
+var (
+	EnvironmentNow        Environment = ""
+	EnvironmentLocal      Environment = "local"
+	EnvironmentDev        Environment = "dev"
+	EnvironmentTesting    Environment = "testing"
+	EnvironmentStaging    Environment = "staging"
+	EnvironmentProduction Environment = "production"
 )
 
 // Config 外部其他服务的配置依赖提供
@@ -11,10 +21,12 @@ type Config struct {
 	iniConfig *Ini `inject:""`
 }
 
-func NewConfigProvider(ini *Ini) *Config {
-	return &Config{
-		iniConfig: ini,
+func GetEnvironment() Environment {
+	if EnvironmentNow == "" {
+		conf := InitializeNewConfigProvider().GetServiceConfig("app")
+		EnvironmentNow = Environment(conf.GetString("environment"))
 	}
+	return EnvironmentNow
 }
 
 func (g *Config) GetServiceConfig(service string) SessionService {
@@ -34,7 +46,6 @@ func (c *SessionService) GetString(key string) string {
 func (c *SessionService) GetInt(key string) int {
 	i, err := c.session.Key(key).Int()
 	if err != nil {
-		logs.Error(err)
 		return 0
 	}
 	return i

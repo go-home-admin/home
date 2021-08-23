@@ -1,6 +1,7 @@
 package http
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/go-home-admin/home/app/providers"
 	"github.com/go-home-admin/home/bootstrap/constraint"
 	"github.com/go-home-admin/home/bootstrap/http/route_help"
@@ -16,11 +17,7 @@ type Kernel struct {
 }
 
 func (k *Kernel) Init() {
-	serviceConfig := k.config.GetServiceConfig("http")
-
-	k.httpServer.SetPort(serviceConfig.GetInt("port"))
-	k.httpServer.SetDebug(serviceConfig.GetBool("debug") == true)
-
+	k.setHttp()
 	// 这里需要注册你的业务前缀, 中间件
 	k.routes.Load(
 		k.httpServer.GetEngine(),
@@ -45,6 +42,15 @@ func (k *Kernel) Run() {
 
 func (k *Kernel) Exit() {
 
+}
+
+func (k *Kernel) setHttp() {
+	appConfig := k.config.GetServiceConfig("app")
+	serviceConfig := k.config.GetServiceConfig("http")
+
+	k.httpServer.SetPort(serviceConfig.GetInt("port"))
+	k.httpServer.SetDebug(appConfig.GetBool("debug") == true)
+	k.httpServer.SetEngine(gin.New())
 }
 
 // GetServer 提供统一命名规范的独立服务

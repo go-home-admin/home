@@ -2,7 +2,7 @@ package services
 
 import (
 	"github.com/gin-gonic/gin"
-	logs "github.com/go-home-admin/home/bootstrap/services/logs"
+	"github.com/sirupsen/logrus"
 	"strconv"
 )
 
@@ -16,13 +16,20 @@ type HttpServer struct {
 }
 
 func (receiver *HttpServer) Init() {
-	receiver.isDebug = false
 	receiver.port = "80"
-	receiver.engine = gin.New()
 }
 
 func (receiver *HttpServer) SetDebug(isDebug bool) {
 	receiver.isDebug = isDebug
+	if receiver.isDebug {
+		gin.SetMode(gin.DebugMode)
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+	}
+}
+
+func (receiver *HttpServer) SetEngine(engine *gin.Engine) {
+	receiver.engine = engine
 }
 
 func (receiver *HttpServer) GetEngine() *gin.Engine {
@@ -34,11 +41,8 @@ func (receiver *HttpServer) SetPort(port int) {
 }
 
 func (receiver *HttpServer) RunListener() {
-	if !receiver.isDebug {
-		gin.SetMode(gin.ReleaseMode)
-	}
 	err := receiver.GetEngine().Run(":" + receiver.port)
 	if err != nil {
-		logs.Error(err)
+		logrus.WithFields(logrus.Fields{"port": receiver.port}).Error("http发送错误")
 	}
 }

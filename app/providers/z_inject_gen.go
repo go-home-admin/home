@@ -42,6 +42,12 @@ func InitializeNewAppProvider() *App {
 	return AppSingle
 }
 
+func NewConfigProvider(iniConfig *Ini) *Config {
+	Config := &Config{}
+	Config.iniConfig = iniConfig
+	return Config
+}
+
 func InitializeNewConfigProvider() *Config {
 	if ConfigSingle == nil {
 		ConfigSingle = NewConfigProvider(
