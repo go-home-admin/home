@@ -27,17 +27,17 @@ func (c *Config) GetInt(key string) int {
 	return i
 }
 
-func (c *Config) GetBool(key string) bool {
+func (c *Config) GetBool(key string, def bool) bool {
 	s := c.iniConfig.Session("app").Key(key).String()
 	if s == "true" {
 		return true
 	}
-	return false
+	return def
 }
 
-func (g *Config) GetServiceConfig(service string) *SessionService {
+func (c *Config) GetServiceConfig(service string) *SessionService {
 	return &SessionService{
-		session: g.iniConfig.Session(service),
+		session: c.iniConfig.Session(service),
 	}
 }
 
@@ -49,10 +49,10 @@ func (c *SessionService) GetString(key string) string {
 	return c.session.Key(key).String()
 }
 
-func (c *SessionService) GetInt(key string) int {
+func (c *SessionService) GetInt(key string, def int) int {
 	i, err := c.session.Key(key).Int()
 	if err != nil {
-		return 0
+		return def
 	}
 	return i
 }

@@ -37,6 +37,10 @@ func (receiver *HttpServer) GetEngine() *gin.Engine {
 }
 
 func (receiver *HttpServer) SetPort(port int) {
+	if port == 0 {
+		port = 80
+		logrus.Warning("端口错误, 转为80")
+	}
 	receiver.port = strconv.Itoa(port)
 }
 

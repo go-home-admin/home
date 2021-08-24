@@ -24,5 +24,5 @@ make-bean:
 
 # 调试启动
 dev:make-route make-bean protoc
-	go run main.go --path=config.ini
+	go run main.go --path=./config
 

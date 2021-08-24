@@ -2,7 +2,11 @@ package providers
 
 import (
 	"flag"
+	"github.com/go-home-admin/home/bootstrap/utils"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/ini.v1"
+	"io/ioutil"
+	"path"
 )
 
 // Ini 的文件加载, 其他服务不能直接使用ini, ini只能由config服务使用, 作为预留可替换
@@ -14,15 +18,24 @@ type Ini struct {
 }
 
 func (i *Ini) Init() {
-	flag.StringVar(&i.path, "path", "config.ini", "加载的配置文件")
+	flag.StringVar(&i.path, "path", "./config", "加载的配置文件")
 
 	//解析命令行参数
 	flag.Parse()
 
-	var err error
-	i.file, err = ini.Load(i.path)
+	cfl, err := utils.GetFiles(i.path)
 	if err != nil {
-		panic("无法加载基础配置, path=" + i.path)
+		logrus.Error(err)
+	}
+
+	i.file = ini.Empty()
+	for _, file := range cfl {
+		if path.Ext(file) == ".ini" {
+			s, _ := ioutil.ReadFile(file)
+			if i.file.Append(file, s) != nil {
+				logrus.Error(err)
+			}
+		}
 	}
 }
 

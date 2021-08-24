@@ -45,8 +45,8 @@ func (k *Kernel) Exit() {
 }
 
 func (k *Kernel) setHttp() {
-	k.httpServer.SetPort(k.config.GetServiceConfig("http").GetInt("port"))
-	k.httpServer.SetDebug(k.config.GetBool("debug") == true)
+	k.httpServer.SetPort(k.config.GetServiceConfig("http").GetInt("port", 80))
+	k.httpServer.SetDebug(k.config.GetBool("debug", true))
 
 	// 默认允许跨域
 	engine := gin.New()
