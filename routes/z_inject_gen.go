@@ -3,17 +3,17 @@
 package routes
 
 import (
+	"github.com/go-home-admin/home/app/http/admin/admin_user"
 	"github.com/go-home-admin/home/app/http/admin/public"
-	public_1 "github.com/go-home-admin/home/app/http/toolset/public"
 	home_constraint "github.com/go-home-admin/home/bootstrap/constraint"
 )
 
 var AdminRoutesSingle *AdminRoutes
 var RoutesSingle *Routes
-var ToolsetRoutesSingle *ToolsetRoutes
 
-func NewAdminRoutesProvider(public *public.Controller) *AdminRoutes {
+func NewAdminRoutesProvider(admin_user *admin_user.Controller, public *public.Controller) *AdminRoutes {
 	AdminRoutes := &AdminRoutes{}
+	AdminRoutes.admin_user = admin_user
 	AdminRoutes.public = public
 	return AdminRoutes
 }
@@ -21,6 +21,8 @@ func NewAdminRoutesProvider(public *public.Controller) *AdminRoutes {
 func InitializeNewAdminRoutesProvider() *AdminRoutes {
 	if AdminRoutesSingle == nil {
 		AdminRoutesSingle = NewAdminRoutesProvider(
+			admin_user.InitializeNewControllerProvider(),
+
 			public.InitializeNewControllerProvider(),
 		)
 
@@ -34,10 +36,9 @@ func InitializeNewAdminRoutesProvider() *AdminRoutes {
 	return AdminRoutesSingle
 }
 
-func NewRoutesProvider(AdminRoutes *AdminRoutes, ToolsetRoutes *ToolsetRoutes) *Routes {
+func NewRoutesProvider(AdminRoutes *AdminRoutes) *Routes {
 	Routes := &Routes{}
 	Routes.AdminRoutes = AdminRoutes
-	Routes.ToolsetRoutes = ToolsetRoutes
 	return Routes
 }
 
@@ -45,8 +46,6 @@ func InitializeNewRoutesProvider() *Routes {
 	if RoutesSingle == nil {
 		RoutesSingle = NewRoutesProvider(
 			InitializeNewAdminRoutesProvider(),
-
-			InitializeNewToolsetRoutesProvider(),
 		)
 
 		var temp interface{} = RoutesSingle
@@ -57,26 +56,4 @@ func InitializeNewRoutesProvider() *Routes {
 	}
 
 	return RoutesSingle
-}
-
-func NewToolsetRoutesProvider(public *public_1.Controller) *ToolsetRoutes {
-	ToolsetRoutes := &ToolsetRoutes{}
-	ToolsetRoutes.public = public
-	return ToolsetRoutes
-}
-
-func InitializeNewToolsetRoutesProvider() *ToolsetRoutes {
-	if ToolsetRoutesSingle == nil {
-		ToolsetRoutesSingle = NewToolsetRoutesProvider(
-			public_1.InitializeNewControllerProvider(),
-		)
-
-		var temp interface{} = ToolsetRoutesSingle
-		construct, ok := temp.(home_constraint.Construct)
-		if ok {
-			construct.Init()
-		}
-	}
-
-	return ToolsetRoutesSingle
 }

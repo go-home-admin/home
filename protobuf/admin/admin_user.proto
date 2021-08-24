@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package admin;
+
+import "http_config.proto";
+
+option go_package = "github.com/go-home-admin/home/generate/proto/admin";
+
+service AdminUser {
+  option (http.RouteGroup) = "admin";
+
+  // 登陆账户信息
+  rpc Info(InfoRequest)returns(InfoResponse){
+    option (http.Get) = "/info";
+  }
+}
+
+message InfoRequest{}
+
+message InfoResponse{
+  // 名称
+  string name = 1;
+  // 头像
+  string avatar = 2;
+  // 描述
+  string introduction = 3;
+  // 角色名称列表
+  repeated string roles = 4;
+}

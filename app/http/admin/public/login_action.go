@@ -6,16 +6,16 @@ import (
 	"github.com/go-home-admin/home/generate/proto/admin"
 )
 
-// Index
-func (receiver *Controller) Index(req *admin.IndexRequest, ctx *gin.Context) (*admin.IndexResponse, error) {
+// Login  登陆
+func (receiver *Controller) Login(req *admin.LoginRequest, ctx *gin.Context) (*admin.LoginResponse, error) {
 	// TODO 这里写业务
-	return &admin.IndexResponse{}, nil
+	return &admin.LoginResponse{}, nil
 }
 
-// GinHandleIndex gin原始路由处理
-// http.Get(/)
-func (receiver *Controller) GinHandleIndex(ctx *gin.Context) {
-	req := &admin.IndexRequest{}
+// GinHandleLogin gin原始路由处理
+// http.Post(/login)
+func (receiver *Controller) GinHandleLogin(ctx *gin.Context) {
+	req := &admin.LoginRequest{}
 	err := ctx.ShouldBind(req)
 
 	if err != nil {
@@ -23,7 +23,7 @@ func (receiver *Controller) GinHandleIndex(ctx *gin.Context) {
 		return
 	}
 
-	resp, err := receiver.Index(req, ctx)
+	resp, err := receiver.Login(req, ctx)
 	if err != nil {
 		providers.ErrorResponse(ctx, err)
 		return

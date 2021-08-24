@@ -9,16 +9,30 @@ option go_package = "github.com/go-home-admin/home/generate/proto/admin";
 service Public {
   option (http.RouteGroup) = "admin-public";
 
-  rpc Index(IndexRequest)returns(IndexResponse){
-    option (http.Get) = "/";
+  // 登陆
+  rpc Login(LoginRequest)returns(LoginResponse){
+    option (http.Post) = "/login";
+  }
+
+  // 退出登陆
+  rpc Logout(LogoutRequest)returns(LogoutResponse){
+    option (http.Post) = "/logout";
   }
 }
 
-message IndexRequest {
-  UserInfo user = 1;
+message LoginRequest {
+  // 账户
+  string username = 1;
+  // 密码
+  string password = 2;
 }
-message IndexResponse {}
 
-message UserInfo {
-  int32 user_id = 1;
+message LoginResponse {
+  string token = 1;
+}
+
+message LogoutRequest {}
+
+message LogoutResponse {
+  string tip = 1;
 }

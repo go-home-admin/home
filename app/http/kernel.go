@@ -27,13 +27,9 @@ func (k *Kernel) Init() {
 				Prefix: "/admin",
 			},
 			{
-				Name:        "admin-login",
+				Name:        "admin",
 				Prefix:      "/admin",
 				Middlewares: nil,
-			},
-			{
-				Name:   "toolset",
-				Prefix: "/toolset",
 			},
 		},
 		&route_help.RouteHelp{},
