@@ -14,6 +14,6 @@ type ToolsetRoutes struct {
 // GetToolsetRoutes Get{option (http.Route)}Routes
 func (c *ToolsetRoutes) GetToolsetRoutes() map[*home_api.Config]func(c *home_gin.Context) {
 	return map[*home_api.Config]func(c *home_gin.Context){
-		home_api.Get("/login"): c.public.GinHandleLogin,
+		home_api.Post("/login"): c.public.GinHandleLogin,
 	}
 }

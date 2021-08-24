@@ -1,18 +1,8 @@
 package providers
 
 import (
+	"github.com/go-home-admin/home/bootstrap/services/app"
 	"gopkg.in/ini.v1"
-)
-
-type Environment string
-
-var (
-	EnvironmentNow        Environment = ""
-	EnvironmentLocal      Environment = "local"
-	EnvironmentDev        Environment = "dev"
-	EnvironmentTesting    Environment = "testing"
-	EnvironmentStaging    Environment = "staging"
-	EnvironmentProduction Environment = "production"
 )
 
 // Config 外部其他服务的配置依赖提供
@@ -21,16 +11,32 @@ type Config struct {
 	iniConfig *Ini `inject:""`
 }
 
-func GetEnvironment() Environment {
-	if EnvironmentNow == "" {
-		conf := InitializeNewConfigProvider().GetServiceConfig("app")
-		EnvironmentNow = Environment(conf.GetString("environment"))
-	}
-	return EnvironmentNow
+func (c *Config) Init() {
+	app.SetEnvironment(c.GetString("environment"))
 }
 
-func (g *Config) GetServiceConfig(service string) SessionService {
-	return SessionService{
+func (c *Config) GetString(key string) string {
+	return c.iniConfig.Session("app").Key(key).String()
+}
+
+func (c *Config) GetInt(key string) int {
+	i, err := c.iniConfig.Session("app").Key(key).Int()
+	if err != nil {
+		return 0
+	}
+	return i
+}
+
+func (c *Config) GetBool(key string) bool {
+	s := c.iniConfig.Session("app").Key(key).String()
+	if s == "true" {
+		return true
+	}
+	return false
+}
+
+func (g *Config) GetServiceConfig(service string) *SessionService {
+	return &SessionService{
 		session: g.iniConfig.Session(service),
 	}
 }

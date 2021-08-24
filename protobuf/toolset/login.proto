@@ -11,9 +11,17 @@ service Public {
 
   // 登陆
   rpc Login(LoginRequest)returns(LoginResponse){
-    option (http.Get) = "/login";
+    option (http.Post) = "/login";
   }
 }
 
-message LoginRequest {}
-message LoginResponse {}
+message LoginRequest {
+  // 账户
+  string username = 1;
+  // 密码
+  string password = 2;
+}
+
+message LoginResponse {
+
+}

@@ -31,6 +31,10 @@ func (k *Kernel) Init() {
 				Prefix:      "/admin",
 				Middlewares: nil,
 			},
+			{
+				Name:   "toolset",
+				Prefix: "/toolset",
+			},
 		},
 		&route_help.RouteHelp{},
 	)
@@ -45,12 +49,13 @@ func (k *Kernel) Exit() {
 }
 
 func (k *Kernel) setHttp() {
-	appConfig := k.config.GetServiceConfig("app")
-	serviceConfig := k.config.GetServiceConfig("http")
+	k.httpServer.SetPort(k.config.GetServiceConfig("http").GetInt("port"))
+	k.httpServer.SetDebug(k.config.GetBool("debug") == true)
 
-	k.httpServer.SetPort(serviceConfig.GetInt("port"))
-	k.httpServer.SetDebug(appConfig.GetBool("debug") == true)
-	k.httpServer.SetEngine(gin.New())
+	// 默认允许跨域
+	engine := gin.New()
+	engine.Use(Cors())
+	k.httpServer.SetEngine(engine)
 }
 
 // GetServer 提供统一命名规范的独立服务

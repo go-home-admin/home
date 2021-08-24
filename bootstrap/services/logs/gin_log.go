@@ -6,8 +6,7 @@ import (
 )
 
 // @Bean
-type GinLogrus struct {
-}
+type GinLogrus struct{}
 
 func (g *GinLogrus) Write(p []byte) (n int, err error) {
 	i := bytes.Index(p, []byte("[GIN-debug] "))

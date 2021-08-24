@@ -83,9 +83,10 @@ func InitializeNewIniProvider() *Ini {
 	return IniSingle
 }
 
-func NewLogProvider(ginLog *logs.GinLogrus) *Log {
+func NewLogProvider(ginLog *logs.GinLogrus, conf *Config) *Log {
 	Log := &Log{}
 	Log.ginLog = ginLog
+	Log.conf = conf
 	return Log
 }
 
@@ -93,6 +94,8 @@ func InitializeNewLogProvider() *Log {
 	if LogSingle == nil {
 		LogSingle = NewLogProvider(
 			logs.InitializeNewGinLogrusProvider(),
+
+			InitializeNewConfigProvider(),
 		)
 
 		var temp interface{} = LogSingle

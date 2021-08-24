@@ -19,7 +19,7 @@ var (
 // @Bean
 type Response struct{}
 
-func (r Response) init() {
+func (r *Response) Init() {
 	ErrorRequest = func(ctx *gin.Context, err error) {
 		Json(ctx, http.StatusOK, gin.H{
 			"code":    1,
