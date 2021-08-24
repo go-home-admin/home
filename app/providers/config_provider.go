@@ -15,6 +15,14 @@ func (c *Config) Init() {
 	app.SetEnvironment(c.GetString("environment"))
 }
 
+func (c *Config) IsDebug() bool {
+	s := c.iniConfig.Session("app").Key("debug").String()
+	if s == "true" {
+		return true
+	}
+	return true
+}
+
 func (c *Config) GetString(key string) string {
 	return c.iniConfig.Session("app").Key(key).String()
 }
