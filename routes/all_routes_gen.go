@@ -8,6 +8,7 @@ import (
 // @Bean
 type Routes struct {
 	AdminRoutes *AdminRoutes `inject:""`
+	ApiRoutes   *ApiRoutes   `inject:""`
 }
 
 // 映射所有组=>地址
@@ -18,6 +19,9 @@ func (r *Routes) GenRoutesConfig() map[string]route_help.GroupMap {
 		),
 		"admin-public": route_help.MergerRouteMap(
 			r.AdminRoutes.GetAdminPublicRoutes(),
+		),
+		"api": route_help.MergerRouteMap(
+			r.ApiRoutes.GetApiRoutes(),
 		),
 	}
 }

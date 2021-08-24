@@ -5,11 +5,13 @@ package routes
 import (
 	"github.com/go-home-admin/home/app/http/admin/admin_user"
 	"github.com/go-home-admin/home/app/http/admin/public"
+	public_1 "github.com/go-home-admin/home/app/http/api/public"
 	home_constraint "github.com/go-home-admin/home/bootstrap/constraint"
 )
 
 var AdminRoutesSingle *AdminRoutes
 var RoutesSingle *Routes
+var ApiRoutesSingle *ApiRoutes
 
 func NewAdminRoutesProvider(admin_user *admin_user.Controller, public *public.Controller) *AdminRoutes {
 	AdminRoutes := &AdminRoutes{}
@@ -36,9 +38,10 @@ func InitializeNewAdminRoutesProvider() *AdminRoutes {
 	return AdminRoutesSingle
 }
 
-func NewRoutesProvider(AdminRoutes *AdminRoutes) *Routes {
+func NewRoutesProvider(AdminRoutes *AdminRoutes, ApiRoutes *ApiRoutes) *Routes {
 	Routes := &Routes{}
 	Routes.AdminRoutes = AdminRoutes
+	Routes.ApiRoutes = ApiRoutes
 	return Routes
 }
 
@@ -46,6 +49,8 @@ func InitializeNewRoutesProvider() *Routes {
 	if RoutesSingle == nil {
 		RoutesSingle = NewRoutesProvider(
 			InitializeNewAdminRoutesProvider(),
+
+			InitializeNewApiRoutesProvider(),
 		)
 
 		var temp interface{} = RoutesSingle
@@ -56,4 +61,26 @@ func InitializeNewRoutesProvider() *Routes {
 	}
 
 	return RoutesSingle
+}
+
+func NewApiRoutesProvider(public *public_1.Controller) *ApiRoutes {
+	ApiRoutes := &ApiRoutes{}
+	ApiRoutes.public = public
+	return ApiRoutes
+}
+
+func InitializeNewApiRoutesProvider() *ApiRoutes {
+	if ApiRoutesSingle == nil {
+		ApiRoutesSingle = NewApiRoutesProvider(
+			public_1.InitializeNewControllerProvider(),
+		)
+
+		var temp interface{} = ApiRoutesSingle
+		construct, ok := temp.(home_constraint.Construct)
+		if ok {
+			construct.Init()
+		}
+	}
+
+	return ApiRoutesSingle
 }

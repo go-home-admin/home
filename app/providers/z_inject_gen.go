@@ -12,6 +12,7 @@ var AppSingle *App
 var ConfigSingle *Config
 var IniSingle *Ini
 var LogSingle *Log
+var MysqlSingle *Mysql
 var ResponseSingle *Response
 
 func NewAppProvider(container *services.Container, resp *Response, log *Log) *App {
@@ -106,6 +107,28 @@ func InitializeNewLogProvider() *Log {
 	}
 
 	return LogSingle
+}
+
+func NewMysqlProvider(conf *Config) *Mysql {
+	Mysql := &Mysql{}
+	Mysql.conf = conf
+	return Mysql
+}
+
+func InitializeNewMysqlProvider() *Mysql {
+	if MysqlSingle == nil {
+		MysqlSingle = NewMysqlProvider(
+			InitializeNewConfigProvider(),
+		)
+
+		var temp interface{} = MysqlSingle
+		construct, ok := temp.(home_constraint.Construct)
+		if ok {
+			construct.Init()
+		}
+	}
+
+	return MysqlSingle
 }
 
 func NewResponseProvider() *Response {

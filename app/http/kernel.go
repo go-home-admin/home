@@ -22,6 +22,7 @@ func (k *Kernel) Init() {
 	k.routes.Load(
 		k.httpServer.GetEngine(),
 		[]route_help.GroupConfig{
+			{Name: "api"},
 			{
 				Name:   "admin-public",
 				Prefix: "/admin",

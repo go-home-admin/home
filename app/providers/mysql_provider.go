@@ -13,6 +13,7 @@ import (
 // @Bean
 type Mysql struct {
 	conf *Config `inject:""`
+	db   *gorm.DB
 }
 
 func (m *Mysql) Init() {
@@ -28,13 +29,18 @@ func (m *Mysql) Init() {
 	if m.conf.IsDebug() {
 		gConf.Logger = &logs.MysqlLog{}
 	}
+	var err error
 	dsn := mysql.Open(fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?parseTime=true", username, password, hosts, port, dbname))
-	db, err := gorm.Open(dsn, gConf)
+	m.db, err = gorm.Open(dsn, gConf)
 	if err != nil {
 		logrus.Error("mysql 链接错误")
 		panic(err)
 	}
 	// https://github.com/go-sql-driver/mysql/issues/1120
-	d := db.ConnPool.(*sql.DB)
+	d := m.db.ConnPool.(*sql.DB)
 	d.SetConnMaxIdleTime(60 * time.Second)
+}
+
+func (m *Mysql) DB() *gorm.DB {
+	return m.db
 }
