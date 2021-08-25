@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "这个是自动文档基础起点",
+        "description": "这个是自动文档基础起点\n\n通用说明: 枚举值,统一未int类型0值预留\n\n\n    {\n        \"code\": 0,\n        \"data\": {\n            \"tip\": \"data是任意结构\"\n        },\n        \"message\": \"通用响应结构, 所有接口的详情都是放入data\",\n        \"time\": 1626173329\n    }\n    ",
         "version": "1.0.0",
         "title": "Swagger Petstore",
         "termsOfService": "http://swagger.io/terms/",
@@ -297,12 +297,7 @@
             },
             "description": ""
         },
-        "swagger.SwaggerRequest": {
-            "type": "object",
-            "properties": [],
-            "description": ""
-        },
-        "swagger.SwaggerResponse": {
+        "swagger.SwaggerNull": {
             "type": "object",
             "properties": [],
             "description": ""
