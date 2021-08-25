@@ -6,12 +6,14 @@ import (
 	"github.com/go-home-admin/home/app/http/admin/admin_user"
 	"github.com/go-home-admin/home/app/http/admin/public"
 	public_1 "github.com/go-home-admin/home/app/http/api/public"
+	"github.com/go-home-admin/home/app/http/swagger/doc"
 	home_constraint "github.com/go-home-admin/home/bootstrap/constraint"
 )
 
 var AdminRoutesSingle *AdminRoutes
 var RoutesSingle *Routes
 var ApiRoutesSingle *ApiRoutes
+var SwaggerRoutesSingle *SwaggerRoutes
 
 func NewAdminRoutesProvider(admin_user *admin_user.Controller, public *public.Controller) *AdminRoutes {
 	AdminRoutes := &AdminRoutes{}
@@ -38,10 +40,11 @@ func InitializeNewAdminRoutesProvider() *AdminRoutes {
 	return AdminRoutesSingle
 }
 
-func NewRoutesProvider(AdminRoutes *AdminRoutes, ApiRoutes *ApiRoutes) *Routes {
+func NewRoutesProvider(AdminRoutes *AdminRoutes, ApiRoutes *ApiRoutes, SwaggerRoutes *SwaggerRoutes) *Routes {
 	Routes := &Routes{}
 	Routes.AdminRoutes = AdminRoutes
 	Routes.ApiRoutes = ApiRoutes
+	Routes.SwaggerRoutes = SwaggerRoutes
 	return Routes
 }
 
@@ -51,6 +54,8 @@ func InitializeNewRoutesProvider() *Routes {
 			InitializeNewAdminRoutesProvider(),
 
 			InitializeNewApiRoutesProvider(),
+
+			InitializeNewSwaggerRoutesProvider(),
 		)
 
 		var temp interface{} = RoutesSingle
@@ -83,4 +88,26 @@ func InitializeNewApiRoutesProvider() *ApiRoutes {
 	}
 
 	return ApiRoutesSingle
+}
+
+func NewSwaggerRoutesProvider(doc *doc.Controller) *SwaggerRoutes {
+	SwaggerRoutes := &SwaggerRoutes{}
+	SwaggerRoutes.doc = doc
+	return SwaggerRoutes
+}
+
+func InitializeNewSwaggerRoutesProvider() *SwaggerRoutes {
+	if SwaggerRoutesSingle == nil {
+		SwaggerRoutesSingle = NewSwaggerRoutesProvider(
+			doc.InitializeNewControllerProvider(),
+		)
+
+		var temp interface{} = SwaggerRoutesSingle
+		construct, ok := temp.(home_constraint.Construct)
+		if ok {
+			construct.Init()
+		}
+	}
+
+	return SwaggerRoutesSingle
 }

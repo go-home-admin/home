@@ -7,8 +7,9 @@ import (
 
 // @Bean
 type Routes struct {
-	AdminRoutes *AdminRoutes `inject:""`
-	ApiRoutes   *ApiRoutes   `inject:""`
+	AdminRoutes   *AdminRoutes   `inject:""`
+	ApiRoutes     *ApiRoutes     `inject:""`
+	SwaggerRoutes *SwaggerRoutes `inject:""`
 }
 
 // 映射所有组=>地址
@@ -22,6 +23,9 @@ func (r *Routes) GenRoutesConfig() map[string]route_help.GroupMap {
 		),
 		"api": route_help.MergerRouteMap(
 			r.ApiRoutes.GetApiRoutes(),
+		),
+		"swagger": route_help.MergerRouteMap(
+			r.SwaggerRoutes.GetSwaggerRoutes(),
 		),
 	}
 }

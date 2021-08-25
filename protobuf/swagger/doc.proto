@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package swagger;
+
+import "http_config.proto";
+
+option go_package = "github.com/go-home-admin/home/generate/proto/swagger";
+
+service Doc {
+  option (http.RouteGroup) = "swagger";
+
+  // 文档
+  rpc Swagger(SwaggerNull)returns(SwaggerNull){
+    option (http.Get) = "/swagger";
+  }
+
+  // 文档json
+  rpc SwaggerJson(SwaggerNull)returns(SwaggerNull){
+    option (http.Get) = "/swagger.json";
+  }
+}
+
+message SwaggerNull {
+
+}

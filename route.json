@@ -1,7 +1,7 @@
 [
   {
-    "name": "admin-public",
-    "prefix": "/toolset",
+    "name": "admin",
+    "prefix": "/admin",
     "security": [
       {
         "api_key": []
@@ -9,8 +9,17 @@
     ]
   },
   {
-    "name": "toolset",
-    "prefix": "/toolset",
+    "name": "admin-public",
+    "prefix": "/admin",
+    "security": [
+      {
+        "api_key": []
+      }
+    ]
+  },
+  {
+    "name": "api",
+    "prefix": "/",
     "security": [
       {
         "api_key": []

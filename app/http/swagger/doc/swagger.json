@@ -1,0 +1,315 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "这个是自动文档基础起点",
+        "version": "1.0.0",
+        "title": "Swagger Petstore",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "email": "apiteam@swagger.io"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        }
+    },
+    "host": "petstore.swagger.io",
+    "basePath": "/v2",
+    "tags": [
+        {
+            "name": "admin",
+            "description": "后台api"
+        },
+        {
+            "name": "api",
+            "description": "这是默认说明。<br>模块详细说明写到<br>/Users/lv/Desktop/golang/go-home-admin/home/protobuf/api/README.md"
+        }
+    ],
+    "schemes": [
+        "https",
+        "http"
+    ],
+    "paths": {
+        "/admin/info": {
+            "get": {
+                "tags": [
+                    "admin"
+                ],
+                "summary": " 登陆账户信息",
+                "description": " 登陆账户信息",
+                "consumes": [
+                    "application/json",
+                    "multipart/form-data",
+                    "application/xml"
+                ],
+                "produces": [
+                    "application/json",
+                    "multipart/form-data",
+                    "application/xml"
+                ],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/admin.InfoResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/admin/login": {
+            "post": {
+                "tags": [
+                    "admin"
+                ],
+                "summary": " 登陆",
+                "description": " 登陆",
+                "consumes": [
+                    "application/json",
+                    "multipart/form-data",
+                    "application/xml"
+                ],
+                "produces": [
+                    "application/json",
+                    "multipart/form-data",
+                    "application/xml"
+                ],
+                "parameters": [
+                    {
+                        "name": "LoginRequest",
+                        "in": "body",
+                        "description": "",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/definitions/admin.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/admin.LoginResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/admin/logout": {
+            "post": {
+                "tags": [
+                    "admin"
+                ],
+                "summary": " 退出登陆",
+                "description": " 退出登陆",
+                "consumes": [
+                    "application/json",
+                    "multipart/form-data",
+                    "application/xml"
+                ],
+                "produces": [
+                    "application/json",
+                    "multipart/form-data",
+                    "application/xml"
+                ],
+                "parameters": [
+                    {
+                        "name": "LogoutRequest",
+                        "in": "body",
+                        "description": "",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/definitions/admin.LogoutRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/admin.LogoutResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "//": {
+            "get": {
+                "tags": [
+                    "api"
+                ],
+                "summary": " 首页",
+                "description": " 首页",
+                "consumes": [
+                    "application/json",
+                    "multipart/form-data",
+                    "application/xml"
+                ],
+                "produces": [
+                    "application/json",
+                    "multipart/form-data",
+                    "application/xml"
+                ],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/api.HomeResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        }
+    },
+    "securityDefinitions": {
+        "petstore_auth": {
+            "type": "oauth2",
+            "authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
+            "flow": "implicit",
+            "scopes": {
+                "write:pets": "modify pets in your account",
+                "read:pets": "read your pets"
+            }
+        },
+        "api_key": {
+            "type": "apiKey",
+            "name": "api_key",
+            "in": "header"
+        }
+    },
+    "definitions": {
+        "admin.InfoRequest": {
+            "type": "object",
+            "properties": [],
+            "description": ""
+        },
+        "admin.InfoResponse": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "format": "string",
+                    "description": " 名称"
+                },
+                "avatar": {
+                    "type": "string",
+                    "format": "string",
+                    "description": " 头像"
+                },
+                "introduction": {
+                    "type": "string",
+                    "format": "string",
+                    "description": " 描述"
+                },
+                "roles": {
+                    "type": "array",
+                    "description": " 角色名称列表",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "description": ""
+        },
+        "admin.LoginRequest": {
+            "type": "object",
+            "properties": {
+                "username": {
+                    "type": "string",
+                    "format": "string",
+                    "description": " 账户"
+                },
+                "password": {
+                    "type": "string",
+                    "format": "string",
+                    "description": " 密码"
+                }
+            },
+            "description": ""
+        },
+        "admin.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string",
+                    "format": "string",
+                    "description": ""
+                }
+            },
+            "description": ""
+        },
+        "admin.LogoutRequest": {
+            "type": "object",
+            "properties": [],
+            "description": ""
+        },
+        "admin.LogoutResponse": {
+            "type": "object",
+            "properties": {
+                "tip": {
+                    "type": "string",
+                    "format": "string",
+                    "description": ""
+                }
+            },
+            "description": ""
+        },
+        "api.HomeRequest": {
+            "type": "object",
+            "properties": [],
+            "description": ""
+        },
+        "api.HomeResponse": {
+            "type": "object",
+            "properties": {
+                "start_time": {
+                    "type": "string",
+                    "format": "string",
+                    "description": ""
+                },
+                "tip": {
+                    "type": "string",
+                    "format": "string",
+                    "description": ""
+                }
+            },
+            "description": ""
+        },
+        "swagger.SwaggerRequest": {
+            "type": "object",
+            "properties": [],
+            "description": ""
+        },
+        "swagger.SwaggerResponse": {
+            "type": "object",
+            "properties": [],
+            "description": ""
+        }
+    },
+    "externalDocs": {
+        "description": "Find out more about Swagger",
+        "url": "http://swagger.io"
+    }
+}
