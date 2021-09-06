@@ -5,17 +5,18 @@
 建议把代码和工具安装到同一个父级目录下
 ~~~~shell
 cd go-home-admin
-git clone git@github.com:go-home-admin/home.git
-git clone git@github.com:go-home-admin/home-toolset-php.git
+git clone https://github.com/go-home-admin/home.git
+git clone https://github.com/go-home-admin/home-toolset-php.git
 ~~~~
 #### 代码生成辅助工具需要初始化
 ~~~~shell
 cd home-toolset-php
 composer install
 ~~~~
-#### 启动`home`
+#### 启动`home`, 需要检查依赖（protobuf, go）
 ~~~~shell
 cd home
+make mac-install
 make dev
 ~~~~
 
