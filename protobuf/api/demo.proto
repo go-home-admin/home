@@ -1,0 +1,29 @@
+// 定义文件级别的Json标签复制
+// @JsonExt("gorm", "autoUpdateTime:nano")
+
+syntax = "proto3";
+
+package api;
+
+import "http_config.proto";
+
+option go_package = "github.com/go-home-admin/home/generate/proto/api";
+
+service ApiDemo {
+  option (http.RouteGroup) = "api";
+
+  // api demo
+  rpc Home(ApiDemoHomeRequest)returns(ApiDemoHomeResponse){
+    option (http.Get) = "/api/demo";
+  }
+}
+
+message ApiDemoHomeRequest {
+  // @JsonExt("bson")
+  int64 id = 1;
+}
+
+message ApiDemoHomeResponse {
+  string start_time = 1;
+  string tip = 2;
+}
