@@ -27,7 +27,8 @@ func (d *MysqlLog) Error(ctx context.Context, s string, i ...interface{}) {
 }
 
 func (d *MysqlLog) Trace(ctx context.Context, begin time.Time, fc func() (sql string, rowsAffected int64), err error) {
-	log.WithFields(log.Fields{"path": "sql", "begin": begin}).Debug(fc())
+	sql, rows := fc()
+	log.WithFields(log.Fields{"path": "sql", "begin": begin, "row": rows}).Debug(sql)
 }
 
 func newDebugLog() logger.Interface {

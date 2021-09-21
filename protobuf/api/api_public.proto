@@ -17,6 +17,7 @@ service Public {
 
 message HomeRequest {}
 
+// @Bson
 message HomeResponse {
   string start_time = 1;
   string tip = 2;

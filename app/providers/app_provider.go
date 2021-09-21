@@ -5,7 +5,7 @@ import (
 	"github.com/go-home-admin/home/bootstrap/services"
 )
 
-// 系统引导结构体
+// App 系统引导结构体
 // @Bean
 type App struct {
 	container *services.Container `inject:""`

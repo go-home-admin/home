@@ -5,6 +5,7 @@ package routes
 import (
 	"github.com/go-home-admin/home/app/http/admin/admin_user"
 	"github.com/go-home-admin/home/app/http/admin/public"
+	"github.com/go-home-admin/home/app/http/api/api_demo"
 	public_1 "github.com/go-home-admin/home/app/http/api/public"
 	"github.com/go-home-admin/home/app/http/swagger/doc"
 	home_constraint "github.com/go-home-admin/home/bootstrap/constraint"
@@ -68,9 +69,10 @@ func InitializeNewRoutesProvider() *Routes {
 	return RoutesSingle
 }
 
-func NewApiRoutesProvider(public *public_1.Controller) *ApiRoutes {
+func NewApiRoutesProvider(public *public_1.Controller, api_demo *api_demo.Controller) *ApiRoutes {
 	ApiRoutes := &ApiRoutes{}
 	ApiRoutes.public = public
+	ApiRoutes.api_demo = api_demo
 	return ApiRoutes
 }
 
@@ -78,6 +80,8 @@ func InitializeNewApiRoutesProvider() *ApiRoutes {
 	if ApiRoutesSingle == nil {
 		ApiRoutesSingle = NewApiRoutesProvider(
 			public_1.InitializeNewControllerProvider(),
+
+			api_demo.InitializeNewControllerProvider(),
 		)
 
 		var temp interface{} = ApiRoutesSingle
