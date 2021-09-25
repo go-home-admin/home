@@ -17,11 +17,7 @@ func InitializeNewControllerProvider() *Controller {
 	if ControllerSingle == nil {
 		ControllerSingle = NewControllerProvider()
 
-		var temp interface{} = ControllerSingle
-		construct, ok := temp.(home_constraint.Construct)
-		if ok {
-			construct.Init()
-		}
+		home_constraint.AfterProvider(ControllerSingle)
 	}
 
 	return ControllerSingle

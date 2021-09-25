@@ -6,7 +6,7 @@ import (
 	"os/signal"
 )
 
-// @Bean
+// Container @Bean
 type Container struct{}
 
 // Run 统一启动服务

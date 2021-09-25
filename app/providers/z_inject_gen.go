@@ -13,6 +13,7 @@ var ConfigSingle *Config
 var IniSingle *Ini
 var LogSingle *Log
 var MysqlSingle *Mysql
+var RedisSingle *Redis
 var ResponseSingle *Response
 
 func NewAppProvider(container *services.Container, resp *Response, log *Log) *App {
@@ -33,11 +34,7 @@ func InitializeNewAppProvider() *App {
 			InitializeNewLogProvider(),
 		)
 
-		var temp interface{} = AppSingle
-		construct, ok := temp.(home_constraint.Construct)
-		if ok {
-			construct.Init()
-		}
+		home_constraint.AfterProvider(AppSingle)
 	}
 
 	return AppSingle
@@ -55,11 +52,7 @@ func InitializeNewConfigProvider() *Config {
 			InitializeNewIniProvider(),
 		)
 
-		var temp interface{} = ConfigSingle
-		construct, ok := temp.(home_constraint.Construct)
-		if ok {
-			construct.Init()
-		}
+		home_constraint.AfterProvider(ConfigSingle)
 	}
 
 	return ConfigSingle
@@ -74,11 +67,7 @@ func InitializeNewIniProvider() *Ini {
 	if IniSingle == nil {
 		IniSingle = NewIniProvider()
 
-		var temp interface{} = IniSingle
-		construct, ok := temp.(home_constraint.Construct)
-		if ok {
-			construct.Init()
-		}
+		home_constraint.AfterProvider(IniSingle)
 	}
 
 	return IniSingle
@@ -99,11 +88,7 @@ func InitializeNewLogProvider() *Log {
 			InitializeNewConfigProvider(),
 		)
 
-		var temp interface{} = LogSingle
-		construct, ok := temp.(home_constraint.Construct)
-		if ok {
-			construct.Init()
-		}
+		home_constraint.AfterProvider(LogSingle)
 	}
 
 	return LogSingle
@@ -121,14 +106,28 @@ func InitializeNewMysqlProvider() *Mysql {
 			InitializeNewConfigProvider(),
 		)
 
-		var temp interface{} = MysqlSingle
-		construct, ok := temp.(home_constraint.Construct)
-		if ok {
-			construct.Init()
-		}
+		home_constraint.AfterProvider(MysqlSingle)
 	}
 
 	return MysqlSingle
+}
+
+func NewRedisProvider(conf *Config) *Redis {
+	Redis := &Redis{}
+	Redis.conf = conf
+	return Redis
+}
+
+func InitializeNewRedisProvider() *Redis {
+	if RedisSingle == nil {
+		RedisSingle = NewRedisProvider(
+			InitializeNewConfigProvider(),
+		)
+
+		home_constraint.AfterProvider(RedisSingle)
+	}
+
+	return RedisSingle
 }
 
 func NewResponseProvider() *Response {
@@ -140,11 +139,7 @@ func InitializeNewResponseProvider() *Response {
 	if ResponseSingle == nil {
 		ResponseSingle = NewResponseProvider()
 
-		var temp interface{} = ResponseSingle
-		construct, ok := temp.(home_constraint.Construct)
-		if ok {
-			construct.Init()
-		}
+		home_constraint.AfterProvider(ResponseSingle)
 	}
 
 	return ResponseSingle

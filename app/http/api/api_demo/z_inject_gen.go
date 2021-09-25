@@ -1,6 +1,6 @@
 // 代码由home-admin生成, 不需要编辑它
 
-package public
+package api_demo
 
 import (
 	home_constraint "github.com/go-home-admin/home/bootstrap/constraint"

@@ -29,11 +29,7 @@ func InitializeNewKernelProvider() *Kernel {
 			providers.InitializeNewConfigProvider(),
 		)
 
-		var temp interface{} = KernelSingle
-		construct, ok := temp.(home_constraint.Construct)
-		if ok {
-			construct.Init()
-		}
+		home_constraint.AfterProvider(KernelSingle)
 	}
 
 	return KernelSingle

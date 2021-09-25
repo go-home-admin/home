@@ -24,7 +24,7 @@ make-swagger:
 	php bin/toolset make:swagger
 
 make-bean:
-	php bin/toolset make:bean ./
+	php bin/toolset make:bean ./ -f
 
 # 调试启动
 dev:protoc make-route make-bean

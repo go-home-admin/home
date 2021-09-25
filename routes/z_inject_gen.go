@@ -31,11 +31,7 @@ func InitializeNewAdminRoutesProvider() *AdminRoutes {
 			public.InitializeNewControllerProvider(),
 		)
 
-		var temp interface{} = AdminRoutesSingle
-		construct, ok := temp.(home_constraint.Construct)
-		if ok {
-			construct.Init()
-		}
+		home_constraint.AfterProvider(AdminRoutesSingle)
 	}
 
 	return AdminRoutesSingle
@@ -59,11 +55,7 @@ func InitializeNewRoutesProvider() *Routes {
 			InitializeNewSwaggerRoutesProvider(),
 		)
 
-		var temp interface{} = RoutesSingle
-		construct, ok := temp.(home_constraint.Construct)
-		if ok {
-			construct.Init()
-		}
+		home_constraint.AfterProvider(RoutesSingle)
 	}
 
 	return RoutesSingle
@@ -84,11 +76,7 @@ func InitializeNewApiRoutesProvider() *ApiRoutes {
 			api_demo.InitializeNewControllerProvider(),
 		)
 
-		var temp interface{} = ApiRoutesSingle
-		construct, ok := temp.(home_constraint.Construct)
-		if ok {
-			construct.Init()
-		}
+		home_constraint.AfterProvider(ApiRoutesSingle)
 	}
 
 	return ApiRoutesSingle
@@ -106,11 +94,7 @@ func InitializeNewSwaggerRoutesProvider() *SwaggerRoutes {
 			doc.InitializeNewControllerProvider(),
 		)
 
-		var temp interface{} = SwaggerRoutesSingle
-		construct, ok := temp.(home_constraint.Construct)
-		if ok {
-			construct.Init()
-		}
+		home_constraint.AfterProvider(SwaggerRoutesSingle)
 	}
 
 	return SwaggerRoutesSingle

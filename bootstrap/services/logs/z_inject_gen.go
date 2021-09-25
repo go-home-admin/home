@@ -17,11 +17,7 @@ func InitializeNewGinLogrusProvider() *GinLogrus {
 	if GinLogrusSingle == nil {
 		GinLogrusSingle = NewGinLogrusProvider()
 
-		var temp interface{} = GinLogrusSingle
-		construct, ok := temp.(home_constraint.Construct)
-		if ok {
-			construct.Init()
-		}
+		home_constraint.AfterProvider(GinLogrusSingle)
 	}
 
 	return GinLogrusSingle

@@ -18,11 +18,7 @@ func InitializeNewContainerProvider() *Container {
 	if ContainerSingle == nil {
 		ContainerSingle = NewContainerProvider()
 
-		var temp interface{} = ContainerSingle
-		construct, ok := temp.(home_constraint.Construct)
-		if ok {
-			construct.Init()
-		}
+		home_constraint.AfterProvider(ContainerSingle)
 	}
 
 	return ContainerSingle
@@ -37,11 +33,7 @@ func InitializeNewHttpServerProvider() *HttpServer {
 	if HttpServerSingle == nil {
 		HttpServerSingle = NewHttpServerProvider()
 
-		var temp interface{} = HttpServerSingle
-		construct, ok := temp.(home_constraint.Construct)
-		if ok {
-			construct.Init()
-		}
+		home_constraint.AfterProvider(HttpServerSingle)
 	}
 
 	return HttpServerSingle

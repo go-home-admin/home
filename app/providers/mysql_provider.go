@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// @Bean
+// Mysql @Bean
 type Mysql struct {
 	conf *Config `inject:""`
 	db   *gorm.DB
