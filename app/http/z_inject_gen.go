@@ -23,9 +23,7 @@ func InitializeNewKernelProvider() *Kernel {
 	if KernelSingle == nil {
 		KernelSingle = NewKernelProvider(
 			routes.InitializeNewRoutesProvider(),
-
 			services.InitializeNewHttpServerProvider(),
-
 			providers.InitializeNewConfigProvider(),
 		)
 

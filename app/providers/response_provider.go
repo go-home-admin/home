@@ -8,15 +8,15 @@ import (
 )
 
 var (
-	// 参数解析错误响应
+	// ErrorRequest 参数解析错误响应
 	ErrorRequest func(ctx *gin.Context, err error)
-	// 业务错误响应
+	// ErrorResponse 业务错误响应
 	ErrorResponse func(ctx *gin.Context, err error)
-	// 成功响应
+	// SuccessResponse 成功响应
 	SuccessResponse func(ctx *gin.Context, data interface{})
 )
 
-// @Bean
+// Response @Bean
 type Response struct{}
 
 func (r *Response) Init() {

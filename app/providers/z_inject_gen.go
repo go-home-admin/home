@@ -28,9 +28,7 @@ func InitializeNewAppProvider() *App {
 	if AppSingle == nil {
 		AppSingle = NewAppProvider(
 			services.InitializeNewContainerProvider(),
-
 			InitializeNewResponseProvider(),
-
 			InitializeNewLogProvider(),
 		)
 
@@ -84,7 +82,6 @@ func InitializeNewLogProvider() *Log {
 	if LogSingle == nil {
 		LogSingle = NewLogProvider(
 			logs.InitializeNewGinLogrusProvider(),
-
 			InitializeNewConfigProvider(),
 		)
 

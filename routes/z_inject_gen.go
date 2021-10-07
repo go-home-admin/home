@@ -27,7 +27,6 @@ func InitializeNewAdminRoutesProvider() *AdminRoutes {
 	if AdminRoutesSingle == nil {
 		AdminRoutesSingle = NewAdminRoutesProvider(
 			admin_user.InitializeNewControllerProvider(),
-
 			public.InitializeNewControllerProvider(),
 		)
 
@@ -49,9 +48,7 @@ func InitializeNewRoutesProvider() *Routes {
 	if RoutesSingle == nil {
 		RoutesSingle = NewRoutesProvider(
 			InitializeNewAdminRoutesProvider(),
-
 			InitializeNewApiRoutesProvider(),
-
 			InitializeNewSwaggerRoutesProvider(),
 		)
 
@@ -72,7 +69,6 @@ func InitializeNewApiRoutesProvider() *ApiRoutes {
 	if ApiRoutesSingle == nil {
 		ApiRoutesSingle = NewApiRoutesProvider(
 			public_1.InitializeNewControllerProvider(),
-
 			api_demo.InitializeNewControllerProvider(),
 		)
 
