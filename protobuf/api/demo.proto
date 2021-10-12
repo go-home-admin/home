@@ -1,5 +1,5 @@
 // 定义文件级别的Json标签复制
-// @JsonExt("gorm", "autoUpdateTime:nano")
+// @Tag("gorm", "autoUpdateTime:nano")
 
 syntax = "proto3";
 
@@ -19,7 +19,7 @@ service ApiDemo {
 }
 
 message ApiDemoHomeRequest {
-  // @JsonExt("bson")
+  // @Tag("bson")
   int64 id = 1;
 }
 

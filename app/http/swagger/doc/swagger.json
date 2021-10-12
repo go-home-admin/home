@@ -169,9 +169,51 @@
                 "parameters": [],
                 "responses": {
                     "200": {
-                        "description": "",
+                        "description": "// @Bson",
                         "schema": {
                             "$ref": "#/definitions/api.HomeResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "//api/demo": {
+            "get": {
+                "tags": [
+                    "api"
+                ],
+                "summary": " api demo",
+                "description": " api demo",
+                "consumes": [
+                    "application/json",
+                    "multipart/form-data",
+                    "application/xml"
+                ],
+                "produces": [
+                    "application/json",
+                    "multipart/form-data",
+                    "application/xml"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": " @JsonExt(\"bson\")",
+                        "required": false,
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/api.ApiDemoHomeResponse"
                         }
                     }
                 },
@@ -282,6 +324,33 @@
             "description": ""
         },
         "api.HomeResponse": {
+            "type": "object",
+            "properties": {
+                "start_time": {
+                    "type": "string",
+                    "format": "string",
+                    "description": ""
+                },
+                "tip": {
+                    "type": "string",
+                    "format": "string",
+                    "description": ""
+                }
+            },
+            "description": " @Bson"
+        },
+        "api.ApiDemoHomeRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": " @JsonExt(\"bson\")"
+                }
+            },
+            "description": ""
+        },
+        "api.ApiDemoHomeResponse": {
             "type": "object",
             "properties": {
                 "start_time": {

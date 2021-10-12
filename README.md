@@ -13,7 +13,7 @@ git clone https://github.com/go-home-admin/home-toolset-php.git
 cd home-toolset-php
 composer install
 ~~~~
-#### 启动`home`, 需要检查依赖（protobuf, go）
+#### 启动`home`, 需要检查依赖（protobuf, go, protoc-gen-go(protoc-gen-go需要依赖GOBIN环境变量)）
 ~~~~shell
 cd home
 make mac-install
@@ -23,6 +23,23 @@ make dev
 # 入门
 ### Makefile 工具
 项目根目录的Makefile文件编写了所有的常用命令和流程, 启动`make dev`是保证能一键启动的命令(不包括环境处理)
+
+### 添加新的模块和api
+在home/protobuf创建新的目录admin, 创建proto文件, 同时设置和目录一致的package和option
+~~~~go
+package admin;
+option go_package = "github.com/go-home-admin/home/generate/proto/admin";
+service Public {
+  option (http.RouteGroup) = "admin-public";
+
+  rpc Index(IndexRequest)returns(IndexResponse){
+    option (http.Get) = "/hello";
+  }
+}
+~~~~
+在这里app/http/kernel.go, 需要注册你的业务前缀, 中间件。
+
+执行`make dev`就会生成文档和基础代码, 这时项目已经正启动和访问, 当然访问api只响应基础字段。
 
 ### 引导和依赖注入
 在任意地方声明方法集合时, 加上@Bean就会被框架自动实例
@@ -42,23 +59,6 @@ func Test_Login(t *testing.T) {
     InitializeNewControllerProvider().Test()
 }
 ~~~~
-
-### 添加新的模块和api
-在home/protobuf创建新的目录admin, 创建proto文件, 同时设置和目录一致的package和option
-~~~~go
-package admin;
-option go_package = "github.com/go-home-admin/home/generate/proto/admin";
-service Public {
-  option (http.RouteGroup) = "admin-public";
-
-  rpc Index(IndexRequest)returns(IndexResponse){
-    option (http.Get) = "/hello";
-  }
-}
-~~~~
-在这里app/http/kernel.go, 需要注册你的业务前缀, 中间件。
-
-执行`make dev`就会生成文档和基础代码, 这时项目已经正启动和访问, 当然访问api只响应基础字段。
 
 ### 注册自己的服务
 ~~~~go
