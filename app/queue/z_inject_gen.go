@@ -9,6 +9,7 @@ import (
 )
 
 var KernelSingle *Kernel
+var WorkerSingle *Worker
 
 func NewKernelProvider(b *broker.RedisBroker, redis *providers.Redis) *Kernel {
 	Kernel := &Kernel{}
@@ -28,4 +29,22 @@ func InitializeNewKernelProvider() *Kernel {
 	}
 
 	return KernelSingle
+}
+
+func NewWorkerProvider(redis *providers.Redis) *Worker {
+	Worker := &Worker{}
+	Worker.redis = redis
+	return Worker
+}
+
+func InitializeNewWorkerProvider() *Worker {
+	if WorkerSingle == nil {
+		WorkerSingle = NewWorkerProvider(
+			providers.InitializeNewRedisProvider(),
+		)
+
+		home_constraint.AfterProvider(WorkerSingle)
+	}
+
+	return WorkerSingle
 }

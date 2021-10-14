@@ -10,11 +10,14 @@ import (
 
 // @Bean
 type Kernel struct {
-	b     *broker.RedisBroker `inject:""`
-	redis *providers.Redis    `inject:""`
+	b      *broker.RedisBroker `inject:""`
+	redis  *providers.Redis    `inject:""`
+	worker *Worker             `inject:""`
 }
 
 func (k *Kernel) Init() {
+	// 工人封装
+	k.b.SetWorker(k.worker)
 	// 注入信息通道代理商
 	k.b.SetConfig(k.redis)
 

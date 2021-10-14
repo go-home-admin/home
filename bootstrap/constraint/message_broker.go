@@ -30,5 +30,11 @@ type Job interface {
 
 type Task struct {
 	ID    string
+	Group string
+	Queue string
 	Event interface{}
+}
+
+type Worker interface {
+	Run(job Job, task Task)
 }

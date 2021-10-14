@@ -21,6 +21,7 @@ type Config struct {
 
 // @Bean
 type RedisBroker struct {
+	worker      constraint.Worker
 	client      *redis.Client
 	config      map[string]*Config
 	dispatch    map[string]constraint.Job
@@ -43,6 +44,10 @@ func defConfig() Config {
 		// 它指定count将被驱逐的最大条目
 		Limit: 0,
 	}
+}
+
+func (r *RedisBroker) SetWorker(worker constraint.Worker) {
+	r.worker = worker
 }
 
 func (r *RedisBroker) SetConfig(client constraint.RedisClient, config ...Config) {
@@ -182,12 +187,12 @@ func (r *RedisBroker) read(group string, queueName string) {
 
 					task := constraint.Task{
 						ID:    xMessage.ID,
+						Group: group,
+						Queue: queueName,
 						Event: job,
 					}
 
-					job.Handler(task)
-					// 自动ack
-					r.client.XAck(ctx, queueName, group, xMessage.ID)
+					r.worker.Run(job, task)
 				}
 			}
 		}
