@@ -37,8 +37,8 @@ func defConfig() Config {
 	return Config{
 		Stream:     constraint.QueueName,
 		NoMkStream: false,
-		MaxLen:     0,
-		Approx:     false,
+		MaxLen:     100000,
+		Approx:     true,
 		Limit:      0,
 	}
 }
@@ -145,9 +145,9 @@ func (r *RedisBroker) read(group string, queueName string) {
 			log.Error("队列工人发生错误, 已退出", err)
 		}
 	}()
-
+	ctx := context.Background()
 	for {
-		cmd := r.client.XReadGroup(context.Background(), &redis.XReadGroupArgs{
+		cmd := r.client.XReadGroup(ctx, &redis.XReadGroupArgs{
 			Group:    group,
 			Consumer: "",
 			Streams:  []string{queueName, ">"},
@@ -184,6 +184,8 @@ func (r *RedisBroker) read(group string, queueName string) {
 					}
 
 					job.Handler(task)
+					// 自动ack
+					r.client.XAck(ctx, queueName, group, xMessage.ID)
 				}
 			}
 		}
