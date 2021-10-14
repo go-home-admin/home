@@ -37,9 +37,11 @@ func defConfig() Config {
 	return Config{
 		Stream:     constraint.QueueName,
 		NoMkStream: false,
-		MaxLen:     100000,
-		Approx:     true,
-		Limit:      0,
+		MaxLen:     1000000,
+		// 几乎精确的修剪
+		Approx: true,
+		// 它指定count将被驱逐的最大条目
+		Limit: 0,
 	}
 }
 
@@ -149,7 +151,7 @@ func (r *RedisBroker) read(group string, queueName string) {
 	for {
 		cmd := r.client.XReadGroup(ctx, &redis.XReadGroupArgs{
 			Group:    group,
-			Consumer: "",
+			Consumer: "home_consumer",
 			Streams:  []string{queueName, ">"},
 			Count:    1,
 			Block:    3 * time.Second,

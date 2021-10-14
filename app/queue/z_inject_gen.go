@@ -9,7 +9,6 @@ import (
 )
 
 var KernelSingle *Kernel
-var StreamSingle *Stream
 
 func NewKernelProvider(b *broker.RedisBroker, redis *providers.Redis) *Kernel {
 	Kernel := &Kernel{}
@@ -29,19 +28,4 @@ func InitializeNewKernelProvider() *Kernel {
 	}
 
 	return KernelSingle
-}
-
-func NewStreamProvider() *Stream {
-	Stream := &Stream{}
-	return Stream
-}
-
-func InitializeNewStreamProvider() *Stream {
-	if StreamSingle == nil {
-		StreamSingle = NewStreamProvider()
-
-		home_constraint.AfterProvider(StreamSingle)
-	}
-
-	return StreamSingle
 }
