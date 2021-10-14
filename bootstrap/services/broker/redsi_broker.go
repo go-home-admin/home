@@ -154,7 +154,7 @@ func (r *RedisBroker) read(group string, queueName string) {
 			Consumer: "home_consumer",
 			Streams:  []string{queueName, ">"},
 			Count:    1,
-			Block:    3 * time.Second,
+			Block:    30 * time.Second,
 			NoAck:    false,
 		})
 
