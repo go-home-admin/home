@@ -14,6 +14,7 @@ import (
 type Mysql struct {
 	conf *Config `inject:""`
 	db   *gorm.DB
+	log  *Log `inject:""` // 引入不用, 为了方便初始化log
 }
 
 func (m *Mysql) Init() {

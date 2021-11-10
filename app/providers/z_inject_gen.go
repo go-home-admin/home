@@ -91,9 +91,10 @@ func InitializeNewLogProvider() *Log {
 	return LogSingle
 }
 
-func NewMysqlProvider(conf *Config) *Mysql {
+func NewMysqlProvider(conf *Config, log *Log) *Mysql {
 	Mysql := &Mysql{}
 	Mysql.conf = conf
+	Mysql.log = log
 	return Mysql
 }
 
@@ -101,6 +102,7 @@ func InitializeNewMysqlProvider() *Mysql {
 	if MysqlSingle == nil {
 		MysqlSingle = NewMysqlProvider(
 			InitializeNewConfigProvider(),
+			InitializeNewLogProvider(),
 		)
 
 		home_constraint.AfterProvider(MysqlSingle)
