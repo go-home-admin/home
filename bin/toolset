@@ -1,6 +1,0 @@
-#!/usr/bin/env php
-<?php
-
-define("HOME_PATH", dirname(__DIR__));
-
-require_once "./../home-toolset-php/toolset";

@@ -2,3 +2,4 @@
 /config.local.ini
 /.config.ini.local
 /generate
+*_inject_gen.go
