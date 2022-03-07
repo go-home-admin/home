@@ -54,25 +54,31 @@ func GetFileParser(path string) (GoFileParser, error) {
 			case "package":
 				d.PackageDoc = lastDoc
 				d.PackageName, offset = handlePackageName(l.list, offset)
+				lastDoc = ""
 			case "import":
 				var imap map[string]string
 				imap, offset = handleImports(l.list, offset)
 				for k, v := range imap {
 					d.Imports[k] = v
 				}
+				lastDoc = ""
 			case "type":
 				var imap GoType
 				imap, offset = handleTypes(l.list, offset, d)
-				imap.Doc = lastDoc
+				imap.Doc = GoDoc(lastDoc)
 				d.Types[imap.Name] = imap
+				lastDoc = ""
 			case "func":
 				var gf GoFunc
 				gf, offset = handleFunds(l.list, offset)
 				d.Funds[gf.Name] = gf
+				lastDoc = ""
 			case "const":
 				_, offset = handleCosts(l.list, offset)
+				lastDoc = ""
 			case "var":
 				_, offset = handleVars(l.list, offset)
+				lastDoc = ""
 			default:
 				fmt.Println("文件块作用域似乎解析有错误", path, work.str, offset)
 			}
@@ -141,7 +147,7 @@ func handleImports(l []*word, offset int) (map[string]string, int) {
 }
 
 type GoType struct {
-	Doc   string
+	Doc   GoDoc
 	Name  string
 	Attrs map[string]GoTypeAttr
 }
@@ -150,7 +156,17 @@ type GoTypeAttr struct {
 	TypeName   string
 	TypeAlias  string
 	TypeImport string
+	InPackage  bool // 是否本包的引用
 	Tag        map[string]string
+}
+
+type GoDoc string
+
+// 是否存在某个注解
+func (d GoDoc) HasAnnotation(check string) bool {
+	ds := string(d)
+
+	return strings.Index(ds, check) != -1
 }
 
 // 普通指针
@@ -236,7 +252,7 @@ func handleTypes(l []*word, offset int, d GoFileParser) (GoType, int) {
 					TypeName: wordAttrs[1],
 					Tag:      map[string]string{},
 				}
-				attr.TypeAlias, attr.TypeImport = getTypeAlias(wordAttrs[1], d)
+				getTypeAlias(wordAttrs[1], d, &attr)
 				// 解析 go tag
 				tagArr := getArrGoTag(wordAttrs[2])
 
@@ -256,18 +272,21 @@ func handleTypes(l []*word, offset int, d GoFileParser) (GoType, int) {
 }
 
 // 根据属性声明类型或者类型的引入名称
-func getTypeAlias(str string, d GoFileParser) (string, string) {
+func getTypeAlias(str string, d GoFileParser, attr *GoTypeAttr) {
 	wArr := GetWords(str)
 	wf := wArr[0]
 
 	if wf.t == wordT_word || wf.str == "*" {
 		if len(wArr) >= 2 {
-			alias := wArr[1].str
-			return alias, d.Imports[alias]
+			attr.TypeAlias, _ = GetFistWord(wArr)
+			attr.TypeImport = d.Imports[attr.TypeAlias]
+			return
 		}
 	}
-
-	return d.PackageName, d.PackageName
+	// 本包
+	attr.TypeAlias = d.PackageName
+	attr.TypeImport = "" // TODO
+	attr.InPackage = true
 }
 
 type GoFunc struct {
@@ -277,24 +296,39 @@ type GoFunc struct {
 
 func handleFunds(l []*word, offset int) (GoFunc, int) {
 	ft, _ := GetFistStr(l[offset+1:])
+	name := ""
 	if ft != "(" {
 		// 普通函数
-		name, i := GetFistWordBehindStr(l[offset:], "func")
+		var i int
+		name, i = GetFistWordBehindStr(l[offset:], "func")
 		offset = offset + i
 		_, et := GetBrackets(l[offset:], "(", ")")
 		offset = offset + et
-		_, et = GetBrackets(l[offset:], "{", "}")
-		return GoFunc{Name: name}, offset + et
 	} else {
 		// 结构函数
 		_, et := GetBrackets(l[offset:], "(", ")")
 		offset = offset + et
-		name, _ := GetFistWord(l[offset:])
+		name, _ = GetFistWord(l[offset:])
 		_, et = GetBrackets(l[offset:], "(", ")")
 		offset = offset + et
-		_, et = GetBrackets(l[offset:], "{", "}")
-		return GoFunc{Name: name}, offset + et
 	}
+	// 排除返回值的interface{}
+	st, et := GetBrackets(l[offset:], "{", "}")
+	interCount := 0
+	for _, w := range l[offset : offset+st] {
+		if w.str == "interface" {
+			interCount++
+		}
+	}
+	if interCount != 0 {
+		for i := 0; i <= interCount; i++ {
+			_, et := GetBrackets(l[offset:], "{", "}")
+			offset = offset + et
+		}
+	} else {
+		offset = offset + et
+	}
+	return GoFunc{Name: name}, offset
 }
 func handleCosts(l []*word, offset int) (map[string]string, int) {
 	return handleVars(l, offset)

@@ -6,15 +6,15 @@ import (
 )
 
 // @Bean
-type Kernel struct {
-	bean  *commands.BeanCommand `inject:""`
-	route commands.RouteCommand `inject:""`
-}
+type Kernel struct{}
 
 func (k *Kernel) Run() {
 	app := command.New()
-	app.AddCommand(commands.BeanCommand{})
-	app.AddCommand(commands.RouteCommand{})
+	for _, provider := range commands.GetAllProvider() {
+		if v, ok := provider.(command.CommandInterface); ok {
+			app.AddCommand(v)
+		}
+	}
 	app.Run()
 }
 

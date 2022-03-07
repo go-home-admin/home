@@ -1,24 +1,18 @@
-// 代码由home-admin生成, 不需要编辑它
-
+// gen for home toolset
 package broker
 
-import (
-	home_constraint "github.com/go-home-admin/home/bootstrap/constraint"
-)
+var _RedisBrokerSingle *RedisBroker
 
-var RedisBrokerSingle *RedisBroker
-
-func NewRedisBrokerProvider() *RedisBroker {
-	RedisBroker := &RedisBroker{}
-	return RedisBroker
+func GetAllProvider() []interface{} {
+	return []interface{}{
+		NewRedisBroker(),
+	}
 }
 
-func InitializeNewRedisBrokerProvider() *RedisBroker {
-	if RedisBrokerSingle == nil {
-		RedisBrokerSingle = NewRedisBrokerProvider()
-
-		home_constraint.AfterProvider(RedisBrokerSingle)
+func NewRedisBroker() *RedisBroker {
+	if _RedisBrokerSingle == nil {
+		RedisBroker := &RedisBroker{}
+		_RedisBrokerSingle = RedisBroker
 	}
-
-	return RedisBrokerSingle
+	return _RedisBrokerSingle
 }

@@ -1,24 +1,18 @@
-// 代码由home-admin生成, 不需要编辑它
-
+// gen for home toolset
 package logs
 
-import (
-	home_constraint "github.com/go-home-admin/home/bootstrap/constraint"
-)
+var _GinLogrusSingle *GinLogrus
 
-var GinLogrusSingle *GinLogrus
-
-func NewGinLogrusProvider() *GinLogrus {
-	GinLogrus := &GinLogrus{}
-	return GinLogrus
+func GetAllProvider() []interface{} {
+	return []interface{}{
+		NewGinLogrus(),
+	}
 }
 
-func InitializeNewGinLogrusProvider() *GinLogrus {
-	if GinLogrusSingle == nil {
-		GinLogrusSingle = NewGinLogrusProvider()
-
-		home_constraint.AfterProvider(GinLogrusSingle)
+func NewGinLogrus() *GinLogrus {
+	if _GinLogrusSingle == nil {
+		GinLogrus := &GinLogrus{}
+		_GinLogrusSingle = GinLogrus
 	}
-
-	return GinLogrusSingle
+	return _GinLogrusSingle
 }

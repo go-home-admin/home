@@ -1,24 +1,18 @@
-// 代码由home-admin生成, 不需要编辑它
-
+// gen for home toolset
 package doc
 
-import (
-	home_constraint "github.com/go-home-admin/home/bootstrap/constraint"
-)
+var _ControllerSingle *Controller
 
-var ControllerSingle *Controller
-
-func NewControllerProvider() *Controller {
-	Controller := &Controller{}
-	return Controller
+func GetAllProvider() []interface{} {
+	return []interface{}{
+		NewController(),
+	}
 }
 
-func InitializeNewControllerProvider() *Controller {
-	if ControllerSingle == nil {
-		ControllerSingle = NewControllerProvider()
-
-		home_constraint.AfterProvider(ControllerSingle)
+func NewController() *Controller {
+	if _ControllerSingle == nil {
+		Controller := &Controller{}
+		_ControllerSingle = Controller
 	}
-
-	return ControllerSingle
+	return _ControllerSingle
 }

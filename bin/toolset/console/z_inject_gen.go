@@ -1,10 +1,5 @@
 // gen for home toolset
-package message
-
-import (
-	providers "github.com/go-home-admin/home/app/providers"
-	broker "github.com/go-home-admin/home/bootstrap/services/broker"
-)
+package console
 
 var _KernelSingle *Kernel
 
@@ -17,8 +12,6 @@ func GetAllProvider() []interface{} {
 func NewKernel() *Kernel {
 	if _KernelSingle == nil {
 		Kernel := &Kernel{}
-		Kernel.b = broker.NewRedisBroker()
-		Kernel.redis = providers.NewRedis()
 		_KernelSingle = Kernel
 	}
 	return _KernelSingle

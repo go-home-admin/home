@@ -1,145 +1,86 @@
-// 代码由home-admin生成, 不需要编辑它
-
+// gen for home toolset
 package providers
 
 import (
-	home_constraint "github.com/go-home-admin/home/bootstrap/constraint"
-	"github.com/go-home-admin/home/bootstrap/services"
-	"github.com/go-home-admin/home/bootstrap/services/logs"
+	services "github.com/go-home-admin/home/bootstrap/services"
+	logs "github.com/go-home-admin/home/bootstrap/services/logs"
 )
 
-var AppSingle *App
-var ConfigSingle *Config
-var IniSingle *Ini
-var LogSingle *Log
-var MysqlSingle *Mysql
-var RedisSingle *Redis
-var ResponseSingle *Response
+var _ConfigSingle *Config
+var _IniSingle *Ini
+var _LogSingle *Log
+var _MysqlSingle *Mysql
+var _RedisSingle *Redis
+var _ResponseSingle *Response
+var _AppSingle *App
 
-func NewAppProvider(container *services.Container, resp *Response, log *Log) *App {
-	App := &App{}
-	App.container = container
-	App.resp = resp
-	App.log = log
-	return App
-}
-
-func InitializeNewAppProvider() *App {
-	if AppSingle == nil {
-		AppSingle = NewAppProvider(
-			services.InitializeNewContainerProvider(),
-			InitializeNewResponseProvider(),
-			InitializeNewLogProvider(),
-		)
-
-		home_constraint.AfterProvider(AppSingle)
+func GetAllProvider() []interface{} {
+	return []interface{}{
+		NewConfig(),
+		NewIni(),
+		NewLog(),
+		NewMysql(),
+		NewRedis(),
+		NewResponse(),
+		NewApp(),
 	}
-
-	return AppSingle
 }
 
-func NewConfigProvider(iniConfig *Ini) *Config {
-	Config := &Config{}
-	Config.iniConfig = iniConfig
-	return Config
-}
-
-func InitializeNewConfigProvider() *Config {
-	if ConfigSingle == nil {
-		ConfigSingle = NewConfigProvider(
-			InitializeNewIniProvider(),
-		)
-
-		home_constraint.AfterProvider(ConfigSingle)
+func NewResponse() *Response {
+	if _ResponseSingle == nil {
+		Response := &Response{}
+		_ResponseSingle = Response
 	}
-
-	return ConfigSingle
+	return _ResponseSingle
 }
-
-func NewIniProvider() *Ini {
-	Ini := &Ini{}
-	return Ini
-}
-
-func InitializeNewIniProvider() *Ini {
-	if IniSingle == nil {
-		IniSingle = NewIniProvider()
-
-		home_constraint.AfterProvider(IniSingle)
+func NewApp() *App {
+	if _AppSingle == nil {
+		App := &App{}
+		App.container = services.NewContainer()
+		App.resp = .New*Response()
+		App.log = .New*Log()
+		_AppSingle = App
 	}
-
-	return IniSingle
+	return _AppSingle
 }
-
-func NewLogProvider(ginLog *logs.GinLogrus, conf *Config) *Log {
-	Log := &Log{}
-	Log.ginLog = ginLog
-	Log.conf = conf
-	return Log
-}
-
-func InitializeNewLogProvider() *Log {
-	if LogSingle == nil {
-		LogSingle = NewLogProvider(
-			logs.InitializeNewGinLogrusProvider(),
-			InitializeNewConfigProvider(),
-		)
-
-		home_constraint.AfterProvider(LogSingle)
+func NewConfig() *Config {
+	if _ConfigSingle == nil {
+		Config := &Config{}
+		Config.iniConfig = .New*Ini()
+		_ConfigSingle = Config
 	}
-
-	return LogSingle
+	return _ConfigSingle
 }
-
-func NewMysqlProvider(conf *Config, log *Log) *Mysql {
-	Mysql := &Mysql{}
-	Mysql.conf = conf
-	Mysql.log = log
-	return Mysql
-}
-
-func InitializeNewMysqlProvider() *Mysql {
-	if MysqlSingle == nil {
-		MysqlSingle = NewMysqlProvider(
-			InitializeNewConfigProvider(),
-			InitializeNewLogProvider(),
-		)
-
-		home_constraint.AfterProvider(MysqlSingle)
+func NewIni() *Ini {
+	if _IniSingle == nil {
+		Ini := &Ini{}
+		_IniSingle = Ini
 	}
-
-	return MysqlSingle
+	return _IniSingle
 }
-
-func NewRedisProvider(conf *Config) *Redis {
-	Redis := &Redis{}
-	Redis.conf = conf
-	return Redis
-}
-
-func InitializeNewRedisProvider() *Redis {
-	if RedisSingle == nil {
-		RedisSingle = NewRedisProvider(
-			InitializeNewConfigProvider(),
-		)
-
-		home_constraint.AfterProvider(RedisSingle)
+func NewLog() *Log {
+	if _LogSingle == nil {
+		Log := &Log{}
+		Log.ginLog = logs.NewGinLogrus()
+		Log.conf = .New*Config()
+		_LogSingle = Log
 	}
-
-	return RedisSingle
+	return _LogSingle
 }
-
-func NewResponseProvider() *Response {
-	Response := &Response{}
-	return Response
-}
-
-func InitializeNewResponseProvider() *Response {
-	if ResponseSingle == nil {
-		ResponseSingle = NewResponseProvider()
-
-		home_constraint.AfterProvider(ResponseSingle)
+func NewMysql() *Mysql {
+	if _MysqlSingle == nil {
+		Mysql := &Mysql{}
+		Mysql.conf = .New*Config()
+		Mysql.log = .New*Log()
+		_MysqlSingle = Mysql
 	}
-
-	return ResponseSingle
+	return _MysqlSingle
+}
+func NewRedis() *Redis {
+	if _RedisSingle == nil {
+		Redis := &Redis{}
+		Redis.conf = .New*Config()
+		_RedisSingle = Redis
+	}
+	return _RedisSingle
 }

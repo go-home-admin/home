@@ -5,6 +5,5 @@ import (
 )
 
 func main() {
-	console := &console.Kernel{}
-	console.Run()
+	console.NewKernel().Run()
 }

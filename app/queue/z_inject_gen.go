@@ -1,52 +1,36 @@
-// 代码由home-admin生成, 不需要编辑它
-
+// gen for home toolset
 package queue
 
 import (
-	"github.com/go-home-admin/home/app/providers"
-	home_constraint "github.com/go-home-admin/home/bootstrap/constraint"
-	"github.com/go-home-admin/home/bootstrap/services/broker"
+	providers "github.com/go-home-admin/home/app/providers"
+	broker "github.com/go-home-admin/home/bootstrap/services/broker"
 )
 
-var KernelSingle *Kernel
-var WorkerSingle *Worker
+var _KernelSingle *Kernel
+var _WorkerSingle *Worker
 
-func NewKernelProvider(b *broker.RedisBroker, redis *providers.Redis, worker *Worker) *Kernel {
-	Kernel := &Kernel{}
-	Kernel.b = b
-	Kernel.redis = redis
-	Kernel.worker = worker
-	return Kernel
-}
-
-func InitializeNewKernelProvider() *Kernel {
-	if KernelSingle == nil {
-		KernelSingle = NewKernelProvider(
-			broker.InitializeNewRedisBrokerProvider(),
-			providers.InitializeNewRedisProvider(),
-			InitializeNewWorkerProvider(),
-		)
-
-		home_constraint.AfterProvider(KernelSingle)
+func GetAllProvider() []interface{} {
+	return []interface{}{
+		NewKernel(),
+		NewWorker(),
 	}
-
-	return KernelSingle
 }
 
-func NewWorkerProvider(redis *providers.Redis) *Worker {
-	Worker := &Worker{}
-	Worker.redis = redis
-	return Worker
-}
-
-func InitializeNewWorkerProvider() *Worker {
-	if WorkerSingle == nil {
-		WorkerSingle = NewWorkerProvider(
-			providers.InitializeNewRedisProvider(),
-		)
-
-		home_constraint.AfterProvider(WorkerSingle)
+func NewKernel() *Kernel {
+	if _KernelSingle == nil {
+		Kernel := &Kernel{}
+		Kernel.b = broker.NewRedisBroker()
+		Kernel.redis = providers.NewRedis()
+		Kernel.worker = .New*Worker()
+		_KernelSingle = Kernel
 	}
-
-	return WorkerSingle
+	return _KernelSingle
+}
+func NewWorker() *Worker {
+	if _WorkerSingle == nil {
+		Worker := &Worker{}
+		Worker.redis = providers.NewRedis()
+		_WorkerSingle = Worker
+	}
+	return _WorkerSingle
 }

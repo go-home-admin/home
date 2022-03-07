@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"fmt"
 	"github.com/ctfang/command"
 	"github.com/go-home-admin/toolset/parser"
 	"log"
@@ -13,9 +12,7 @@ import (
 )
 
 // @Bean
-type BeanCommand struct {
-	r RouteCommand `inject:""`
-}
+type BeanCommand struct{}
 
 func (BeanCommand) Configure() command.Configure {
 	return command.Configure{
@@ -26,6 +23,13 @@ func (BeanCommand) Configure() command.Configure {
 				{
 					Name:        "path",
 					Description: "需要处理的目录",
+				},
+			},
+
+			Has: []command.ArgParam{
+				{
+					Name:        "-f",
+					Description: "强制更新",
 				},
 			},
 		},
@@ -40,7 +44,21 @@ func (BeanCommand) Execute(input command.Input) {
 		path, _ = filepath.Abs(path)
 	}
 
+	//if input.GetHas("-f") == true {
+	//	for dir, _ := range parser.NewGoParserForDir(path) {
+	//		if
+	//	}
+	//}
+
+	skip := map[string]bool{
+		"/Users/lv/Desktop/github.com/go-hom-admin/home/bin": true,
+	}
+
 	for dir, fileParsers := range parser.NewGoParserForDir(path) {
+		if _, ok := skip[dir]; ok {
+			break
+		}
+
 		bc := newBeanCache()
 		for _, fileParser := range fileParsers {
 			bc.name = fileParser.PackageName
@@ -51,9 +69,12 @@ func (BeanCommand) Execute(input command.Input) {
 							bc.imports[impStr] = impStr
 						}
 
-						bc.structn[tName] = goType
 						break
 					}
+				}
+
+				if goType.Doc.HasAnnotation("@Bean") {
+					bc.structList[tName] = goType
 				}
 			}
 		}
@@ -63,45 +84,118 @@ func (BeanCommand) Execute(input command.Input) {
 }
 
 type beanCache struct {
-	name    string
-	imports map[string]string
-	structn map[string]parser.GoType
+	name       string
+	imports    map[string]string
+	structList map[string]parser.GoType
 }
 
 func newBeanCache() beanCache {
 	return beanCache{
-		imports: make(map[string]string),
-		structn: make(map[string]parser.GoType),
+		imports:    make(map[string]string),
+		structList: make(map[string]parser.GoType),
 	}
 }
 
 func genBean(dir string, bc beanCache) {
-	if len(bc.structn) == 0 {
+	if len(bc.structList) == 0 {
 		return
 	}
 	context := make([]string, 0)
-	str := "// gen for home toolset\n"
-
 	context = append(context, "package "+bc.name)
 
-	aliasMapImport := genImportAlias(bc.imports)
-	context = append(context, "\nimport (\n"+getImportStr(aliasMapImport)+"\n)\n")
+	// import
+	importAlias := genImportAlias(bc.imports)
+	if len(importAlias) != 0 {
+		context = append(context, "\nimport ("+getImportStr(bc, importAlias)+"\n)")
+	}
 
+	// Single
+	context = append(context, genSingle(bc))
+	// Provider
+	context = append(context, genProvider(bc, importAlias))
+	str := "// gen for home toolset"
 	for _, s2 := range context {
 		str = str + "\n" + s2
 	}
-	fmt.Println(dir + "/z_inject_gen.test")
-	err := os.WriteFile(dir+"/z_inject_gen.test", []byte(str), 0766)
+
+	err := os.WriteFile(dir+"/z_inject_gen.go", []byte(str), 0766)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	os.Exit(0)
 }
 
-// 生成 alias => import
+func genSingle(bc beanCache) string {
+	str := ""
+	allProviderStr := "\n\treturn []interface{}{"
+	for s, goType := range bc.structList {
+		if goType.Doc.HasAnnotation("@Bean") {
+			str = str + "\nvar " + genSingleName(s) + " *" + s
+			allProviderStr += "\n\t\t" + genInitializeNewStr(s) + "(),"
+		}
+	}
+	// 返回全部的提供商
+	str += "\n\nfunc GetAllProvider() []interface{} {" + allProviderStr + "\n\t}\n}"
+	return str
+}
+
+func genSingleName(s string) string {
+	return "_" + s + "Single"
+}
+
+func genProvider(bc beanCache, m map[string]string) string {
+	str := ""
+	for s, goType := range bc.structList {
+		if goType.Doc.HasAnnotation("@Bean") {
+			str = str + "\nfunc " + genInitializeNewStr(s) + "() *" + s + " {" +
+				"\n\tif " + genSingleName(s) + " == nil {" + // if _provider == nil {
+				"\n\t\t" + s + " := " + "&" + s + "{}" // provider := provider{}
+
+			for attrName, attr := range goType.Attrs {
+				pointer := ""
+				if !attr.IsPointer() {
+					pointer = "*"
+				}
+
+				for tagName, _ := range attr.Tag {
+					if tagName == "inject" {
+						str = str + "\n\t\t" +
+							s + "." + attrName + " = " + pointer + getInitializeNewFunName(attr, m)
+					}
+				}
+			}
+			str = str +
+				"\n\t\t" + genSingleName(s) + " = " + s +
+				"\n\t}" +
+				"\n\treturn " + genSingleName(s) +
+				"\n}"
+		}
+	}
+
+	return str
+}
+
+func getInitializeNewFunName(k parser.GoTypeAttr, m map[string]string) string {
+	alias := ""
+	name := k.TypeName
+	if !k.InPackage {
+		a := m[k.TypeImport]
+		alias = a + "."
+		arr := strings.Split(k.TypeName, ".")
+		name = arr[len(arr)-1]
+	}
+
+	return alias + genInitializeNewStr(name) + "()"
+}
+
+// 控制对完函数名称
+func genInitializeNewStr(name string) string {
+	return "New" + name
+}
+
+// 生成 import => alias
 func genImportAlias(m map[string]string) map[string]string {
 	aliasMapImport := make(map[string]string)
+	importMapAlias := make(map[string]string)
 	for _, imp := range m {
 		temp := strings.Split(imp, "/")
 		key := temp[len(temp)-1]
@@ -116,15 +210,37 @@ func genImportAlias(m map[string]string) map[string]string {
 		}
 		aliasMapImport[key] = imp
 	}
+	for s, s2 := range aliasMapImport {
+		importMapAlias[s2] = s
+	}
 
-	return aliasMapImport
+	return importMapAlias
 }
 
-func getImportStr(m map[string]string) string {
+// m = import => alias
+func getImportStr(bc beanCache, m map[string]string) string {
+	has := map[string]bool{}
+	for _, goType := range bc.structList {
+		if goType.Doc.HasAnnotation("@Bean") {
+			for _, attr := range goType.Attrs {
+				if !attr.InPackage {
+					has[attr.TypeImport] = true
+				}
+			}
+
+		}
+	}
+	// 删除未使用的import
+	for s, _ := range m {
+		if _, ok := has[s]; !ok {
+			delete(m, s)
+		}
+	}
+
 	sk := sortMap(m)
 	got := ""
 	for _, k := range sk {
-		got = k + " \"" + m[k] + "\""
+		got += "\n\t" + m[k] + " \"" + k + "\""
 	}
 
 	return got

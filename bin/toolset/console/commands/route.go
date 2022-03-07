@@ -6,8 +6,7 @@ import (
 )
 
 // @Bean
-type RouteCommand struct {
-}
+type RouteCommand struct{}
 
 func (RouteCommand) Configure() command.Configure {
 	return command.Configure{

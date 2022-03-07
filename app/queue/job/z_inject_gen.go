@@ -1,24 +1,18 @@
-// 代码由home-admin生成, 不需要编辑它
-
+// gen for home toolset
 package job
 
-import (
-	home_constraint "github.com/go-home-admin/home/bootstrap/constraint"
-)
+var _DemoJobSingle *DemoJob
 
-var DemoJobSingle *DemoJob
-
-func NewDemoJobProvider() *DemoJob {
-	DemoJob := &DemoJob{}
-	return DemoJob
+func GetAllProvider() []interface{} {
+	return []interface{}{
+		NewDemoJob(),
+	}
 }
 
-func InitializeNewDemoJobProvider() *DemoJob {
-	if DemoJobSingle == nil {
-		DemoJobSingle = NewDemoJobProvider()
-
-		home_constraint.AfterProvider(DemoJobSingle)
+func NewDemoJob() *DemoJob {
+	if _DemoJobSingle == nil {
+		DemoJob := &DemoJob{}
+		_DemoJobSingle = DemoJob
 	}
-
-	return DemoJobSingle
+	return _DemoJobSingle
 }
