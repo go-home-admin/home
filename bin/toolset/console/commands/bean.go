@@ -5,7 +5,6 @@ import (
 	"github.com/go-home-admin/toolset/parser"
 	"log"
 	"os"
-	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -19,13 +18,6 @@ func (BeanCommand) Configure() command.Configure {
 		Name:        "make:bean",
 		Description: "生成依赖注入的声明源代码文件",
 		Input: command.Argument{
-			Option: []command.ArgParam{
-				{
-					Name:        "path",
-					Description: "需要处理的目录",
-				},
-			},
-
 			Has: []command.ArgParam{
 				{
 					Name:        "-f",
@@ -37,12 +29,7 @@ func (BeanCommand) Configure() command.Configure {
 }
 
 func (BeanCommand) Execute(input command.Input) {
-	path := input.GetOption("path")
-	if len(path) == 0 {
-		path, _ = os.Getwd()
-	} else {
-		path, _ = filepath.Abs(path)
-	}
+	path := getRootPath()
 
 	//if input.GetHas("-f") == true {
 	//	for dir, _ := range parser.NewGoParserForDir(path) {

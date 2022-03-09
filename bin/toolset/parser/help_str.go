@@ -66,6 +66,19 @@ func GetFistWord(l []*word) (string, int) {
 	return "", len(l)
 }
 
+// 获取第n个单词
+func GetWord(l []*word, n int) (string, int) {
+	for i, w := range l {
+		if w.t == wordT_word {
+			n--
+			if n <= 0 {
+				return w.str, i
+			}
+		}
+	}
+	return "", len(l)
+}
+
 // 获取第一个字符(不包括空格, 换行符, 制表)
 func GetFistStr(l []*word) (string, int) {
 	for i, w := range l {
@@ -116,6 +129,7 @@ func GetBracketsOrLn(l []*word, start, end string) (int, int, bool) {
 }
 
 // 括号引用起来的块, 词性必须是分隔符
+// 返回是开始偏移和结束偏移
 func GetBrackets(l []*word, start, end string) (int, int) {
 	var startInt, endInt int
 

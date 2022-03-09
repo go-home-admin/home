@@ -49,7 +49,7 @@ func GetChildrenDir(path string) []DirInfo {
 	}
 
 	for _, file := range files {
-		if file.IsDir() {
+		if file.IsDir() && file.Name()[0:1] != "." {
 			got = append(got, DirInfo{
 				Name: file.Name(),
 				Path: path + "/" + file.Name(),
