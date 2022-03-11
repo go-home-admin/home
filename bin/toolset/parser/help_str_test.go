@@ -28,7 +28,12 @@ func TestGetBrackets(t *testing.T) {
 	}
 
 	start, end := GetBrackets(l, "{", "}")
-	fmt.Println(start, end)
+	if l[start].str != "{" {
+		t.Error("{解析失败")
+	}
+	if l[end].str != "}" {
+		t.Error("}解析失败")
+	}
 }
 
 func TestLastIsIdentifier(t *testing.T) {

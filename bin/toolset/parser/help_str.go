@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"strings"
 	"unicode"
 )
 
@@ -46,10 +47,8 @@ func GetLastIsIdentifier(l []*word, start string) (bool, int) {
 			return ok, i
 		} else if w.str == start {
 			ok = true
-		} else if !ok || !(w.t == wordT_doc || InArrString(w.str, []string{" ", "\t", "\n"})) {
-			if ok {
-				return false, i
-			}
+		} else if ok && !(w.t == wordT_doc || InArrString(w.str, []string{" ", "\t"})) {
+			ok = false
 		}
 	}
 
@@ -143,14 +142,14 @@ func GetBrackets(l []*word, start, end string) (int, int) {
 		} else {
 			if w.t == wordT_division {
 				switch w.str {
+				case start:
+					bCount++
 				case end:
 					bCount--
 					if bCount <= 0 {
 						endInt = i
 						return startInt, endInt
 					}
-				case start:
-					bCount++
 				}
 			}
 		}
@@ -337,4 +336,48 @@ func GetWords(source string) []*word {
 	}
 
 	return list
+}
+
+// 驼峰转蛇形
+func StringToSnake(s string) string {
+	s = strings.ReplaceAll(s, "-", "_")
+	data := make([]byte, 0, len(s)*2)
+	j := false
+	num := len(s)
+	for i := 0; i < num; i++ {
+		d := s[i]
+		if i > 0 && d >= 'A' && d <= 'Z' && j {
+			data = append(data, '_')
+		}
+		if d != '_' {
+			j = true
+		}
+		data = append(data, d)
+	}
+	return strings.ToLower(string(data[:]))
+}
+
+// 蛇形转驼峰
+func StringToHump(s string) string {
+	data := make([]byte, 0, len(s))
+	j := false
+	k := false
+	num := len(s) - 1
+	for i := 0; i <= num; i++ {
+		d := s[i]
+		if k == false && d >= 'A' && d <= 'Z' {
+			k = true
+		}
+		if d >= 'a' && d <= 'z' && (j || k == false) {
+			d = d - 32
+			j = false
+			k = true
+		}
+		if k && (d == '_' || d == '-') && num > i && s[i+1] >= 'a' && s[i+1] <= 'z' {
+			j = true
+			continue
+		}
+		data = append(data, d)
+	}
+	return string(data[:])
 }

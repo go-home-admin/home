@@ -25,10 +25,11 @@ type Option struct {
 }
 
 type Service struct {
-	Doc  string
-	Name string
-	Opt  map[string]Option
-	Rpc  map[string]ServiceRpc
+	Protoc *ProtocFileParser
+	Doc    string
+	Name   string
+	Opt    map[string]Option
+	Rpc    map[string]ServiceRpc
 }
 
 type ServiceRpc struct {
@@ -112,8 +113,9 @@ func GetProtoFileParser(path string) (ProtocFileParser, error) {
 				lastDoc = ""
 			case "service":
 				var val Service
-				val.Doc = lastDoc
 				val, offset = protoService(l.list, offset)
+				val.Protoc = &d
+				val.Doc = lastDoc
 				d.Services[val.Name] = val
 				lastDoc = ""
 			case "message":
@@ -173,7 +175,7 @@ func serverOption(l []*word, offset int) (Option, int) {
 
 	return Option{
 		Key:   key[1 : len(key)-1],
-		Val:   val,
+		Val:   val[1 : len(val)-1],
 		wl:    wl,
 		alias: alias,
 	}, offset + i

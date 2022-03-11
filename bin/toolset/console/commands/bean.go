@@ -24,24 +24,33 @@ func (BeanCommand) Configure() command.Configure {
 					Description: "强制更新",
 				},
 			},
+			Option: []command.ArgParam{
+				{
+					Name:        "skip",
+					Description: "跳过目录",
+					Default:     "@root/generate",
+				},
+			},
 		},
 	}
 }
 
 func (BeanCommand) Execute(input command.Input) {
-	path := getRootPath()
+	root := getRootPath()
 
 	//if input.GetHas("-f") == true {
-	//	for dir, _ := range parser.NewGoParserForDir(path) {
+	//	for alias, _ := range parser.NewGoParserForDir(path) {
 	//		if
 	//	}
 	//}
 
-	skip := map[string]bool{
-		"/Users/lv/Desktop/github.com/go-hom-admin/home/bin": true,
+	skip := make(map[string]bool)
+	for _, s := range input.GetOptions("proto_path") {
+		s = strings.Replace(s, "@root", root, 1)
+		skip[s] = true
 	}
 
-	for dir, fileParsers := range parser.NewGoParserForDir(path) {
+	for dir, fileParsers := range parser.NewGoParserForDir(root) {
 		if _, ok := skip[dir]; ok {
 			break
 		}
@@ -164,18 +173,25 @@ func genProvider(bc beanCache, m map[string]string) string {
 func getInitializeNewFunName(k parser.GoTypeAttr, m map[string]string) string {
 	alias := ""
 	name := k.TypeName
+
 	if !k.InPackage {
 		a := m[k.TypeImport]
 		alias = a + "."
 		arr := strings.Split(k.TypeName, ".")
 		name = arr[len(arr)-1]
 	}
-
+	if name[0:1] == "*" {
+		name = name[1:]
+	}
 	return alias + genInitializeNewStr(name) + "()"
 }
 
 // 控制对完函数名称
 func genInitializeNewStr(name string) string {
+	if name[0:1] == "*" {
+		name = name[1:]
+	}
+
 	return "New" + name
 }
 
@@ -192,6 +208,7 @@ func genImportAlias(m map[string]string) map[string]string {
 				newKey := key + strconv.Itoa(i)
 				if _, ok2 := aliasMapImport[newKey]; !ok2 {
 					key = newKey
+					break
 				}
 			}
 		}

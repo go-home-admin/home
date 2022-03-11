@@ -6,31 +6,38 @@ import (
 	logs "github.com/go-home-admin/home/bootstrap/services/logs"
 )
 
-var _ResponseSingle *Response
-var _AppSingle *App
 var _ConfigSingle *Config
 var _IniSingle *Ini
 var _LogSingle *Log
 var _MysqlSingle *Mysql
 var _RedisSingle *Redis
+var _ResponseSingle *Response
+var _AppSingle *App
 
 func GetAllProvider() []interface{} {
 	return []interface{}{
-		NewResponse(),
-		NewApp(),
 		NewConfig(),
 		NewIni(),
 		NewLog(),
 		NewMysql(),
 		NewRedis(),
+		NewResponse(),
+		NewApp(),
 	}
 }
 
+func NewIni() *Ini {
+	if _IniSingle == nil {
+		Ini := &Ini{}
+		_IniSingle = Ini
+	}
+	return _IniSingle
+}
 func NewLog() *Log {
 	if _LogSingle == nil {
 		Log := &Log{}
 		Log.ginLog = logs.NewGinLogrus()
-		Log.conf = .New*Config()
+		Log.conf = NewConfig()
 		_LogSingle = Log
 	}
 	return _LogSingle
@@ -38,8 +45,8 @@ func NewLog() *Log {
 func NewMysql() *Mysql {
 	if _MysqlSingle == nil {
 		Mysql := &Mysql{}
-		Mysql.conf = .New*Config()
-		Mysql.log = .New*Log()
+		Mysql.conf = NewConfig()
+		Mysql.log = NewLog()
 		_MysqlSingle = Mysql
 	}
 	return _MysqlSingle
@@ -47,7 +54,7 @@ func NewMysql() *Mysql {
 func NewRedis() *Redis {
 	if _RedisSingle == nil {
 		Redis := &Redis{}
-		Redis.conf = .New*Config()
+		Redis.conf = NewConfig()
 		_RedisSingle = Redis
 	}
 	return _RedisSingle
@@ -63,8 +70,8 @@ func NewApp() *App {
 	if _AppSingle == nil {
 		App := &App{}
 		App.container = services.NewContainer()
-		App.resp = .New*Response()
-		App.log = .New*Log()
+		App.resp = NewResponse()
+		App.log = NewLog()
 		_AppSingle = App
 	}
 	return _AppSingle
@@ -72,15 +79,8 @@ func NewApp() *App {
 func NewConfig() *Config {
 	if _ConfigSingle == nil {
 		Config := &Config{}
-		Config.iniConfig = .New*Ini()
+		Config.iniConfig = NewIni()
 		_ConfigSingle = Config
 	}
 	return _ConfigSingle
-}
-func NewIni() *Ini {
-	if _IniSingle == nil {
-		Ini := &Ini{}
-		_IniSingle = Ini
-	}
-	return _IniSingle
 }

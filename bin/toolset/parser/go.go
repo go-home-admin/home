@@ -80,7 +80,12 @@ func GetFileParser(path string) (GoFileParser, error) {
 				_, offset = handleVars(l.list, offset)
 				lastDoc = ""
 			default:
-				fmt.Println("文件块作用域似乎解析有错误", path, work.str, offset)
+				nl := l.list[offset:]
+				str := ""
+				for _, w := range nl {
+					str += w.str
+				}
+				fmt.Println("文件块作用域似乎解析有错误", path, offset, str)
 			}
 		}
 	}
@@ -131,7 +136,7 @@ func handleImports(l []*word, offset int) (map[string]string, int) {
 		newOffset = et
 
 		arr := make([]string, 0)
-		for _, w := range l[st:et] {
+		for _, w := range l[st : et+1] {
 			if wordT_line == w.t && len(arr) != 0 {
 				key, val = getImport(arr)
 				imap[key] = val
@@ -277,7 +282,7 @@ func getTypeAlias(str string, d GoFileParser, attr *GoTypeAttr) {
 	wf := wArr[0]
 
 	if wf.t == wordT_word || wf.str == "*" {
-		if len(wArr) >= 2 {
+		if (wf.str == "*" && len(wArr) >= 3) || (wf.str != "*" && len(wArr) >= 2) {
 			attr.TypeAlias, _ = GetFistWord(wArr)
 			attr.TypeImport = d.Imports[attr.TypeAlias]
 			return
@@ -337,9 +342,28 @@ func handleCosts(l []*word, offset int) (map[string]string, int) {
 func handleVars(l []*word, offset int) (map[string]string, int) {
 	ft, _ := GetFistStr(l[offset+1:])
 	if ft != "(" {
-		return nil, offset + NextLine(l[offset:])
+		ok, _ := GetLastIsIdentifier(l[offset:], "{")
+		if ok {
+			last := NextLine(l[offset:])
+			ss := l[offset+last-1]
+			if ss.str == "{" {
+				nl := l[offset+last-1:]
+				offset = offset + last - 1
+				_, et := GetBrackets(nl, "{", "}")
+				return nil, offset + et + 1
+			} else {
+				nl := l[offset:]
+				_, et := GetBrackets(nl, "{", "}")
+				return nil, offset + et + 1
+			}
+		} else {
+			last := NextLine(l[offset:])
+			offset = offset + last
+			return nil, offset
+		}
 	} else {
-		_, et := GetBrackets(l[offset:], "(", ")")
-		return nil, offset + et
+		nl := l[offset:]
+		_, et := GetBrackets(nl, "(", ")")
+		return nil, offset + et + 1
 	}
 }
