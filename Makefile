@@ -11,20 +11,20 @@ mac-install:
 
 # Orm自动维护
 make-orm:
-	php bin/toolset make:orm ./config/mysql.local.ini
+	go run ./bin/toolset/main.go make:protoc
 
 # 只维护 protoc
 protoc:
-	php bin/toolset protoc
+	go run ./bin/toolset/main.go make:protoc
 
 make-route:
-	php bin/toolset make:route
+	go run ./bin/toolset/main.go make:route
 
 make-swagger:
-	php bin/toolset make:swagger
+	go run ./bin/toolset/main.go make:protoc
 
 make-bean:
-	php bin/toolset make:bean ./ -f
+	go run ./bin/toolset/main.go make:bean
 
 # 调试启动
 dev:protoc make-route make-bean

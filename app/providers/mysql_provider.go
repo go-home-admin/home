@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// Mysql @Bean
+// Mysql @Bean("mysql")
 type Mysql struct {
 	conf *Config `inject:""`
 	db   *gorm.DB
@@ -44,4 +44,8 @@ func (m *Mysql) Init() {
 
 func (m *Mysql) DB() *gorm.DB {
 	return m.db
+}
+
+func (m *Mysql) GetBean(alias string) *gorm.DB {
+	return &gorm.DB{}
 }
