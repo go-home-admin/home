@@ -15,9 +15,13 @@ type Mysql struct {
 	conf *Config `inject:""`
 	db   *gorm.DB
 	log  *Log `inject:""` // 引入不用, 为了方便初始化log
+
+	dbs map[string]*gorm.DB
 }
 
 func (m *Mysql) Init() {
+	m.dbs = make(map[string]*gorm.DB)
+
 	config := m.conf.GetServiceConfig("mysql")
 	hosts := config.GetString("hosts")
 	port := config.GetString("port")
@@ -47,5 +51,5 @@ func (m *Mysql) DB() *gorm.DB {
 }
 
 func (m *Mysql) GetBean(alias string) *gorm.DB {
-	return &gorm.DB{}
+	return m.dbs[alias]
 }
