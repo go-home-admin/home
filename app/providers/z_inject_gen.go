@@ -3,46 +3,30 @@ package providers
 
 import (
 	services "github.com/go-home-admin/home/bootstrap/services"
+	app "github.com/go-home-admin/home/bootstrap/services/app"
 	logs "github.com/go-home-admin/home/bootstrap/services/logs"
 )
 
+var _ConfigSingle *Config
 var _IniSingle *Ini
 var _LogSingle *Log
 var _MysqlSingle *Mysql
 var _RedisSingle *Redis
 var _ResponseSingle *Response
 var _AppSingle *App
-var _ConfigSingle *Config
 
 func GetAllProvider() []interface{} {
 	return []interface{}{
+		NewConfig(),
 		NewIni(),
 		NewLog(),
 		NewMysql(),
 		NewRedis(),
 		NewResponse(),
 		NewApp(),
-		NewConfig(),
 	}
 }
 
-func NewRedis() *Redis {
-	if _RedisSingle == nil {
-		Redis := &Redis{}
-		Redis.conf = NewConfig()
-		app.AfterProvider(Redis, "")
-		_RedisSingle = Redis
-	}
-	return _RedisSingle
-}
-func NewResponse() *Response {
-	if _ResponseSingle == nil {
-		Response := &Response{}
-		app.AfterProvider(Response, "")
-		_ResponseSingle = Response
-	}
-	return _ResponseSingle
-}
 func NewApp() *App {
 	if _AppSingle == nil {
 		App := &App{}
@@ -74,8 +58,8 @@ func NewIni() *Ini {
 func NewLog() *Log {
 	if _LogSingle == nil {
 		Log := &Log{}
-		Log.ginLog = logs.NewGinLogrus()
 		Log.conf = NewConfig()
+		Log.ginLog = logs.NewGinLogrus()
 		app.AfterProvider(Log, "")
 		_LogSingle = Log
 	}
@@ -90,4 +74,21 @@ func NewMysql() *Mysql {
 		_MysqlSingle = Mysql
 	}
 	return _MysqlSingle
+}
+func NewRedis() *Redis {
+	if _RedisSingle == nil {
+		Redis := &Redis{}
+		Redis.conf = NewConfig()
+		app.AfterProvider(Redis, "")
+		_RedisSingle = Redis
+	}
+	return _RedisSingle
+}
+func NewResponse() *Response {
+	if _ResponseSingle == nil {
+		Response := &Response{}
+		app.AfterProvider(Response, "")
+		_ResponseSingle = Response
+	}
+	return _ResponseSingle
 }

@@ -2,18 +2,18 @@
 package commands
 
 import (
-	"github.com/go-home-admin/home/bootstrap/services/app"
+	app "github.com/go-home-admin/home/bootstrap/services/app"
 )
 
-var _RouteCommandSingle *RouteCommand
 var _BeanCommandSingle *BeanCommand
 var _ProtocCommandSingle *ProtocCommand
+var _RouteCommandSingle *RouteCommand
 
 func GetAllProvider() []interface{} {
 	return []interface{}{
-		NewRouteCommand(),
 		NewBeanCommand(),
 		NewProtocCommand(),
+		NewRouteCommand(),
 	}
 }
 

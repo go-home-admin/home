@@ -238,16 +238,14 @@ func genImportAlias(m map[string]string) map[string]string {
 
 // m = import => alias
 func getImportStr(bc beanCache, m map[string]string) string {
-	has := map[string]bool{}
+	has := map[string]bool{
+		"github.com/go-home-admin/home/bootstrap/services/app": true,
+	}
 	for _, goType := range bc.structList {
 		if goType.Doc.HasAnnotation("@Bean") {
 			for _, attr := range goType.Attrs {
 				if !attr.InPackage {
 					has[attr.TypeImport] = true
-					tag := attr.Tag["inject"]
-					if tag.Count() >= 2 {
-						has["github.com/go-home-admin/home/bootstrap/services/app"] = true
-					}
 				}
 			}
 

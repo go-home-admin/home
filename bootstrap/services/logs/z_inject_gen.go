@@ -1,7 +1,9 @@
 // gen for home toolset
 package logs
 
-import ()
+import (
+	app "github.com/go-home-admin/home/bootstrap/services/app"
+)
 
 var _GinLogrusSingle *GinLogrus
 

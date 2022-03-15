@@ -1,7 +1,9 @@
 // gen for home toolset
 package admin_user
 
-import ()
+import (
+	app "github.com/go-home-admin/home/bootstrap/services/app"
+)
 
 var _ControllerSingle *Controller
 

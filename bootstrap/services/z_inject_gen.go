@@ -1,7 +1,9 @@
 // gen for home toolset
 package services
 
-import ()
+import (
+	app "github.com/go-home-admin/home/bootstrap/services/app"
+)
 
 var _ContainerSingle *Container
 var _HttpServerSingle *HttpServer

@@ -3,6 +3,7 @@ package message
 
 import (
 	providers "github.com/go-home-admin/home/app/providers"
+	app "github.com/go-home-admin/home/bootstrap/services/app"
 	broker "github.com/go-home-admin/home/bootstrap/services/broker"
 )
 
