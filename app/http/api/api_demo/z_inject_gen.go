@@ -1,6 +1,8 @@
 // gen for home toolset
 package api_demo
 
+import ()
+
 var _ControllerSingle *Controller
 
 func GetAllProvider() []interface{} {
@@ -12,6 +14,7 @@ func GetAllProvider() []interface{} {
 func NewController() *Controller {
 	if _ControllerSingle == nil {
 		Controller := &Controller{}
+		app.AfterProvider(Controller, "")
 		_ControllerSingle = Controller
 	}
 	return _ControllerSingle

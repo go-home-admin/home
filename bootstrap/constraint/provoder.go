@@ -15,11 +15,3 @@ type Construct interface {
 type AfterRegistration interface {
 	AfterRegistration(beans []interface{})
 }
-
-// AfterProvider 在 Initialize 函数后执行
-func AfterProvider(bean interface{}) {
-	construct, ok := bean.(Construct)
-	if ok {
-		construct.Init()
-	}
-}

@@ -15,6 +15,6 @@ func (m *Mysql) Init() {
 	m.dbs = make(map[string]*gorm.DB)
 }
 
-func (m *Mysql) GetBean(alias string) *gorm.DB {
+func (m *Mysql) GetBean(alias string) interface{} {
 	return m.dbs[alias]
 }

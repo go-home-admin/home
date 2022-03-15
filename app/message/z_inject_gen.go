@@ -19,6 +19,7 @@ func NewKernel() *Kernel {
 		Kernel := &Kernel{}
 		Kernel.b = broker.NewRedisBroker()
 		Kernel.redis = providers.NewRedis()
+		app.AfterProvider(Kernel, "")
 		_KernelSingle = Kernel
 	}
 	return _KernelSingle

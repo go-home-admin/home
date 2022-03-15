@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	path2 "path"
+	"path/filepath"
 )
 
 type FileInfo struct {
@@ -18,7 +19,7 @@ type DirInfo struct {
 	Path string
 }
 
-// 获取目录下所有文件
+// GetFiles 获取目录下所有文件
 func (di DirInfo) GetFiles(ext string) []FileInfo {
 	got := make([]FileInfo, 0)
 
@@ -39,9 +40,14 @@ func (di DirInfo) GetFiles(ext string) []FileInfo {
 	return got
 }
 
-// 获取目录和所有子目录
+// GetChildrenDir 获取目录和所有子目录
 func GetChildrenDir(path string) []DirInfo {
-	got := make([]DirInfo, 0)
+	got := []DirInfo{
+		{
+			Name: filepath.Base(path),
+			Path: path,
+		},
+	}
 
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
@@ -61,7 +67,7 @@ func GetChildrenDir(path string) []DirInfo {
 	return got
 }
 
-// 读取目录中的所有文件包括子目录的文件
+// GetDirFiles 读取目录中的所有文件包括子目录的文件
 func GetDirFiles(path string, ext string) []FileInfo {
 	got := make([]FileInfo, 0)
 

@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-// @Bean
+// BeanCommand @Bean
 type BeanCommand struct{}
 
 func (BeanCommand) Configure() command.Configure {
@@ -87,7 +87,9 @@ type beanCache struct {
 
 func newBeanCache() beanCache {
 	return beanCache{
-		imports:    make(map[string]string),
+		imports: map[string]string{
+			"github.com/go-home-admin/home/bootstrap/services/app": "github.com/go-home-admin/home/bootstrap/services/app",
+		},
 		structList: make(map[string]parser.GoType),
 	}
 }
@@ -159,7 +161,10 @@ func genProvider(bc beanCache, m map[string]string) string {
 					}
 				}
 			}
+
+			constraint := m["github.com/go-home-admin/home/bootstrap/services/app"]
 			str = str +
+				"\n\t\t" + constraint + ".AfterProvider(" + s + ", \"" + goType.Doc.GetAlias() + "\")" +
 				"\n\t\t" + genSingleName(s) + " = " + s +
 				"\n\t}" +
 				"\n\treturn " + genSingleName(s) +
@@ -179,11 +184,21 @@ func getInitializeNewFunName(k parser.GoTypeAttr, m map[string]string) string {
 		alias = a + "."
 		arr := strings.Split(k.TypeName, ".")
 		name = arr[len(arr)-1]
-	}
-	if name[0:1] == "*" {
+	} else if name[0:1] == "*" {
 		name = name[1:]
 	}
-	return alias + genInitializeNewStr(name) + "()"
+	tag := k.Tag["inject"]
+	if tag.Count() < 2 {
+		return alias + genInitializeNewStr(name) + "()"
+	} else {
+		beanAlias := tag.Get(0)
+		beanValue := tag.Get(1)
+
+		constraint := m["github.com/go-home-admin/home/bootstrap/services/app"]
+
+		return constraint + ".GetBean(\"" + beanAlias + "\").(" + constraint + ".Bean)" +
+			".GetBean(\"" + beanValue + "\").(*" + alias + name + ")"
+	}
 }
 
 // 控制对完函数名称
@@ -229,22 +244,27 @@ func getImportStr(bc beanCache, m map[string]string) string {
 			for _, attr := range goType.Attrs {
 				if !attr.InPackage {
 					has[attr.TypeImport] = true
+					tag := attr.Tag["inject"]
+					if tag.Count() >= 2 {
+						has["github.com/go-home-admin/home/bootstrap/services/app"] = true
+					}
 				}
 			}
 
 		}
 	}
 	// 删除未使用的import
-	for s, _ := range m {
-		if _, ok := has[s]; !ok {
-			delete(m, s)
+	nm := make(map[string]string)
+	for s, vv := range m {
+		if _, ok := has[s]; ok {
+			nm[s] = vv
 		}
 	}
 
-	sk := sortMap(m)
+	sk := sortMap(nm)
 	got := ""
 	for _, k := range sk {
-		got += "\n\t" + m[k] + " \"" + k + "\""
+		got += "\n\t" + nm[k] + " \"" + k + "\""
 	}
 
 	return got

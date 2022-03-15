@@ -1,6 +1,8 @@
 // gen for home toolset
 package services
 
+import ()
+
 var _ContainerSingle *Container
 var _HttpServerSingle *HttpServer
 
@@ -14,6 +16,7 @@ func GetAllProvider() []interface{} {
 func NewContainer() *Container {
 	if _ContainerSingle == nil {
 		Container := &Container{}
+		app.AfterProvider(Container, "")
 		_ContainerSingle = Container
 	}
 	return _ContainerSingle
@@ -21,6 +24,7 @@ func NewContainer() *Container {
 func NewHttpServer() *HttpServer {
 	if _HttpServerSingle == nil {
 		HttpServer := &HttpServer{}
+		app.AfterProvider(HttpServer, "")
 		_HttpServerSingle = HttpServer
 	}
 	return _HttpServerSingle

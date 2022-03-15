@@ -162,19 +162,48 @@ type GoTypeAttr struct {
 	TypeAlias  string
 	TypeImport string
 	InPackage  bool // 是否本包的引用
-	Tag        map[string]string
+	Tag        map[string]TagDoc
+}
+
+type TagDoc string
+
+func (t TagDoc) Get(num int) string {
+	s := string(t)
+	sr := strings.Split(s, ",")
+	return strings.Trim(sr[num], " ")
+}
+
+func (t TagDoc) Count() int {
+	s := string(t)
+	sr := strings.Split(s, ",")
+	return len(sr)
 }
 
 type GoDoc string
 
-// 是否存在某个注解
+// HasAnnotation 是否存在某个注解
 func (d GoDoc) HasAnnotation(check string) bool {
-	ds := string(d)
-
-	return strings.Index(ds, check) != -1
+	return strings.Index(string(d), check) != -1
 }
 
-// 普通指针
+func (d GoDoc) GetAlias() string {
+	l := GetWords(string(d)[2:])
+	num := 0
+	for i, w := range l {
+		if w.t == wordT_word {
+			if w.str == "Bean" {
+				if l[i-1].str == "@" {
+					num = 1
+				}
+			} else if num == 1 {
+				return w.str[1 : len(w.str)-1]
+			}
+		}
+	}
+	return ""
+}
+
+// IsPointer 普通指针
 func (receiver GoTypeAttr) IsPointer() bool {
 	return receiver.TypeName[0:1] == "*"
 }
@@ -255,14 +284,15 @@ func handleTypes(l []*word, offset int, d GoFileParser) (GoType, int) {
 				attr := GoTypeAttr{
 					Name:     wordAttrs[0],
 					TypeName: wordAttrs[1],
-					Tag:      map[string]string{},
+					Tag:      map[string]TagDoc{},
 				}
 				getTypeAlias(wordAttrs[1], d, &attr)
 				// 解析 go tag
 				tagArr := getArrGoTag(wordAttrs[2])
 
 				for _, tagStrArr := range tagArr {
-					attr.Tag[tagStrArr[0]] = tagStrArr[1]
+					td := tagStrArr[1]
+					attr.Tag[tagStrArr[0]] = TagDoc(td[1 : len(td)-1])
 				}
 				got.Attrs[attr.Name] = attr
 			}

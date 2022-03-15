@@ -5,9 +5,9 @@ import (
 	"github.com/go-home-admin/home/bootstrap/services"
 )
 
-// @Bean("config")
+// ConfigProvider @Bean("config")
 type ConfigProvider struct {
-	data map[string]*services.Config `inject:""`
+	data map[string]*services.Config
 
 	path string
 	port string
@@ -28,6 +28,6 @@ func (c *ConfigProvider) Init() {
 	c.initFlag()
 }
 
-func (c *ConfigProvider) GetBean(alias string) *services.Config {
+func (c *ConfigProvider) GetBean(alias string) interface{} {
 	return c.data[alias]
 }
