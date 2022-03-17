@@ -17,17 +17,15 @@ func GetAllProvider() []interface{} {
 
 func NewContainer() *Container {
 	if _ContainerSingle == nil {
-		Container := &Container{}
-		app.AfterProvider(Container, "")
-		_ContainerSingle = Container
+		_ContainerSingle = &Container{}
+		app.AfterProvider(_ContainerSingle, "")
 	}
 	return _ContainerSingle
 }
 func NewHttpServer() *HttpServer {
 	if _HttpServerSingle == nil {
-		HttpServer := &HttpServer{}
-		app.AfterProvider(HttpServer, "")
-		_HttpServerSingle = HttpServer
+		_HttpServerSingle = &HttpServer{}
+		app.AfterProvider(_HttpServerSingle, "")
 	}
 	return _HttpServerSingle
 }

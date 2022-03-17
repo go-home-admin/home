@@ -15,9 +15,8 @@ func GetAllProvider() []interface{} {
 
 func NewGinLogrus() *GinLogrus {
 	if _GinLogrusSingle == nil {
-		GinLogrus := &GinLogrus{}
-		app.AfterProvider(GinLogrus, "")
-		_GinLogrusSingle = GinLogrus
+		_GinLogrusSingle = &GinLogrus{}
+		app.AfterProvider(_GinLogrusSingle, "")
 	}
 	return _GinLogrusSingle
 }

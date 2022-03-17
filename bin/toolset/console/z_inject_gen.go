@@ -15,9 +15,8 @@ func GetAllProvider() []interface{} {
 
 func NewKernel() *Kernel {
 	if _KernelSingle == nil {
-		Kernel := &Kernel{}
-		app.AfterProvider(Kernel, "")
-		_KernelSingle = Kernel
+		_KernelSingle = &Kernel{}
+		app.AfterProvider(_KernelSingle, "")
 	}
 	return _KernelSingle
 }

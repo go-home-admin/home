@@ -143,10 +143,11 @@ func genSingleName(s string) string {
 func genProvider(bc beanCache, m map[string]string) string {
 	str := ""
 	for s, goType := range bc.structList {
+		sVar := genSingleName(s)
 		if goType.Doc.HasAnnotation("@Bean") {
 			str = str + "\nfunc " + genInitializeNewStr(s) + "() *" + s + " {" +
-				"\n\tif " + genSingleName(s) + " == nil {" + // if _provider == nil {
-				"\n\t\t" + s + " := " + "&" + s + "{}" // provider := provider{}
+				"\n\tif " + sVar + " == nil {" + // if _provider == nil {
+				"\n\t\t" + sVar + " = " + "&" + s + "{}" // provider := provider{}
 
 			for attrName, attr := range goType.Attrs {
 				pointer := ""
@@ -157,17 +158,16 @@ func genProvider(bc beanCache, m map[string]string) string {
 				for tagName, _ := range attr.Tag {
 					if tagName == "inject" {
 						str = str + "\n\t\t" +
-							s + "." + attrName + " = " + pointer + getInitializeNewFunName(attr, m)
+							sVar + "." + attrName + " = " + pointer + getInitializeNewFunName(attr, m)
 					}
 				}
 			}
 
 			constraint := m["github.com/go-home-admin/home/bootstrap/services/app"]
 			str = str +
-				"\n\t\t" + constraint + ".AfterProvider(" + s + ", \"" + goType.Doc.GetAlias() + "\")" +
-				"\n\t\t" + genSingleName(s) + " = " + s +
+				"\n\t\t" + constraint + ".AfterProvider(" + sVar + ", \"" + goType.Doc.GetAlias() + "\")" +
 				"\n\t}" +
-				"\n\treturn " + genSingleName(s) +
+				"\n\treturn " + sVar +
 				"\n}"
 		}
 	}

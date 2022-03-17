@@ -19,25 +19,22 @@ func GetAllProvider() []interface{} {
 
 func NewBeanCommand() *BeanCommand {
 	if _BeanCommandSingle == nil {
-		BeanCommand := &BeanCommand{}
-		app.AfterProvider(BeanCommand, "")
-		_BeanCommandSingle = BeanCommand
+		_BeanCommandSingle = &BeanCommand{}
+		app.AfterProvider(_BeanCommandSingle, "")
 	}
 	return _BeanCommandSingle
 }
 func NewProtocCommand() *ProtocCommand {
 	if _ProtocCommandSingle == nil {
-		ProtocCommand := &ProtocCommand{}
-		app.AfterProvider(ProtocCommand, "")
-		_ProtocCommandSingle = ProtocCommand
+		_ProtocCommandSingle = &ProtocCommand{}
+		app.AfterProvider(_ProtocCommandSingle, "")
 	}
 	return _ProtocCommandSingle
 }
 func NewRouteCommand() *RouteCommand {
 	if _RouteCommandSingle == nil {
-		RouteCommand := &RouteCommand{}
-		app.AfterProvider(RouteCommand, "")
-		_RouteCommandSingle = RouteCommand
+		_RouteCommandSingle = &RouteCommand{}
+		app.AfterProvider(_RouteCommandSingle, "")
 	}
 	return _RouteCommandSingle
 }

@@ -13,5 +13,5 @@ type Construct interface {
 
 // AfterRegistration 注册完成后, 统一处理
 type AfterRegistration interface {
-	AfterRegistration(beans []interface{})
+	Boot()
 }

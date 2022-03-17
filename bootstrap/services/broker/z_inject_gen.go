@@ -15,9 +15,8 @@ func GetAllProvider() []interface{} {
 
 func NewRedisBroker() *RedisBroker {
 	if _RedisBrokerSingle == nil {
-		RedisBroker := &RedisBroker{}
-		app.AfterProvider(RedisBroker, "")
-		_RedisBrokerSingle = RedisBroker
+		_RedisBrokerSingle = &RedisBroker{}
+		app.AfterProvider(_RedisBrokerSingle, "")
 	}
 	return _RedisBrokerSingle
 }

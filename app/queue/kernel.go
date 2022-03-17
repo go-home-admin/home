@@ -22,7 +22,7 @@ func (k *Kernel) Init() {
 	k.b.SetConfig(k.redis)
 
 	// 注册Job
-	k.b.Consumer(job.InitializeNewDemoJobProvider())
+	k.b.Consumer(job.NewDemoJob())
 }
 
 func (k *Kernel) Run() {
