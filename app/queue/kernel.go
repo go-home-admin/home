@@ -34,5 +34,5 @@ func (k *Kernel) Exit() {
 }
 
 func GetServer() constraint.KernelServer {
-	return InitializeNewKernelProvider()
+	return NewKernel()
 }

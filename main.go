@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	app := providers.InitializeNewAppProvider()
+	app := providers.NewApp()
 
 	app.Run([]constraint.KernelServer{
 		// http服务

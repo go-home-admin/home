@@ -1,0 +1,15 @@
+default: mysql
+
+connections:
+  mysql:
+    driver: mysql
+    port: 3306
+    database: home-mysql
+    username: root
+    password: env("DB_PASSWORD", "123456")
+  pg:
+    driver: postgresql
+    port: 5432
+    database: home-mysql
+    username: root
+    password: 123456
