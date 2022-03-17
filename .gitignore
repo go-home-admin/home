@@ -4,3 +4,4 @@
 /generate
 *_inject_gen.go
 routes
+.env
