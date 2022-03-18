@@ -4,6 +4,7 @@ import (
 	"embed"
 	"flag"
 	"github.com/go-home-admin/home/bootstrap/services"
+	"gopkg.in/yaml.v2"
 	"path"
 )
 
@@ -42,10 +43,14 @@ func (c *ConfigProvider) initFile() {
 		panic(err)
 	}
 	for _, entry := range DirEntry {
-		if path.Ext(entry.Name()) == ".ini" {
+		if path.Ext(entry.Name()) == ".yaml" {
 			fileContext, _ := defaultConfigDir.ReadFile(defaultDir + "/" + entry.Name())
-
-			_ = fileContext
+			m := make(map[interface{}]interface{})
+			err = yaml.Unmarshal(fileContext, &m)
+			if err != nil {
+				panic(err)
+			}
+			c.data[entry.Name()] = services.NewConfig(m)
 		}
 	}
 }
