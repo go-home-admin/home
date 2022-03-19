@@ -5,9 +5,7 @@ import (
 	"strings"
 )
 
-/**
-golang parser 非完整token实现
-*/
+// GoFileParser 非完整token实现
 type GoFileParser struct {
 	PackageName string
 	PackageDoc  string
@@ -30,6 +28,36 @@ func NewGoParserForDir(path string) map[string][]GoFileParser {
 	return got
 }
 
+// go 关键字语法块
+// map\[]\interface{}
+func getWordsWitchGo(l *GoWords) GoWords {
+	var got = GoWords{
+		list: make([]*word, 0),
+	}
+
+	for offset := 0; offset < len(l.list); offset++ {
+		work := l.list[offset]
+		switch work.t {
+		case wordT_word:
+			switch work.str {
+			case "interface":
+				if len(l.list) >= (offset+2) && l.list[offset+1].str == "{" && l.list[offset+2].str == "}" {
+					offset = offset + 2
+					work.str = work.str + "{}"
+					got.list = append(got.list, work)
+				} else {
+					got.list = append(got.list, work)
+				}
+			default:
+				got.list = append(got.list, work)
+			}
+		default:
+			got.list = append(got.list, work)
+		}
+	}
+	return got
+}
+
 func GetFileParser(path string) (GoFileParser, error) {
 	d := GoFileParser{
 		PackageName: "",
@@ -40,6 +68,7 @@ func GetFileParser(path string) (GoFileParser, error) {
 	}
 
 	l := getWordsWitchFile(path)
+	l = getWordsWitchGo(&l)
 	lastDoc := ""
 	for offset := 0; offset < len(l.list); offset++ {
 		work := l.list[offset]
@@ -209,7 +238,7 @@ func (receiver GoTypeAttr) IsPointer() bool {
 }
 
 func (receiver GoTypeAttr) HasTag(name string) bool {
-	for s, _ := range receiver.Tag {
+	for s := range receiver.Tag {
 		if s == name {
 			return true
 		}
