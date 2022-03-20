@@ -2,7 +2,6 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/go-home-admin/home/app/providers"
 	"github.com/go-home-admin/home/bootstrap/constraint"
 	"github.com/go-home-admin/home/bootstrap/services"
 )
@@ -10,7 +9,7 @@ import (
 // Kernel @Bean
 type Kernel struct {
 	httpServer *services.HttpServer `inject:""`
-	config     *providers.Config    `inject:""`
+	config     *services.Config     `inject:"config, app"`
 }
 
 func (k *Kernel) Init() {
@@ -27,8 +26,8 @@ func (k *Kernel) Exit() {
 }
 
 func (k *Kernel) setHttp() {
-	k.httpServer.SetPort(k.config.GetServiceConfig("http").GetInt("port", 80))
-	k.httpServer.SetDebug(k.config.IsDebug())
+	k.httpServer.SetPort(k.config.GetInt("http", 80))
+	k.httpServer.SetDebug(true)
 
 	// 默认允许跨域
 	engine := gin.New()

@@ -5,9 +5,9 @@ import (
 	"gorm.io/gorm"
 )
 
-// @Bean("mysql")
+// MysqlProvider @Bean("mysql")
 type MysqlProvider struct {
-	config services.Config `inject:"config, mysql"`
+	config *services.Config `inject:"config, database"`
 	dbs    map[string]*gorm.DB
 }
 

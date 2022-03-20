@@ -6,6 +6,7 @@ import (
 	"github.com/go-home-admin/home/bootstrap/services"
 	"gopkg.in/yaml.v2"
 	"path"
+	"strings"
 )
 
 // 默认配置加载目录
@@ -50,7 +51,7 @@ func (c *ConfigProvider) initFile() {
 			if err != nil {
 				panic(err)
 			}
-			c.data[entry.Name()] = services.NewConfig(m)
+			c.data[strings.TrimSuffix(entry.Name(), ".yaml")] = services.NewConfig(m)
 		}
 	}
 }

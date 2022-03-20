@@ -192,7 +192,7 @@ func (receiver *Controller) GinHandle{action}(ctx *gin.Context) {
 					str = strings.ReplaceAll(str, s, O)
 				}
 
-				err = os.WriteFile(out+"/"+actionName+"_action.go", []byte(str), 0766)
+				err = os.WriteFile(out+"/"+parser.StringToSnake(actionName)+"_action.go", []byte(str), 0766)
 				if err != nil {
 					log.Fatal(err)
 				}

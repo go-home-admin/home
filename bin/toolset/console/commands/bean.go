@@ -58,7 +58,7 @@ func (BeanCommand) Execute(input command.Input) {
 		bc := newBeanCache()
 		for _, fileParser := range fileParsers {
 			bc.name = fileParser.PackageName
-			for tName, goType := range fileParser.Types {
+			for _, goType := range fileParser.Types {
 				for _, attr := range goType.Attrs {
 					if attr.HasTag("inject") {
 						for _, impStr := range fileParser.Imports {
@@ -70,7 +70,7 @@ func (BeanCommand) Execute(input command.Input) {
 				}
 
 				if goType.Doc.HasAnnotation("@Bean") {
-					bc.structList[tName] = goType
+					bc.structList = append(bc.structList, goType)
 				}
 			}
 		}
@@ -82,7 +82,7 @@ func (BeanCommand) Execute(input command.Input) {
 type beanCache struct {
 	name       string
 	imports    map[string]string
-	structList map[string]parser.GoType
+	structList []parser.GoType
 }
 
 func newBeanCache() beanCache {
@@ -90,7 +90,7 @@ func newBeanCache() beanCache {
 		imports: map[string]string{
 			"github.com/go-home-admin/home/bootstrap/services/app": "github.com/go-home-admin/home/bootstrap/services/app",
 		},
-		structList: make(map[string]parser.GoType),
+		structList: make([]parser.GoType, 0),
 	}
 }
 
@@ -125,10 +125,10 @@ func genBean(dir string, bc beanCache) {
 func genSingle(bc beanCache) string {
 	str := ""
 	allProviderStr := "\n\treturn []interface{}{"
-	for s, goType := range bc.structList {
+	for _, goType := range bc.structList {
 		if goType.Doc.HasAnnotation("@Bean") {
-			str = str + "\nvar " + genSingleName(s) + " *" + s
-			allProviderStr += "\n\t\t" + genInitializeNewStr(s) + "(),"
+			str = str + "\nvar " + genSingleName(goType.Name) + " *" + goType.Name
+			allProviderStr += "\n\t\t" + genInitializeNewStr(goType.Name) + "(),"
 		}
 	}
 	// 返回全部的提供商
@@ -142,12 +142,12 @@ func genSingleName(s string) string {
 
 func genProvider(bc beanCache, m map[string]string) string {
 	str := ""
-	for s, goType := range bc.structList {
-		sVar := genSingleName(s)
+	for _, goType := range bc.structList {
+		sVar := genSingleName(goType.Name)
 		if goType.Doc.HasAnnotation("@Bean") {
-			str = str + "\nfunc " + genInitializeNewStr(s) + "() *" + s + " {" +
+			str = str + "\nfunc " + genInitializeNewStr(goType.Name) + "() *" + goType.Name + " {" +
 				"\n\tif " + sVar + " == nil {" + // if _provider == nil {
-				"\n\t\t" + sVar + " = " + "&" + s + "{}" // provider := provider{}
+				"\n\t\t" + sVar + " = " + "&" + goType.Name + "{}" // provider := provider{}
 
 			for attrName, attr := range goType.Attrs {
 				pointer := ""

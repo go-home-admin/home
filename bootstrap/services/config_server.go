@@ -23,11 +23,11 @@ func (c *Config) GetKey(key string) map[interface{}]interface{} {
 	lc := len(arr)
 	ll := lc - 1
 	for i := 0; i < lc; i++ {
-		s := m[i]
+		s := arr[i]
 		if v, ok := m[s]; ok {
 			if ll == i {
 				switch v.(type) {
-				case string:
+				case map[interface{}]interface{}:
 					return v.(map[interface{}]interface{})
 				default:
 					return nil
@@ -53,7 +53,7 @@ func (c *Config) GetString(key string, def ...string) string {
 	lc := len(arr)
 	ll := lc - 1
 	for i := 0; i < lc; i++ {
-		s := m[i]
+		s := arr[i]
 		if v, ok := m[s]; ok {
 			if ll == i {
 				switch v.(type) {
@@ -92,7 +92,7 @@ func (c *Config) GetInt(key string, def ...int) int {
 	lc := len(arr)
 	ll := lc - 1
 	for i := 0; i < lc; i++ {
-		s := m[i]
+		s := arr[i]
 		if v, ok := m[s]; ok {
 			if ll == i {
 				switch v.(type) {
@@ -131,7 +131,7 @@ func (c *Config) GetBool(key string, def ...bool) bool {
 	lc := len(arr)
 	ll := lc - 1
 	for i := 0; i < lc; i++ {
-		s := m[i]
+		s := arr[i]
 		if v, ok := m[s]; ok {
 			if ll == i {
 				switch v.(type) {

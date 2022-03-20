@@ -1,15 +1,12 @@
 package queue
 
 import (
-	"context"
-	"github.com/go-home-admin/home/app/providers"
 	"github.com/go-home-admin/home/bootstrap/constraint"
 	log "github.com/sirupsen/logrus"
 )
 
 // @Bean
 type Worker struct {
-	redis *providers.Redis `inject:""`
 
 	// 最多并发执行
 	limit     uint
@@ -38,10 +35,5 @@ func (w *Worker) call(job constraint.Job, task constraint.Task) {
 	}()
 
 	job.Handler(task)
-	w.redis.GetClient().XAck(
-		context.Background(),
-		task.Queue,
-		task.Group,
-		task.ID,
-	)
+
 }

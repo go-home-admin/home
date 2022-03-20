@@ -15,7 +15,6 @@ type App struct {
 
 	// 你的应用引导
 	resp *Response `inject:""`
-	log  *Log      `inject:""`
 }
 
 func (a *App) Run(servers []constraint.KernelServer) {
