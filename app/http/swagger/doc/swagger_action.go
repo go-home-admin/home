@@ -1,24 +1,21 @@
 package doc
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/go-home-admin/home/app/providers"
-	"github.com/go-home-admin/home/generate/proto/swagger"
-	"net/http"
+	gin "github.com/gin-gonic/gin"
+	providers "github.com/go-home-admin/home/app/providers"
+	swagger "github.com/go-home-admin/home/generate/proto/swagger"
 )
 
-// Swagger  文档
-func (receiver *Controller) Swagger(req *swagger.SwaggerNull, ctx *gin.Context) error {
-	ctx.Header("Content-Type", "text/html; charset=utf-8")
-	ctx.String(http.StatusOK, html)
-
-	return nil
+// Swagger
+func (receiver *Controller) Swagger(req *swagger.InfoRequest, ctx *gin.Context) (*swagger.InfoResponse, error) {
+	// TODO 这里写业务
+	return &swagger.InfoResponse{}, nil
 }
 
 // GinHandleSwagger gin原始路由处理
 // http.Get(/swagger)
 func (receiver *Controller) GinHandleSwagger(ctx *gin.Context) {
-	req := &swagger.SwaggerNull{}
+	req := &swagger.InfoRequest{}
 	err := ctx.ShouldBind(req)
 
 	if err != nil {
@@ -26,9 +23,11 @@ func (receiver *Controller) GinHandleSwagger(ctx *gin.Context) {
 		return
 	}
 
-	err = receiver.Swagger(req, ctx)
+	resp, err := receiver.Swagger(req, ctx)
 	if err != nil {
 		providers.ErrorResponse(ctx, err)
 		return
 	}
+
+	providers.SuccessResponse(ctx, resp)
 }

@@ -1,12 +1,12 @@
 package admin_user
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/go-home-admin/home/app/providers"
-	"github.com/go-home-admin/home/generate/proto/admin"
+	gin "github.com/gin-gonic/gin"
+	providers "github.com/go-home-admin/home/app/providers"
+	admin "github.com/go-home-admin/home/generate/proto/admin"
 )
 
-// Info  登陆账户信息
+// Info
 func (receiver *Controller) Info(req *admin.InfoRequest, ctx *gin.Context) (*admin.InfoResponse, error) {
 	// TODO 这里写业务
 	return &admin.InfoResponse{}, nil

@@ -25,9 +25,14 @@ func (RouteCommand) Configure() command.Configure {
 					Default:     "@root/protobuf",
 				},
 				{
-					Name:        "out",
+					Name:        "out_route",
 					Description: "生成文件到指定目录",
 					Default:     "@root/routes",
+				},
+				{
+					Name:        "out_actions",
+					Description: "生成文件到指定目录",
+					Default:     "@root/app/http",
 				},
 			},
 		},
@@ -37,8 +42,12 @@ func (RouteCommand) Configure() command.Configure {
 func (RouteCommand) Execute(input command.Input) {
 	root := getRootPath()
 	module := getModModule()
-	out := input.GetOption("out")
+	out := input.GetOption("out_route")
 	out = strings.Replace(out, "@root", root, 1)
+
+	outHttp := input.GetOption("out_actions")
+	outHttp = strings.Replace(outHttp, "@root", root, 1)
+
 	path := input.GetOption("path")
 	path = strings.Replace(path, "@root", root, 1)
 
@@ -63,6 +72,7 @@ func (RouteCommand) Execute(input command.Input) {
 								servers:     make([]parser.Service, 0),
 							}
 						}
+						genController(service, outHttp)
 						break
 					}
 				}
@@ -92,6 +102,103 @@ func (RouteCommand) Execute(input command.Input) {
 	cmd.Stderr = os.Stderr
 	cmd.Dir = out
 	_ = cmd.Run()
+}
+
+func genController(server parser.Service, out string) {
+	page := server.Protoc.PackageName
+	out += "/" + page + "/" + parser.StringToSnake(server.Name)
+
+	if !parser.DirIsExist(out) {
+		_ = os.MkdirAll(out, 0760)
+	}
+
+	conStr := `package {package}
+
+// Controller @Bean
+type Controller struct {
+}`
+	conStr = strings.ReplaceAll(conStr, "{package}", parser.StringToSnake(server.Name))
+	err := os.WriteFile(out+"/controller.go", []byte(conStr), 0760)
+	if err != nil {
+		panic(err)
+	}
+
+	methodStr := `package {package}
+
+import ({import})
+
+// {action}  {doc}
+func (receiver *Controller) {action}(req *{controllerAlias}.InfoRequest, ctx *gin.Context) (*{controllerAlias}.InfoResponse, error) {
+	// TODO 这里写业务
+	return &{controllerAlias}.InfoResponse{}, nil
+}
+
+// GinHandle{action} gin原始路由处理
+// http.{method}({url})
+func (receiver *Controller) GinHandle{action}(ctx *gin.Context) {
+	req := &{controllerAlias}.InfoRequest{}
+	err := ctx.ShouldBind(req)
+
+	if err != nil {
+		{providers}.ErrorRequest(ctx, err)
+		return
+	}
+
+	resp, err := receiver.{action}(req, ctx)
+	if err != nil {
+		{providers}.ErrorResponse(ctx, err)
+		return
+	}
+
+	{providers}.SuccessResponse(ctx, resp)
+}
+`
+	gin := "github.com/gin-gonic/gin"
+	providers := "github.com/go-home-admin/home/app/providers"
+	imports := map[string]string{gin: gin, providers: providers}
+	goMod := getModModule()
+
+	for rName, rpc := range server.Rpc {
+		for _, option := range rpc.Opt {
+			if strings.Index(option.Key, "http.") == 0 {
+				serPage := goMod + "/generate/proto/" + server.Protoc.PackageName
+				imports[serPage] = serPage
+				importsStr := ""
+				m := genImportAlias(imports)
+				sk := sortMap(m)
+				for _, s := range sk {
+					importsStr += "\n\t" + m[s] + " \"" + s + "\""
+				}
+
+				controllerAlias := m[serPage]
+
+				str := methodStr
+				actionName := parser.StringToHump(rName)
+
+				i := strings.Index(option.Key, ".")
+				method := option.Key[i+1:]
+				url := option.Val
+
+				for s, O := range map[string]string{
+					"{package}":         parser.StringToSnake(server.Name),
+					"{import}":          importsStr + "\n",
+					"{doc}":             rpc.Doc,
+					"{method}":          method,
+					"{url}":             url,
+					"{action}":          actionName,
+					"{controllerAlias}": controllerAlias,
+					"{providers}":       m[providers],
+				} {
+					str = strings.ReplaceAll(str, s, O)
+				}
+
+				err = os.WriteFile(out+"/"+actionName+"_action.go", []byte(str), 0766)
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
+		}
+	}
 }
 
 func genRoute(g *ApiGroups, out string) {

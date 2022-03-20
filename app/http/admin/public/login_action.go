@@ -1,21 +1,21 @@
 package public
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/go-home-admin/home/app/providers"
-	"github.com/go-home-admin/home/generate/proto/admin"
+	gin "github.com/gin-gonic/gin"
+	providers "github.com/go-home-admin/home/app/providers"
+	admin "github.com/go-home-admin/home/generate/proto/admin"
 )
 
-// Login  登陆
-func (receiver *Controller) Login(req *admin.LoginRequest, ctx *gin.Context) (*admin.LoginResponse, error) {
+// Login
+func (receiver *Controller) Login(req *admin.InfoRequest, ctx *gin.Context) (*admin.InfoResponse, error) {
 	// TODO 这里写业务
-	return &admin.LoginResponse{}, nil
+	return &admin.InfoResponse{}, nil
 }
 
 // GinHandleLogin gin原始路由处理
 // http.Post(/login)
 func (receiver *Controller) GinHandleLogin(ctx *gin.Context) {
-	req := &admin.LoginRequest{}
+	req := &admin.InfoRequest{}
 	err := ctx.ShouldBind(req)
 
 	if err != nil {

@@ -1,21 +1,21 @@
 package api_demo
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/go-home-admin/home/app/providers"
-	"github.com/go-home-admin/home/generate/proto/api"
+	gin "github.com/gin-gonic/gin"
+	providers "github.com/go-home-admin/home/app/providers"
+	api "github.com/go-home-admin/home/generate/proto/api"
 )
 
-// Home  首页
-func (receiver *Controller) Home(req *api.HomeRequest, ctx *gin.Context) (*api.HomeResponse, error) {
+// Home
+func (receiver *Controller) Home(req *api.InfoRequest, ctx *gin.Context) (*api.InfoResponse, error) {
 	// TODO 这里写业务
-	return &api.HomeResponse{}, nil
+	return &api.InfoResponse{}, nil
 }
 
 // GinHandleHome gin原始路由处理
-// http.Get(/)
+// http.Get(/api/demo)
 func (receiver *Controller) GinHandleHome(ctx *gin.Context) {
-	req := &api.HomeRequest{}
+	req := &api.InfoRequest{}
 	err := ctx.ShouldBind(req)
 
 	if err != nil {

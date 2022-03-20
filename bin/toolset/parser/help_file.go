@@ -9,6 +9,11 @@ import (
 	"path/filepath"
 )
 
+func DirIsExist(f string) bool {
+	_, err := os.Stat(f)
+	return err == nil || os.IsExist(err)
+}
+
 type FileInfo struct {
 	fs.FileInfo
 	Path string
