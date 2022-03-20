@@ -1,11 +1,10 @@
 package providers
 
 import (
-	"fmt"
 	"github.com/go-home-admin/home/bootstrap/services"
 )
 
-// DatabaseProvider @Bean
+// DatabaseProvider @Bean("database")
 type DatabaseProvider struct {
 	config services.Config `inject:"config, database"`
 }
@@ -13,8 +12,21 @@ type DatabaseProvider struct {
 func (m *DatabaseProvider) Init() {
 	connections := m.config.GetKey("connections")
 
-	for i, i2 := range connections {
+	for _, dataT := range connections {
+		data, ok := dataT.(map[string]interface{})
 
-		fmt.Println(i, i2)
+		if !ok {
+			continue
+		}
+		driver := data["driver"].(string)
+		switch driver {
+		case "postgresql":
+		case "mysql":
+			NewMysqlProvider()
+		}
 	}
+}
+
+func (m *DatabaseProvider) GetBean() interface{} {
+	return nil
 }
