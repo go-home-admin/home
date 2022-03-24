@@ -102,7 +102,7 @@ func genBean(dir string, bc beanCache) {
 	context = append(context, "package "+bc.name)
 
 	// import
-	importAlias := genImportAlias(bc.imports)
+	importAlias := parser.GenImportAlias(bc.imports)
 	if len(importAlias) != 0 {
 		context = append(context, "\nimport ("+getImportStr(bc, importAlias)+"\n)")
 	}

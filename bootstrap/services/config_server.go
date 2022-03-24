@@ -96,7 +96,7 @@ func (c *Config) GetInt(key string, def ...int) int {
 		if v, ok := m[s]; ok {
 			if ll == i {
 				switch v.(type) {
-				case string:
+				case int:
 					return v.(int)
 				default:
 					if len(def) == 0 {

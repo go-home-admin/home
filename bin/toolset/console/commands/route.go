@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-// @Bean
+// RouteCommand @Bean
 type RouteCommand struct{}
 
 func (RouteCommand) Configure() command.Configure {
@@ -128,15 +128,15 @@ type Controller struct {
 import ({import})
 
 // {action}  {doc}
-func (receiver *Controller) {action}(req *{controllerAlias}.InfoRequest, ctx *gin.Context) (*{controllerAlias}.InfoResponse, error) {
+func (receiver *Controller) {action}(req *{controllerAlias}.{param}, ctx *gin.Context) (*{controllerAlias}.{return}, error) {
 	// TODO 这里写业务
-	return &{controllerAlias}.InfoResponse{}, nil
+	return &{controllerAlias}.{return}{}, nil
 }
 
 // GinHandle{action} gin原始路由处理
 // http.{method}({url})
 func (receiver *Controller) GinHandle{action}(ctx *gin.Context) {
-	req := &{controllerAlias}.InfoRequest{}
+	req := &{controllerAlias}.{param}{}
 	err := ctx.ShouldBind(req)
 
 	if err != nil {
@@ -188,6 +188,8 @@ func (receiver *Controller) GinHandle{action}(ctx *gin.Context) {
 					"{action}":          actionName,
 					"{controllerAlias}": controllerAlias,
 					"{providers}":       m[providers],
+					"{param}":           rpc.Param,
+					"{return}":          rpc.Return,
 				} {
 					str = strings.ReplaceAll(str, s, O)
 				}
@@ -208,7 +210,7 @@ func genRoute(g *ApiGroups, out string) {
 	// import
 	importAlias := genImportAlias(g.imports)
 	if len(importAlias) != 0 {
-		context = append(context, "\nimport ("+getImportStrForMap(importAlias)+"\n)")
+		context = append(context, "\nimport ("+parser.GetImportStrForMap(importAlias)+"\n)")
 	}
 	// Routes struct
 	context = append(context, genRoutesStruct(g, importAlias))
@@ -270,14 +272,4 @@ type Controller struct {
 	name  string
 	alias string
 	ty    string // *alias.Controller
-}
-
-func getImportStrForMap(m map[string]string) string {
-	sk := sortMap(m)
-	got := ""
-	for _, k := range sk {
-		got += "\n\t" + m[k] + " \"" + k + "\""
-	}
-
-	return got
 }

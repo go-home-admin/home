@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"sort"
+	"strconv"
 	"strings"
 	"unicode"
 )
@@ -380,4 +382,51 @@ func StringToHump(s string) string {
 		data = append(data, d)
 	}
 	return string(data[:])
+}
+
+// SortMap 排序map
+func SortMap(m map[string]string) []string {
+	var keys []string
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
+}
+
+// GetImportStrForMap 生成import
+func GetImportStrForMap(m map[string]string) string {
+	sk := SortMap(m)
+	got := ""
+	for _, k := range sk {
+		got += "\n\t" + m[k] + " \"" + k + "\""
+	}
+
+	return got
+}
+
+// GenImportAlias 生成 import => alias
+func GenImportAlias(m map[string]string) map[string]string {
+	aliasMapImport := make(map[string]string)
+	importMapAlias := make(map[string]string)
+	for _, imp := range m {
+		temp := strings.Split(imp, "/")
+		key := temp[len(temp)-1]
+
+		if _, ok := aliasMapImport[key]; ok {
+			for i := 1; i < 1000; i++ {
+				newKey := key + strconv.Itoa(i)
+				if _, ok2 := aliasMapImport[newKey]; !ok2 {
+					key = newKey
+					break
+				}
+			}
+		}
+		aliasMapImport[key] = imp
+	}
+	for s, s2 := range aliasMapImport {
+		importMapAlias[s2] = s
+	}
+
+	return importMapAlias
 }

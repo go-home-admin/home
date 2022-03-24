@@ -7,13 +7,17 @@ import (
 // DatabaseProvider @Bean("database")
 type DatabaseProvider struct {
 	config services.Config `inject:"config, database"`
+
+	m map[string]interface{}
 }
 
 func (m *DatabaseProvider) Init() {
+	m.m = make(map[string]interface{})
+
 	connections := m.config.GetKey("connections")
 
 	for _, dataT := range connections {
-		data, ok := dataT.(map[string]interface{})
+		data, ok := dataT.(map[interface{}]interface{})
 
 		if !ok {
 			continue
@@ -22,11 +26,11 @@ func (m *DatabaseProvider) Init() {
 		switch driver {
 		case "postgresql":
 		case "mysql":
-			NewMysqlProvider()
+			m.m[driver] = NewMysqlProvider()
 		}
 	}
 }
 
-func (m *DatabaseProvider) GetBean() interface{} {
-	return nil
+func (m *DatabaseProvider) GetBean(alias string) interface{} {
+	return m.m[alias]
 }

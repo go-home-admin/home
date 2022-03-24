@@ -4,8 +4,13 @@ import (
 	"embed"
 	"flag"
 	"github.com/go-home-admin/home/bootstrap/services"
+	"github.com/go-home-admin/home/bootstrap/utils"
+	"github.com/joho/godotenv"
 	"gopkg.in/yaml.v2"
+	"io/fs"
+	"os"
 	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -39,13 +44,45 @@ func (c *ConfigProvider) initFlag() {
 }
 
 func (c *ConfigProvider) initFile() {
-	DirEntry, err := defaultConfigDir.ReadDir(defaultDir)
-	if err != nil {
-		panic(err)
+	var DirEntry []fs.DirEntry
+	var err error
+	if defaultConfigDir == nil {
+		// 单元测试中, 可能未初始化框架, 从本目录开始往上查找go.mod文件确定跟目录
+		pwd, _ := os.Getwd()
+		pwdArr := strings.Split(pwd, "/")
+		parDir := ""
+		for i := 0; i < len(pwdArr)-1; i++ {
+			checkDir := pwd + parDir
+			if _, err := os.Stat(checkDir + "/go.mod"); err == nil {
+				dirs, _ := filepath.Abs(checkDir + "/" + defaultDir)
+				DirEntry, err = os.ReadDir(dirs)
+				if err != nil {
+					panic(err)
+				}
+				_ = godotenv.Load(checkDir + "/.env")
+				defaultDir = checkDir + "/" + defaultDir
+				break
+			}
+			parDir += "/.."
+		}
+		if _FrameworkProviderSingle == nil {
+			NewFrameworkProvider()
+		}
+	} else {
+		_ = godotenv.Load()
+		DirEntry, err = defaultConfigDir.ReadDir(defaultDir)
+		if err != nil {
+			panic(err)
+		}
 	}
+
 	for _, entry := range DirEntry {
 		if path.Ext(entry.Name()) == ".yaml" {
-			fileContext, _ := defaultConfigDir.ReadFile(defaultDir + "/" + entry.Name())
+			fileContext, err := os.ReadFile(defaultDir + "/" + entry.Name())
+			if err != nil {
+				panic(err)
+			}
+			fileContext = utils.SetEnv(fileContext)
 			m := make(map[interface{}]interface{})
 			err = yaml.Unmarshal(fileContext, &m)
 			if err != nil {
@@ -59,11 +96,6 @@ func (c *ConfigProvider) initFile() {
 func (c *ConfigProvider) Boot() {
 	if !flag.Parsed() {
 		flag.Parse()
-	}
-
-	// 单元测试中, 可能未初始化框架
-	if _FrameworkProviderSingle == nil {
-		NewFrameworkProvider()
 	}
 }
 
