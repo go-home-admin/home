@@ -59,6 +59,7 @@ func (c *ConfigProvider) initFile() {
 				if err != nil {
 					panic(err)
 				}
+				// checkDir as root
 				_ = godotenv.Load(checkDir + "/.env")
 				defaultDir = checkDir + "/" + defaultDir
 				break

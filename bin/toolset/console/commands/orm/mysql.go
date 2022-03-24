@@ -2,6 +2,7 @@ package orm
 
 import (
 	"database/sql"
+	_ "embed"
 	"fmt"
 	"github.com/go-home-admin/home/bootstrap/services"
 	"github.com/go-home-admin/toolset/parser"
@@ -30,12 +31,21 @@ func GenMysql(name string, conf map[interface{}]interface{}, out string) {
 	// 计算import
 	imports := getImports(tableColumns)
 	for table, columns := range tableColumns {
-		file := out + "/" + parser.StringToSnake(table)
+		mysqlTableName := parser.StringToSnake(table)
+		file := out + "/" + mysqlTableName
 
 		str := "package " + name
 		str += "\nimport (" + imports[table] + "\n)"
 		str += "\n" + genOrmStruct(table, columns)
 
+		baseFunStr := baseMysqlFuncStr
+		for old, new := range map[string]string{
+			"MysqlTableName": parser.StringToHump(table),
+		} {
+			baseFunStr = strings.ReplaceAll(baseFunStr, old, new)
+		}
+
+		str += baseFunStr
 		err := os.WriteFile(file+"_gen.go", []byte(str), 0766)
 		if err != nil {
 			log.Fatal(err)
@@ -43,11 +53,8 @@ func GenMysql(name string, conf map[interface{}]interface{}, out string) {
 	}
 }
 
-var baseMysqlFunc = `
-
-
-
-`
+//go:embed mysql.go.text
+var baseMysqlFuncStr string
 
 var alias = map[string]string{
 	"database": "github.com/go-home-admin/home/bootstrap/services/database",
@@ -57,7 +64,12 @@ var alias = map[string]string{
 func getImports(tableColumns map[string][]tableColumn) map[string]string {
 	got := make(map[string]string)
 	for table, columns := range tableColumns {
-		tm := make(map[string]string)
+		tm := map[string]string{
+			"gorm.io/gorm": "gorm",
+			"github.com/go-home-admin/home/bootstrap/providers": "providers",
+			"github.com/sirupsen/logrus":                        "logrus",
+			"database/sql":                                      "sql",
+		}
 		for _, column := range columns {
 			index := strings.Index(column.GoaType, ".")
 			if index != -1 {
@@ -83,7 +95,7 @@ func genOrmStruct(table string, columns []tableColumn) string {
 	}
 
 	str = strings.ReplaceAll(str, "{TableName}", TableName)
-	return "\n// " + TableName + " @Bean(\"" + table + "\")\n" + str + "\n}"
+	return "\n" + str + "\n}"
 }
 
 func genGormTag(column tableColumn) string {

@@ -11,5 +11,6 @@ func TestOrmTableName_First(t *testing.T) {
 
 	first, _ := NewOrmTableName().First()
 
-	utils.Dump(first)
+	count := NewOrmTableName().Count()
+	utils.Dump(first, count)
 }

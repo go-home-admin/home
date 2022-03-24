@@ -1,24 +1,3 @@
-package demo
-
-import (
-	"database/sql"
-	"github.com/go-home-admin/home/bootstrap/providers"
-	database "github.com/go-home-admin/home/bootstrap/services/database"
-	log "github.com/sirupsen/logrus"
-	"gorm.io/gorm"
-)
-
-type MysqlTableName struct {
-	Id       int64         `gorm:"primaryKey;column:id"`        //
-	Date     database.Time `gorm:"column:date"`                 // 时间
-	Guard    string        `gorm:"column:guard"`                // guard
-	Ip       string        `gorm:"column:ip"`                   // ip
-	Uri      string        `gorm:"primaryKey;column:uri"`       // 请求地址
-	Params   string        `gorm:"column:params"`               // 参数
-	UserId   int64         `gorm:"column:user_id"`              // uid
-	User     string        `gorm:"column:user"`                 // uid
-	HttpType string        `gorm:"primaryKey;column:http_type"` // http_type
-}
 
 func (receiver *MysqlTableName) TableName() string {
 	return "action_logs"
@@ -28,7 +7,7 @@ type OrmMysqlTableName struct {
 	db *gorm.DB
 }
 
-func NewOrmTableName() *OrmMysqlTableName {
+func NewOrmMysqlTableName() *OrmMysqlTableName {
 	orm := &OrmMysqlTableName{}
 	orm.db = providers.NewMysqlProvider().GetBean("mysql").(*gorm.DB)
 	return orm
@@ -110,7 +89,7 @@ func (orm *OrmMysqlTableName) Exec(sql string, values ...interface{}) *gorm.DB {
 
 // ------------ 以下是单表独有的函数, 便捷字段条件, Laravel风格操作 ---------
 
-type TableNameList []*MysqlTableName
+type MysqlTableNameList []*MysqlTableName
 
 func (orm *OrmMysqlTableName) Insert(row *MysqlTableName) *gorm.DB {
 	return orm.db.Create(row)
@@ -130,7 +109,7 @@ func (orm *OrmMysqlTableName) Offset(offset int) *OrmMysqlTableName {
 	return orm
 }
 
-func (orm *OrmMysqlTableName) Get() (TableNameList, int64) {
+func (orm *OrmMysqlTableName) Get() (MysqlTableNameList, int64) {
 	return orm.Find()
 }
 
@@ -173,11 +152,11 @@ func (orm *OrmMysqlTableName) Last(conds ...interface{}) (*MysqlTableName, int64
 	return dest, db.RowsAffected
 }
 
-func (orm *OrmMysqlTableName) Find(conds ...interface{}) (TableNameList, int64) {
+func (orm *OrmMysqlTableName) Find(conds ...interface{}) (MysqlTableNameList, int64) {
 	list := make([]*MysqlTableName, 0)
 	tx := orm.db.Model(&MysqlTableName{}).Find(list, conds...)
 	if tx.Error != nil {
-		log.Error(tx.Error)
+		logrus.Error(tx.Error)
 	}
 	return list, tx.RowsAffected
 }
