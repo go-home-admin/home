@@ -47,11 +47,36 @@ func GenMysql(name string, conf map[interface{}]interface{}, out string) {
 
 		str += baseFunStr
 		str += genFieldFunc(table, columns)
+		str += genListFunc(table, columns)
 		err := os.WriteFile(file+"_gen.go", []byte(str), 0766)
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
+}
+
+func genListFunc(table string, columns []tableColumn) string {
+	TableName := parser.StringToHump(table)
+	str := "\ntype " + TableName + "List []*" + TableName
+	for _, column := range columns {
+		// 索引，或者枚举字段
+		if strInStr(column.Field, []string{"id", "code"}) {
+			str += "\nfunc (l " + TableName + "List) Get" + column.ColumnName + "List() []" + column.GoaType + " {" +
+				"\n\tgot := make([]" + column.GoaType + ", 0)\n\tfor _, val := range l {" +
+				"\n\t\tgot = append(got, val." + column.ColumnName + ")" +
+				"\n\t}" +
+				"\n\treturn got" +
+				"\n}"
+
+			str += "\nfunc (l " + TableName + "List) Get" + column.ColumnName + "Map() map[" + column.GoaType + "]*" + TableName + " {" +
+				"\n\tgot := make(map[" + column.GoaType + "]*" + TableName + ")\n\tfor _, val := range l {" +
+				"\n\t\tgot[val." + column.ColumnName + "] = val" +
+				"\n\t}" +
+				"\n\treturn got" +
+				"\n}"
+		}
+	}
+	return str
 }
 
 func genFieldFunc(table string, columns []tableColumn) string {
