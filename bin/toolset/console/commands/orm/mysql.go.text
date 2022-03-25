@@ -200,13 +200,15 @@ func (orm *OrmMysqlTableName) Where(query interface{}, args ...interface{}) *Orm
 }
 
 func (orm *OrmMysqlTableName) And(fuc func(orm *OrmMysqlTableName)) *OrmMysqlTableName {
-	fuc(orm)
-	orm.db.Where(orm.db)
+	ormAnd := NewOrmMysqlTableName()
+	fuc(ormAnd)
+	orm.db.Where(ormAnd.db)
 	return orm
 }
 
 func (orm *OrmMysqlTableName) Or(fuc func(orm *OrmMysqlTableName)) *OrmMysqlTableName {
-	fuc(orm)
-	orm.db.Or(orm.db)
+	ormOr := NewOrmMysqlTableName()
+	fuc(ormOr)
+	orm.db.Or(ormOr.db)
 	return orm
 }

@@ -46,6 +46,7 @@ func GenMysql(name string, conf map[interface{}]interface{}, out string) {
 		}
 
 		str += baseFunStr
+		str += genFieldFunc(table, columns)
 		err := os.WriteFile(file+"_gen.go", []byte(str), 0766)
 		if err != nil {
 			log.Fatal(err)
@@ -53,9 +54,91 @@ func GenMysql(name string, conf map[interface{}]interface{}, out string) {
 	}
 }
 
+func genFieldFunc(table string, columns []tableColumn) string {
+	TableName := parser.StringToHump(table)
+
+	str := ""
+	for _, column := range columns {
+		// 等于函数
+		str += "\nfunc (orm *Orm" + TableName + ") Where" + column.ColumnName + "(val " + column.GoaType + ") *Orm" + TableName + " {" +
+			"\n\torm.db.Where(\"`" + column.Field + "` = ?\", val)" +
+			"\n\treturn orm" +
+			"\n}"
+
+		if column.PrimaryKey != "" {
+			// if 主键, 生成In, > <
+			str += "\nfunc (orm *Orm" + TableName + ") Where" + column.ColumnName + "In(val []" + column.GoaType + ") *Orm" + TableName + " {" +
+				"\n\torm.db.Where(\"`" + column.Field + "` IN ?\", val)" +
+				"\n\treturn orm" +
+				"\n}"
+
+			str += "\nfunc (orm *Orm" + TableName + ") Where" + column.ColumnName + "Gt(val " + column.GoaType + ") *Orm" + TableName + " {" +
+				"\n\torm.db.Where(\"`" + column.Field + "` > ?\", val)" +
+				"\n\treturn orm" +
+				"\n}"
+			str += "\nfunc (orm *Orm" + TableName + ") Where" + column.ColumnName + "Gte(val " + column.GoaType + ") *Orm" + TableName + " {" +
+				"\n\torm.db.Where(\"`" + column.Field + "` >= ?\", val)" +
+				"\n\treturn orm" +
+				"\n}"
+
+			str += "\nfunc (orm *Orm" + TableName + ") Where" + column.ColumnName + "Lt(val " + column.GoaType + ") *Orm" + TableName + " {" +
+				"\n\torm.db.Where(\"`" + column.Field + "` < ?\", val)" +
+				"\n\treturn orm" +
+				"\n}"
+			str += "\nfunc (orm *Orm" + TableName + ") Where" + column.ColumnName + "Lte(val " + column.GoaType + ") *Orm" + TableName + " {" +
+				"\n\torm.db.Where(\"`" + column.Field + "` <= ?\", val)" +
+				"\n\treturn orm" +
+				"\n}"
+		} else {
+			// 索引，或者枚举字段
+			if strInStr(column.Field, []string{"id", "code", "status", "state"}) {
+				// else if 名称存在 id, code, status 生成in操作
+				str += "\nfunc (orm *Orm" + TableName + ") Where" + column.ColumnName + "In(val []" + column.GoaType + ") *Orm" + TableName + " {" +
+					"\n\torm.db.Where(\"`" + column.Field + "` IN ?\", val)" +
+					"\n\treturn orm" +
+					"\n}"
+
+				str += "\nfunc (orm *Orm" + TableName + ") Where" + column.ColumnName + "Ne(val " + column.GoaType + ") *Orm" + TableName + " {" +
+					"\n\torm.db.Where(\"`" + column.Field + "` <> ?\", val)" +
+					"\n\treturn orm" +
+					"\n}"
+			}
+			// 时间字段
+			if strInStr(column.Field, []string{"created", "updated", "time", "_at"}) || (column.GoaType == "database.Time") {
+				str += "\nfunc (orm *Orm" + TableName + ") Where" + column.ColumnName + "Between(begin " + column.GoaType + ", end " + column.GoaType + ") *Orm" + TableName + " {" +
+					"\n\torm.db.Where(\"`" + column.Field + "` BETWEEN ? AND ?\", begin, end)" +
+					"\n\treturn orm" +
+					"\n}"
+
+				str += "\nfunc (orm *Orm" + TableName + ") Where" + column.ColumnName + "Lte(val " + column.GoaType + ") *Orm" + TableName + " {" +
+					"\n\torm.db.Where(\"`" + column.Field + "` <= ?\", val)" +
+					"\n\treturn orm" +
+					"\n}"
+
+				str += "\nfunc (orm *Orm" + TableName + ") Where" + column.ColumnName + "Gte(val " + column.GoaType + ") *Orm" + TableName + " {" +
+					"\n\torm.db.Where(\"`" + column.Field + "` >= ?\", val)" +
+					"\n\treturn orm" +
+					"\n}"
+			}
+		}
+	}
+
+	return str
+}
+
+func strInStr(s string, in []string) bool {
+	for _, sub := range in {
+		if strings.Index(s, sub) != -1 {
+			return true
+		}
+	}
+	return false
+}
+
 //go:embed mysql.go.text
 var baseMysqlFuncStr string
 
+// 字段类型引入
 var alias = map[string]string{
 	"database": "github.com/go-home-admin/home/bootstrap/services/database",
 }
@@ -64,6 +147,7 @@ var alias = map[string]string{
 func getImports(tableColumns map[string][]tableColumn) map[string]string {
 	got := make(map[string]string)
 	for table, columns := range tableColumns {
+		// 初始引入
 		tm := map[string]string{
 			"gorm.io/gorm": "gorm",
 			"github.com/go-home-admin/home/bootstrap/providers": "providers",
