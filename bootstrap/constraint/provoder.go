@@ -1,5 +1,10 @@
 package constraint
 
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/go-home-admin/home/bootstrap/http/api"
+)
+
 type ServiceProvider interface {
 	register()
 	boot()
@@ -14,4 +19,9 @@ type Construct interface {
 // AfterRegistration 注册完成后, 统一处理
 type AfterRegistration interface {
 	Boot()
+}
+
+type Route interface {
+	GetGroup() string
+	GetRoutes() map[*api.Config]func(c *gin.Context)
 }

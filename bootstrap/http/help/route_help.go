@@ -1,4 +1,4 @@
-package route_help
+package help
 
 import (
 	"github.com/gin-gonic/gin"
@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// RouteHelp @Bean
 type RouteHelp struct {
 }
 
@@ -18,19 +19,7 @@ type GroupConfig struct {
 	Middlewares []func(ctx *gin.Context)
 }
 
-type GroupMap map[*api.Config]func(c *gin.Context)
-
-func MergerRouteMap(ms ...GroupMap) GroupMap {
-	got := make(GroupMap)
-	for _, m := range ms {
-		for config, f := range m {
-			got[config] = f
-		}
-	}
-	return got
-}
-
-func (r *RouteHelp) Load(engine *gin.Engine, config []GroupConfig, allGroupRoute map[string]GroupMap) {
+func (r *RouteHelp) Load(engine *gin.Engine, config []GroupConfig, allGroupRoute map[string]map[*api.Config]func(c *gin.Context)) {
 	isUserConfig := make(map[string]bool)
 	for gn, gm := range allGroupRoute {
 		if _, ok := isUserConfig[gn]; !ok {

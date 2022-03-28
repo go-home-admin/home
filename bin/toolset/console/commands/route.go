@@ -231,7 +231,11 @@ func genRoutesFunc(g *ApiGroups, m map[string]string) string {
 	homeGin := m["github.com/gin-gonic/gin"]
 	homeApi := m["github.com/go-home-admin/home/bootstrap/http/api"]
 
-	str := "\nfunc (c *" + parser.StringToHump(g.name) + "Routes) GetRoutes() map[*" + homeApi + ".Config]func(c *" + homeGin + ".Context) {" +
+	str := "func (c *" + parser.StringToHump(g.name) + "Routes) GetGroup() string {" +
+		"\n\treturn \"" + g.name + "\"" +
+		"\n}"
+
+	str += "\nfunc (c *" + parser.StringToHump(g.name) + "Routes) GetRoutes() map[*" + homeApi + ".Config]func(c *" + homeGin + ".Context) {" +
 		"\n\treturn map[*" + homeApi + ".Config]func(c *" + homeGin + ".Context){"
 
 	for _, server := range g.servers {
