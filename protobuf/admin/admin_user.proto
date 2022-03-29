@@ -1,3 +1,4 @@
+// @Tag("binding","required")
 syntax = "proto3";
 
 package admin;
@@ -15,11 +16,14 @@ service AdminUser {
   }
 }
 
-message InfoRequest{}
+message InfoRequest{
+  // @Tag("json")
+  int64 id = 1;
+}
 
 message InfoResponse{
   // 名称
-  string name = 1;
+  string name = 1; // test
   // 头像
   string avatar = 2;
   // 描述

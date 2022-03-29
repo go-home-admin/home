@@ -86,13 +86,13 @@ func GetProtoFileParser(path string) (ProtocFileParser, error) {
 	for offset := 0; offset < len(l.list); offset++ {
 		work := l.list[offset]
 		// 原则上, 每个块级别的作用域必须自己处理完, 返回的偏移必须是下一个块的开始
-		switch work.t {
+		switch work.Ty {
 		case wordT_line:
 		case wordT_division:
 		case wordT_doc:
-			lastDoc = work.str
+			lastDoc = work.Str
 		case wordT_word:
-			switch work.str {
+			switch work.Str {
 			case "syntax":
 				d.Doc = lastDoc
 				d.Syntax, offset = protoSyntax(l.list, offset)
@@ -134,7 +134,7 @@ func GetProtoFileParser(path string) (ProtocFileParser, error) {
 				_, offset = protoExtend(l.list, offset)
 				lastDoc = ""
 			default:
-				fmt.Println("文件块作用域似乎解析有错误", path, work.str, offset)
+				fmt.Println("文件块作用域似乎解析有错误", path, work.Str, offset)
 			}
 		}
 	}
@@ -167,10 +167,10 @@ func serverOption(l []*word, offset int) (Option, int) {
 	var key string
 	var alias string
 	if len(wl) >= 5 {
-		alias = wl[1].str
+		alias = wl[1].Str
 	}
 	for _, w := range wl {
-		key = key + w.str
+		key = key + w.Str
 	}
 
 	return Option{
@@ -194,12 +194,12 @@ func protoService(l []*word, offset int) (Service, int) {
 	}
 	for offset := 0; offset < len(nl); offset++ {
 		work := nl[offset]
-		switch work.t {
+		switch work.Ty {
 		case wordT_line:
 		case wordT_division:
 		case wordT_doc:
 		case wordT_word:
-			switch work.str {
+			switch work.Str {
 			case "option":
 				var val Option
 				val, offset = serverOption(nl, offset)
@@ -229,12 +229,12 @@ func protoRpc(l []*word, offset int) (ServiceRpc, int) {
 	nl := l[offset+st : newOffset]
 	for offset := 0; offset < len(nl); offset++ {
 		work := nl[offset]
-		switch work.t {
+		switch work.Ty {
 		case wordT_line:
 		case wordT_division:
 		case wordT_doc:
 		case wordT_word:
-			switch work.str {
+			switch work.Str {
 			case "option":
 				var val Option
 				val, offset = serverOption(nl, offset)
@@ -265,7 +265,7 @@ func protoMessage(l []*word, offset int) (Message, int) {
 	}
 	for offset := 0; offset < len(nl); offset++ {
 		work := nl[offset]
-		switch work.t {
+		switch work.Ty {
 		case wordT_line:
 		case wordT_division:
 		case wordT_doc:
@@ -289,7 +289,7 @@ func protoEnum(l []*word, offset int) (Enum, int) {
 	}
 	for offset := 0; offset < len(nl); offset++ {
 		work := nl[offset]
-		switch work.t {
+		switch work.Ty {
 		case wordT_line:
 		case wordT_division:
 		case wordT_doc:
@@ -315,7 +315,7 @@ func protoExtend(l []*word, offset int) (Message, int) {
 	}
 	for offset := 0; offset < len(nl); offset++ {
 		work := nl[offset]
-		switch work.t {
+		switch work.Ty {
 		case wordT_line:
 		case wordT_division:
 		case wordT_doc:

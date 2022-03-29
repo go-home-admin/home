@@ -37,13 +37,13 @@ func getWordsWitchGo(l *GoWords) GoWords {
 
 	for offset := 0; offset < len(l.list); offset++ {
 		work := l.list[offset]
-		switch work.t {
+		switch work.Ty {
 		case wordT_word:
-			switch work.str {
+			switch work.Str {
 			case "interface":
-				if len(l.list) >= (offset+2) && l.list[offset+1].str == "{" && l.list[offset+2].str == "}" {
+				if len(l.list) >= (offset+2) && l.list[offset+1].Str == "{" && l.list[offset+2].Str == "}" {
 					offset = offset + 2
-					work.str = work.str + "{}"
+					work.Str = work.Str + "{}"
 					got.list = append(got.list, work)
 				} else {
 					got.list = append(got.list, work)
@@ -73,13 +73,14 @@ func GetFileParser(path string) (GoFileParser, error) {
 	for offset := 0; offset < len(l.list); offset++ {
 		work := l.list[offset]
 		// 原则上, 每个块级别的作用域必须自己处理完, 返回的偏移必须是下一个块的开始
-		switch work.t {
+		switch work.Ty {
 		case wordT_line:
+			lastDoc += work.Str
 		case wordT_division:
 		case wordT_doc:
-			lastDoc = work.str
+			lastDoc += work.Str
 		case wordT_word:
-			switch work.str {
+			switch work.Str {
 			case "package":
 				d.PackageDoc = lastDoc
 				d.PackageName, offset = handlePackageName(l.list, offset)
@@ -112,7 +113,7 @@ func GetFileParser(path string) (GoFileParser, error) {
 				nl := l.list[offset:]
 				str := ""
 				for _, w := range nl {
-					str += w.str
+					str += w.Str
 				}
 				fmt.Println("文件块作用域似乎解析有错误", path, offset, str)
 			}
@@ -147,15 +148,15 @@ func handleImports(l []*word, offset int) (map[string]string, int) {
 	if ft != "(" {
 		arr := make([]string, 0)
 		for i, w := range l[offset+fti:] {
-			if wordT_line == w.t {
+			if wordT_line == w.Ty {
 				newOffset = offset + fti + i
 				key, val = getImport(arr)
 				imap[key] = val
 				return imap, newOffset
 			}
 
-			if w.t == wordT_word {
-				arr = append(arr, w.str)
+			if w.Ty == wordT_word {
+				arr = append(arr, w.Str)
 			}
 		}
 	} else {
@@ -166,14 +167,14 @@ func handleImports(l []*word, offset int) (map[string]string, int) {
 
 		arr := make([]string, 0)
 		for _, w := range l[st : et+1] {
-			if wordT_line == w.t && len(arr) != 0 {
+			if wordT_line == w.Ty && len(arr) != 0 {
 				key, val = getImport(arr)
 				imap[key] = val
 				arr = make([]string, 0)
 			}
 
-			if w.t == wordT_word {
-				arr = append(arr, w.str)
+			if w.Ty == wordT_word {
+				arr = append(arr, w.Str)
 			}
 		}
 	}
@@ -219,13 +220,13 @@ func (d GoDoc) GetAlias() string {
 	l := GetWords(string(d)[2:])
 	num := 0
 	for i, w := range l {
-		if w.t == wordT_word {
-			if w.str == "Bean" {
-				if l[i-1].str == "@" {
+		if w.Ty == wordT_word {
+			if w.Str == "Bean" {
+				if l[i-1].Str == "@" {
 					num = 1
 				}
 			} else if num == 1 {
-				return w.str[1 : len(w.str)-1]
+				return w.Str[1 : len(w.Str)-1]
 			}
 		}
 	}
@@ -251,15 +252,15 @@ func getArrGoWord(l []*word) [][]string {
 	got := make([][]string, 0)
 	arr := GetArrWord(l)
 	for _, i := range arr {
-		lis := i[len(i)-1].str
+		lis := i[len(i)-1].Str
 		if lis[0:1] == "`" && len(i) >= 3 {
 			ty := ""
 			for in := 1; in < len(i)-1; in++ {
-				if i[in].t != wordT_doc {
-					ty = ty + i[in].str
+				if i[in].Ty != wordT_doc {
+					ty = ty + i[in].Str
 				}
 			}
-			got = append(got, []string{i[0].str, ty, lis})
+			got = append(got, []string{i[0].Str, ty, lis})
 		}
 	}
 
@@ -275,8 +276,8 @@ func getArrGoTag(source string) [][]string {
 	got := make([][]string, 0)
 	arr := make([]string, 0)
 	for _, w := range wl {
-		if w.t == wordT_word {
-			arr = append(arr, w.str)
+		if w.Ty == wordT_word {
+			arr = append(arr, w.Str)
 			i++
 			if i >= 2 {
 				i = 0
@@ -340,8 +341,8 @@ func getTypeAlias(str string, d GoFileParser, attr *GoTypeAttr) {
 	wArr := GetWords(str)
 	wf := wArr[0]
 
-	if wf.t == wordT_word || wf.str == "*" {
-		if (wf.str == "*" && len(wArr) >= 3) || (wf.str != "*" && len(wArr) >= 2) {
+	if wf.Ty == wordT_word || wf.Str == "*" {
+		if (wf.Str == "*" && len(wArr) >= 3) || (wf.Str != "*" && len(wArr) >= 2) {
 			attr.TypeAlias, _ = GetFistWord(wArr)
 			attr.TypeImport = d.Imports[attr.TypeAlias]
 			return
@@ -380,7 +381,7 @@ func handleFunds(l []*word, offset int) (GoFunc, int) {
 	st, et := GetBrackets(l[offset:], "{", "}")
 	interCount := 0
 	for _, w := range l[offset : offset+st] {
-		if w.str == "interface" {
+		if w.Str == "interface" {
 			interCount++
 		}
 	}
@@ -405,7 +406,7 @@ func handleVars(l []*word, offset int) (map[string]string, int) {
 		if ok {
 			last := NextLine(l[offset:])
 			ss := l[offset+last-1]
-			if ss.str == "{" {
+			if ss.Str == "{" {
 				nl := l[offset+last-1:]
 				offset = offset + last - 1
 				_, et := GetBrackets(nl, "{", "}")

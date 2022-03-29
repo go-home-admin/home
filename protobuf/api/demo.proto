@@ -26,4 +26,8 @@ message ApiDemoHomeRequest {
 message ApiDemoHomeResponse {
   string start_time = 1;
   string tip = 2;
+
+  oneof data {
+    string name = 3;
+  }
 }
