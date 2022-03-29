@@ -1,2 +1,0 @@
-# toolset
-go toolset

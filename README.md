@@ -6,13 +6,9 @@
 ~~~~shell
 cd go-home-admin
 git clone https://github.com/go-home-admin/home.git
-git clone https://github.com/go-home-admin/home-toolset-php.git
+go install github.com/go-home-admin/toolset
 ~~~~
-#### 代码生成辅助工具需要初始化
-~~~~shell
-cd home-toolset-php
-composer install
-~~~~
+
 #### 启动`home`, 需要检查依赖（protobuf, go, protoc-gen-go(protoc-gen-go需要依赖GOBIN环境变量)）
 ~~~~shell
 cd home
