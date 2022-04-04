@@ -18,4 +18,5 @@ extend google.protobuf.MethodOptions {
   string Put = 50003;
   string Delete = 50004;
   string Options = 50005;
+  string Any = 50010;
 }

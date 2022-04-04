@@ -8,7 +8,7 @@ mac-install:
 	go install google.golang.org/grpc						# 原始微服务工具
 	go install github.com/golang/protobuf/proto			# proto 工具链
 	go install github.com/golang/protobuf/protoc-gen-go	# proto 工具链, 生成go代码插件
-	go install github.com/go-home-admin/toolset
+	go install github.com/go-home-admin/toolset@latest
 
 # Orm自动维护
 make-orm:

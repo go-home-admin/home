@@ -33,3 +33,18 @@ func Put(str string) *Config {
 
 	return &config
 }
+
+func Options(str string) *Config {
+	config := make(Config)
+	config["method"] = "options"
+	config["url"] = str
+
+	return &config
+}
+func Any(str string) *Config {
+	config := make(Config)
+	config["method"] = "Any"
+	config["url"] = str
+
+	return &config
+}

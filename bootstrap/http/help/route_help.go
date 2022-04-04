@@ -72,6 +72,10 @@ func (r *RouteHelp) loadRoutes(engine *gin.RouterGroup, routes map[*api.Config]f
 			engine.PUT(config["url"], fun)
 		case "delete":
 			engine.DELETE(config["url"], fun)
+		case "options":
+			engine.OPTIONS(config["url"], fun)
+		case "any":
+			engine.Any(config["url"], fun)
 		}
 	}
 }
