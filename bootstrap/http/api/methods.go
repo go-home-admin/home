@@ -43,7 +43,7 @@ func Options(str string) *Config {
 }
 func Any(str string) *Config {
 	config := make(Config)
-	config["method"] = "Any"
+	config["method"] = "any"
 	config["url"] = str
 
 	return &config
