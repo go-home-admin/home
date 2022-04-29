@@ -101,5 +101,15 @@ func (c *ConfigProvider) Boot() {
 }
 
 func (c *ConfigProvider) GetBean(alias string) interface{} {
-	return c.data[alias]
+	index := strings.Index(alias, ".")
+	if index == -1 {
+		return c.data[alias]
+	}
+
+	fileConfig, ok := c.data[alias[:index]]
+	if !ok {
+		return nil
+	}
+	key := alias[index+1:]
+	return fileConfig.GetConfig(key)
 }

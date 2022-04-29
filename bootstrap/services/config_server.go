@@ -162,3 +162,30 @@ func (c *Config) GetBool(key string, def ...bool) bool {
 	}
 	return def[0]
 }
+
+func (c *Config) GetConfig(key string) *Config {
+	arr := strings.Split(key, ".")
+
+	m := c.m
+	lc := len(arr)
+	ll := lc - 1
+	for i := 0; i < lc; i++ {
+		s := arr[i]
+		if v, ok := m[s]; ok {
+			if ll == i {
+				return NewConfig(v.(map[interface{}]interface{}))
+			}
+
+			val, ook := v.(map[interface{}]interface{})
+			if ook {
+				m = val
+			} else {
+				return nil
+			}
+		} else {
+			return nil
+		}
+	}
+
+	return nil
+}
