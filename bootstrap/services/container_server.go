@@ -24,7 +24,5 @@ func (a *Container) Run(servers []constraint.KernelServer) {
 	signal.Notify(quit, os.Interrupt)
 	<-quit
 
-	for _, server := range servers {
-		server.Exit()
-	}
+	app.RunExit()
 }

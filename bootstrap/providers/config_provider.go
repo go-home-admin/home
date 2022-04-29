@@ -16,14 +16,14 @@ import (
 
 // 默认配置加载目录
 var defaultConfigDir *embed.FS
-var defaultDir = "config"
+var defaultDir = "Route"
 
 func SetConfigDir(fs *embed.FS) {
 	defaultConfigDir = fs
 }
 
 // ConfigProvider
-// @Bean("config")
+// @Bean("Route")
 type ConfigProvider struct {
 	data map[string]*services.Config
 
@@ -98,6 +98,7 @@ func (c *ConfigProvider) Boot() {
 	if !flag.Parsed() {
 		flag.Parse()
 	}
+	services.Init = true
 }
 
 func (c *ConfigProvider) GetBean(alias string) interface{} {

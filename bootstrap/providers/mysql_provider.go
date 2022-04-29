@@ -12,7 +12,7 @@ import (
 
 // MysqlProvider @Bean("mysql")
 type MysqlProvider struct {
-	config *services.Config `inject:"config, database"`
+	config *services.Config `inject:"Route, database"`
 	dbs    map[string]*gorm.DB
 }
 

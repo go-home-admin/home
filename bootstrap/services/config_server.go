@@ -1,12 +1,23 @@
 package services
 
-import "strings"
+import (
+	"github.com/go-home-admin/home/bootstrap/services/app"
+	"strings"
+)
+
+// Init 单元测试辅助
+// 如果一个单元测试连配置都都不使用, 想来也无需初始化了
+var Init bool
 
 type Config struct {
 	m map[interface{}]interface{}
 }
 
 func NewConfig(m map[interface{}]interface{}) *Config {
+	if !Init {
+		app.RunBoot()
+	}
+
 	return &Config{
 		m: m,
 	}

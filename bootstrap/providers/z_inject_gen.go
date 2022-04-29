@@ -10,6 +10,7 @@ var _ConfigProviderSingle *ConfigProvider
 var _DatabaseProviderSingle *DatabaseProvider
 var _FrameworkProviderSingle *FrameworkProvider
 var _MysqlProviderSingle *MysqlProvider
+var _RouteProviderSingle *RouteProvider
 
 func GetAllProvider() []interface{} {
 	return []interface{}{
@@ -17,21 +18,21 @@ func GetAllProvider() []interface{} {
 		NewDatabaseProvider(),
 		NewFrameworkProvider(),
 		NewMysqlProvider(),
+		NewRouteProvider(),
 	}
 }
 
 func NewConfigProvider() *ConfigProvider {
 	if _ConfigProviderSingle == nil {
 		_ConfigProviderSingle = &ConfigProvider{}
-		app.AfterProvider(_ConfigProviderSingle, "config")
+		app.AfterProvider(_ConfigProviderSingle, "")
 	}
 	return _ConfigProviderSingle
 }
 func NewDatabaseProvider() *DatabaseProvider {
 	if _DatabaseProviderSingle == nil {
 		_DatabaseProviderSingle = &DatabaseProvider{}
-		_DatabaseProviderSingle.config = *app.GetBean("config").(app.Bean).GetBean("database").(*services.Config)
-		app.AfterProvider(_DatabaseProviderSingle, "database")
+		app.AfterProvider(_DatabaseProviderSingle, "")
 	}
 	return _DatabaseProviderSingle
 }
@@ -47,8 +48,15 @@ func NewFrameworkProvider() *FrameworkProvider {
 func NewMysqlProvider() *MysqlProvider {
 	if _MysqlProviderSingle == nil {
 		_MysqlProviderSingle = &MysqlProvider{}
-		_MysqlProviderSingle.config = app.GetBean("config").(app.Bean).GetBean("database").(*services.Config)
-		app.AfterProvider(_MysqlProviderSingle, "mysql")
+		_MysqlProviderSingle.config = app.GetBean("Route").(app.Bean).GetBean("database").(*services.Config)
+		app.AfterProvider(_MysqlProviderSingle, "")
 	}
 	return _MysqlProviderSingle
+}
+func NewRouteProvider() *RouteProvider {
+	if _RouteProviderSingle == nil {
+		_RouteProviderSingle = &RouteProvider{}
+		app.AfterProvider(_RouteProviderSingle, "")
+	}
+	return _RouteProviderSingle
 }

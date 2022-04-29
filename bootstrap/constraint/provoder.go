@@ -21,6 +21,10 @@ type AfterRegistration interface {
 	Boot()
 }
 
+type Exit interface {
+	Exit()
+}
+
 type Route interface {
 	GetGroup() string
 	GetRoutes() map[*api.Config]func(c *gin.Context)
