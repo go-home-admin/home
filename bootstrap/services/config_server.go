@@ -1,7 +1,6 @@
 package services
 
 import (
-	"github.com/go-home-admin/home/bootstrap/services/app"
 	"strings"
 )
 
@@ -14,10 +13,6 @@ type Config struct {
 }
 
 func NewConfig(m map[interface{}]interface{}) *Config {
-	if !Init {
-		app.RunBoot()
-	}
-
 	return &Config{
 		m: m,
 	}

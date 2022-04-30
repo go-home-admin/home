@@ -1,6 +1,8 @@
 package app
 
-import "github.com/go-home-admin/home/bootstrap/constraint"
+import (
+	"github.com/go-home-admin/home/bootstrap/constraint"
+)
 
 var beansAlias = map[string]interface{}{}
 var beansBoot = make([]constraint.AfterRegistration, 0)

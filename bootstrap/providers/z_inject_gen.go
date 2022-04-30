@@ -25,14 +25,14 @@ func GetAllProvider() []interface{} {
 func NewConfigProvider() *ConfigProvider {
 	if _ConfigProviderSingle == nil {
 		_ConfigProviderSingle = &ConfigProvider{}
-		app.AfterProvider(_ConfigProviderSingle, "")
+		app.AfterProvider(_ConfigProviderSingle, "config")
 	}
 	return _ConfigProviderSingle
 }
 func NewDatabaseProvider() *DatabaseProvider {
 	if _DatabaseProviderSingle == nil {
 		_DatabaseProviderSingle = &DatabaseProvider{}
-		app.AfterProvider(_DatabaseProviderSingle, "")
+		app.AfterProvider(_DatabaseProviderSingle, "database")
 	}
 	return _DatabaseProviderSingle
 }
@@ -48,8 +48,8 @@ func NewFrameworkProvider() *FrameworkProvider {
 func NewMysqlProvider() *MysqlProvider {
 	if _MysqlProviderSingle == nil {
 		_MysqlProviderSingle = &MysqlProvider{}
-		_MysqlProviderSingle.config = app.GetBean("Route").(app.Bean).GetBean("database").(*services.Config)
-		app.AfterProvider(_MysqlProviderSingle, "")
+		_MysqlProviderSingle.config = app.GetBean("config").(app.Bean).GetBean("database").(*services.Config)
+		app.AfterProvider(_MysqlProviderSingle, "mysql")
 	}
 	return _MysqlProviderSingle
 }

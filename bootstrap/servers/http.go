@@ -20,6 +20,7 @@ type Http struct {
 	MiddlewareGroup map[string][]gin.HandlerFunc
 
 	Port string
+	init bool
 }
 
 func (http *Http) Init() {
@@ -28,14 +29,19 @@ func (http *Http) Init() {
 }
 
 func (http *Http) Boot() {
+	if http.init {
+		return
+	}
+	http.init = true
+
 	// 初始化所有配置
 	group := make(map[string]*gin.RouterGroup)
 	for gn, _ := range http.Route {
 		gc, ok := http.RouteGroupConfig[gn]
-		if !ok {
-			http.RouteGroupConfig[gn] = &providers.GroupConfig{}
+		if ok {
 			group[gn] = http.Engine.Group(gc.GetPrefix())
 		} else {
+			http.RouteGroupConfig[gn] = &providers.GroupConfig{}
 			group[gn] = http.Engine.Group("")
 		}
 	}
@@ -60,19 +66,19 @@ func (http *Http) Boot() {
 					gr.Use(handlerFunc)
 				}
 			}
+		}
 
-			for f, fun := range gm {
-				config := *f
-				switch config["method"] {
-				case "get":
-					gr.GET(config["url"], fun)
-				case "post":
-					gr.POST(config["url"], fun)
-				case "put":
-					gr.PUT(config["url"], fun)
-				case "delete":
-					gr.DELETE(config["url"], fun)
-				}
+		for f, fun := range gm {
+			config := *f
+			switch config["method"] {
+			case "get":
+				gr.GET(config["url"], fun)
+			case "post":
+				gr.POST(config["url"], fun)
+			case "put":
+				gr.PUT(config["url"], fun)
+			case "delete":
+				gr.DELETE(config["url"], fun)
 			}
 		}
 	}

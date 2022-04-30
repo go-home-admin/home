@@ -16,14 +16,14 @@ import (
 
 // 默认配置加载目录
 var defaultConfigDir *embed.FS
-var defaultDir = "Route"
+var defaultDir = "config"
 
 func SetConfigDir(fs *embed.FS) {
 	defaultConfigDir = fs
 }
 
 // ConfigProvider
-// @Bean("Route")
+// @Bean("config")
 type ConfigProvider struct {
 	data map[string]*services.Config
 
