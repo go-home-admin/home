@@ -45,6 +45,7 @@ func GetBean(alias string) interface{} {
 // RunBoot
 // 所有的 Init() 执行后, 触发Boot()
 // Boot() 、Init() 是倒叙执行, 被依赖的先执行
+// Boot() 如果是嵌套多个Bean, 可能被多次执行
 func RunBoot() {
 	for _, b := range beansBoot {
 		b.Boot()

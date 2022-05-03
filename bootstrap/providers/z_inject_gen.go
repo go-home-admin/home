@@ -32,6 +32,7 @@ func NewConfigProvider() *ConfigProvider {
 func NewDatabaseProvider() *DatabaseProvider {
 	if _DatabaseProviderSingle == nil {
 		_DatabaseProviderSingle = &DatabaseProvider{}
+		_DatabaseProviderSingle.Config = app.GetBean("config").(app.Bean).GetBean("database").(*services.Config)
 		app.AfterProvider(_DatabaseProviderSingle, "database")
 	}
 	return _DatabaseProviderSingle

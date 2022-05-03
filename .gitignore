@@ -2,6 +2,5 @@
 /config.local.ini
 /.config.ini.local
 /generate
-z_inject_gen.go
 routes
 .env
