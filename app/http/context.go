@@ -23,10 +23,10 @@ func (receiver Ctx) Success(data interface{}) {
 	})
 }
 
-func (receiver Ctx) Fail(code int, msg string) {
+func (receiver Ctx) Fail(err error) {
 	receiver.JSON(http.StatusOK, map[string]interface{}{
-		"code": code,
-		"msg":  msg,
+		"code": 1,
+		"msg":  err.Error(),
 	})
 }
 
@@ -36,6 +36,6 @@ func (receiver Ctx) Gin() *gin.Context {
 
 type Context interface {
 	Success(data interface{})
-	Fail(code int, msg string)
+	Fail(err error)
 	Gin() *gin.Context
 }
