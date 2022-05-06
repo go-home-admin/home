@@ -1,7 +1,6 @@
 package servers
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-home-admin/home/bootstrap/providers"
 	"github.com/go-home-admin/home/bootstrap/services"
@@ -91,6 +90,4 @@ func (http *Http) Run() {
 	}
 }
 
-func (http *Http) Exit() {
-	fmt.Println("http server exit ok")
-}
+func (http *Http) Exit() {}

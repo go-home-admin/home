@@ -10,23 +10,6 @@ mac-install:
 	go install github.com/golang/protobuf/protoc-gen-go	# proto 工具链, 生成go代码插件
 	go install github.com/go-home-admin/toolset
 
-# Orm自动维护
-make-orm:
-	toolset make:orm
-
-# 只维护 protoc
-protoc:
-	toolset  make:protoc
-
-make-route:
-	toolset  make:route
-
-make-swagger:
-
 make-bean:
 	toolset  make:bean
-
-# 调试启动
-dev:protoc make-route make-bean
-	go run main.go
 

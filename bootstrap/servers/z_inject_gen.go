@@ -7,14 +7,23 @@ import (
 	app "github.com/go-home-admin/home/bootstrap/services/app"
 )
 
+var _CrontabSingle *Crontab
 var _HttpSingle *Http
 
 func GetAllProvider() []interface{} {
 	return []interface{}{
+		NewCrontab(),
 		NewHttp(),
 	}
 }
 
+func NewCrontab() *Crontab {
+	if _CrontabSingle == nil {
+		_CrontabSingle = &Crontab{}
+		app.AfterProvider(_CrontabSingle, "")
+	}
+	return _CrontabSingle
+}
 func NewHttp() *Http {
 	if _HttpSingle == nil {
 		_HttpSingle = &Http{}
