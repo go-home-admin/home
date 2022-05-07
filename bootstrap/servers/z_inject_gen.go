@@ -9,11 +9,15 @@ import (
 
 var _CrontabSingle *Crontab
 var _HttpSingle *Http
+var _QueueSingle *Queue
+var _WebsocketSingle *Websocket
 
 func GetAllProvider() []interface{} {
 	return []interface{}{
 		NewCrontab(),
 		NewHttp(),
+		NewQueue(),
+		NewWebsocket(),
 	}
 }
 
@@ -33,4 +37,19 @@ func NewHttp() *Http {
 		app.AfterProvider(_HttpSingle, "http")
 	}
 	return _HttpSingle
+}
+func NewQueue() *Queue {
+	if _QueueSingle == nil {
+		_QueueSingle = &Queue{}
+		_QueueSingle.queue = app.GetBean("config").(app.Bean).GetBean("queue").(*services.Config)
+		app.AfterProvider(_QueueSingle, "")
+	}
+	return _QueueSingle
+}
+func NewWebsocket() *Websocket {
+	if _WebsocketSingle == nil {
+		_WebsocketSingle = &Websocket{}
+		app.AfterProvider(_WebsocketSingle, "")
+	}
+	return _WebsocketSingle
 }

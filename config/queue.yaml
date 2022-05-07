@@ -1,0 +1,7 @@
+# database.connections.redis
+connection: redis
+
+# 队列默认配置
+default:
+  group_name: home_group
+  consumer_name: home_consumer

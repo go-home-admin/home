@@ -78,6 +78,10 @@ func (http *Http) Boot() {
 				gr.PUT(config["url"], fun)
 			case "delete":
 				gr.DELETE(config["url"], fun)
+			case "options":
+				gr.OPTIONS(config["url"], fun)
+			case "any":
+				gr.Any(config["url"], fun)
 			}
 		}
 	}
@@ -86,7 +90,7 @@ func (http *Http) Boot() {
 func (http *Http) Run() {
 	err := http.Engine.Run(":" + http.Port)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{"port": http.Port}).Error("http发送错误")
+		logrus.WithFields(logrus.Fields{"port": http.Port}).Error("http发生错误")
 	}
 }
 

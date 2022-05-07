@@ -10,6 +10,7 @@ var _ConfigProviderSingle *ConfigProvider
 var _DatabaseProviderSingle *DatabaseProvider
 var _FrameworkProviderSingle *FrameworkProvider
 var _MysqlProviderSingle *MysqlProvider
+var _RedisProviderSingle *RedisProvider
 var _RouteProviderSingle *RouteProvider
 
 func GetAllProvider() []interface{} {
@@ -18,6 +19,7 @@ func GetAllProvider() []interface{} {
 		NewDatabaseProvider(),
 		NewFrameworkProvider(),
 		NewMysqlProvider(),
+		NewRedisProvider(),
 		NewRouteProvider(),
 	}
 }
@@ -53,6 +55,14 @@ func NewMysqlProvider() *MysqlProvider {
 		app.AfterProvider(_MysqlProviderSingle, "mysql")
 	}
 	return _MysqlProviderSingle
+}
+func NewRedisProvider() *RedisProvider {
+	if _RedisProviderSingle == nil {
+		_RedisProviderSingle = &RedisProvider{}
+		_RedisProviderSingle.Config = app.GetBean("config").(app.Bean).GetBean("database").(*services.Config)
+		app.AfterProvider(_RedisProviderSingle, "redis")
+	}
+	return _RedisProviderSingle
 }
 func NewRouteProvider() *RouteProvider {
 	if _RouteProviderSingle == nil {

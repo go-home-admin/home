@@ -18,14 +18,21 @@ type RedisClient interface {
 }
 
 type JobConfig struct {
-	Event     interface{}
+	Message   interface{}
 	GroupName string
 	QueueName string
 }
 
 type Job interface {
-	Config() JobConfig
-	Handler(task Task)
+	Handler()
+}
+
+type SetRoute interface {
+	SetRoute() string
+}
+
+type SetQueue interface {
+	SetQueue() string
 }
 
 type Task struct {
