@@ -54,8 +54,8 @@ func (q *Queue) Listen(jobs []interface{}) {
 				panic("队列路由: " + route + " 重复, 需要在您的message对象创建 SetRoute() string , 使用自定义路由避免重复。")
 			}
 		}
-
 	}
+
 }
 
 func (q *Queue) Push(message interface{}) {

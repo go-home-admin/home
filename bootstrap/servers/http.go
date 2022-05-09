@@ -46,12 +46,7 @@ func (http *Http) Boot() {
 	}
 
 	// 全局中间件设置
-	for _, handlerFunc := range http.Middleware {
-		for gn, _ := range http.Route {
-			gr := group[gn]
-			gr.Use(handlerFunc)
-		}
-	}
+	http.Engine.Use(http.Middleware...)
 
 	// 分组中间件设置
 	for gn, gm := range http.Route {
