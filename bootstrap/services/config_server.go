@@ -9,23 +9,23 @@ import (
 var Init bool
 
 type Config struct {
-	m map[interface{}]interface{}
+	M map[interface{}]interface{}
 }
 
 func NewConfig(m map[interface{}]interface{}) *Config {
 	return &Config{
-		m: m,
+		M: m,
 	}
 }
 
 func (c *Config) Get() map[interface{}]interface{} {
-	return c.m
+	return c.M
 }
 
 func (c *Config) GetKey(key string) map[interface{}]interface{} {
 	arr := strings.Split(key, ".")
 
-	m := c.m
+	m := c.M
 	lc := len(arr)
 	ll := lc - 1
 	for i := 0; i < lc; i++ {
@@ -55,7 +55,7 @@ func (c *Config) GetKey(key string) map[interface{}]interface{} {
 func (c *Config) GetString(key string, def ...string) string {
 	arr := strings.Split(key, ".")
 
-	m := c.m
+	m := c.M
 	lc := len(arr)
 	ll := lc - 1
 	for i := 0; i < lc; i++ {
@@ -94,7 +94,7 @@ func (c *Config) GetString(key string, def ...string) string {
 func (c *Config) GetInt(key string, def ...int) int {
 	arr := strings.Split(key, ".")
 
-	m := c.m
+	m := c.M
 	lc := len(arr)
 	ll := lc - 1
 	for i := 0; i < lc; i++ {
@@ -133,7 +133,7 @@ func (c *Config) GetInt(key string, def ...int) int {
 func (c *Config) GetBool(key string, def ...bool) bool {
 	arr := strings.Split(key, ".")
 
-	m := c.m
+	m := c.M
 	lc := len(arr)
 	ll := lc - 1
 	for i := 0; i < lc; i++ {
@@ -172,7 +172,7 @@ func (c *Config) GetBool(key string, def ...bool) bool {
 func (c *Config) GetConfig(key string) *Config {
 	arr := strings.Split(key, ".")
 
-	m := c.m
+	m := c.M
 	lc := len(arr)
 	ll := lc - 1
 	for i := 0; i < lc; i++ {

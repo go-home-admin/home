@@ -34,6 +34,7 @@ func NewHttp() *Http {
 		_HttpSingle.RouteProvider = providers.NewRouteProvider()
 		_HttpSingle.HttpServer = services.NewHttpServer()
 		_HttpSingle.Config = app.GetBean("config").(app.Bean).GetBean("app.servers.http").(*services.Config)
+		_HttpSingle.TPort = *app.GetBean("config").(app.Bean).GetBean("app.servers.http.port").(*int)
 		app.AfterProvider(_HttpSingle, "http")
 	}
 	return _HttpSingle

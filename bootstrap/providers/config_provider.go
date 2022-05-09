@@ -28,7 +28,6 @@ type ConfigProvider struct {
 	data map[string]*services.Config
 
 	path string
-	port string
 }
 
 func (c *ConfigProvider) Init() {
@@ -40,7 +39,6 @@ func (c *ConfigProvider) Init() {
 
 func (c *ConfigProvider) initFlag() {
 	flag.StringVar(&c.path, "env", "./.env", "加载配置文件")
-	flag.StringVar(&c.port, "port", "8080", "http端口")
 }
 
 func (c *ConfigProvider) initFile() {
@@ -101,6 +99,7 @@ func (c *ConfigProvider) Boot() {
 	services.Init = true
 }
 
+// GetBean 约定大于一切, 自己接收的代码和配置结构要人工约束成一致
 func (c *ConfigProvider) GetBean(alias string) interface{} {
 	index := strings.Index(alias, ".")
 	if index == -1 {
@@ -111,6 +110,46 @@ func (c *ConfigProvider) GetBean(alias string) interface{} {
 	if !ok {
 		return nil
 	}
-	key := alias[index+1:]
-	return fileConfig.GetConfig(key)
+	arr := strings.Split(alias[index+1:], ".")
+	m := fileConfig.M
+	lc := len(arr)
+	ll := lc - 1
+	for i := 0; i < lc; i++ {
+		s := arr[i]
+		if v, ok := m[s]; ok {
+			if ll == i {
+				val, ook := v.(map[interface{}]interface{})
+				if ook {
+					return services.NewConfig(val)
+				} else {
+					switch v.(type) {
+					case int:
+						got := v.(int)
+						return &got
+					case uint:
+						got := v.(uint)
+						return &got
+					case bool:
+						got := v.(bool)
+						return &got
+					case string:
+						got := v.(string)
+						return &got
+					}
+					return v
+				}
+			}
+
+			val, ook := v.(map[interface{}]interface{})
+			if ook {
+				m = val
+			} else {
+				return nil
+			}
+		} else {
+			return nil
+		}
+	}
+
+	return nil
 }

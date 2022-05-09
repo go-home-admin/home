@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/go-home-admin/home/bootstrap/constraint"
+	"strings"
 )
 
 var beansAlias = map[string]interface{}{}
@@ -35,11 +36,22 @@ func AfterProvider(bean interface{}, alias string) {
 }
 
 type Bean interface {
+	// GetBean 只能返回指针的值
 	GetBean(alias string) interface{}
 }
 
+// GetBean 只能返回指针的值
 func GetBean(alias string) interface{} {
-	return beansAlias[alias]
+	arr := strings.Split(alias, ".")
+	bean, ok := beansAlias[arr[0]]
+	if !ok {
+		panic("提供者别名方式的使用需要提前注册, 可以写到app_provider.go文件注册。")
+	}
+	if len(arr) == 1 {
+		return bean
+	}
+
+	return bean.(Bean).GetBean(strings.Join(arr[1:], "."))
 }
 
 // RunBoot
