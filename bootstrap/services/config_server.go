@@ -1,6 +1,7 @@
 package services
 
 import (
+	"strconv"
 	"strings"
 )
 
@@ -65,6 +66,8 @@ func (c *Config) GetString(key string, def ...string) string {
 				switch v.(type) {
 				case string:
 					return v.(string)
+				case int:
+					return strconv.Itoa(v.(int))
 				default:
 					if len(def) == 0 {
 						return ""
