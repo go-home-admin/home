@@ -42,7 +42,7 @@ type Bean interface {
 
 // GetBean 只能返回指针的值
 func GetBean(alias string) interface{} {
-	arr := strings.Split(alias, ".")
+	arr := strings.Split(alias, ", ")
 	bean, ok := beansAlias[arr[0]]
 	if !ok {
 		panic("提供者别名方式的使用需要提前注册, 可以写到app_provider.go文件注册。")
