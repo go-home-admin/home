@@ -16,6 +16,12 @@ func Now() Time {
 	}
 }
 
+func NowPointer() *Time {
+	return &Time{
+		time.Now(),
+	}
+}
+
 // Value 写入数据库时会调用该方法将自定义时间类型转换并写入数据库
 func (t Time) Value() (driver.Value, error) {
 	var zeroTime time.Time
