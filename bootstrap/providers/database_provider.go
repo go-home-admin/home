@@ -31,7 +31,12 @@ func (m *DatabaseProvider) GetBean(alias string) interface{} {
 		}
 		if name == alias {
 			driver := data["driver"].(string)
-			return app.GetBean(driver).(app.Bean).GetBean(name.(string))
+			switch driver {
+			case "mysql":
+				return NewMysqlProvider().GetBean(name.(string))
+			default:
+				return app.GetBean(driver).(app.Bean).GetBean(name.(string))
+			}
 		}
 	}
 	return nil

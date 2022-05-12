@@ -3,7 +3,6 @@ package providers
 
 import (
 	services "github.com/go-home-admin/home/bootstrap/services"
-	app "github.com/go-home-admin/home/bootstrap/services/app"
 )
 
 var _ConfigProviderSingle *ConfigProvider
@@ -27,15 +26,15 @@ func GetAllProvider() []interface{} {
 func NewConfigProvider() *ConfigProvider {
 	if _ConfigProviderSingle == nil {
 		_ConfigProviderSingle = &ConfigProvider{}
-		app.AfterProvider(_ConfigProviderSingle, "config")
+		AfterProvider(_ConfigProviderSingle, "config")
 	}
 	return _ConfigProviderSingle
 }
 func NewDatabaseProvider() *DatabaseProvider {
 	if _DatabaseProviderSingle == nil {
 		_DatabaseProviderSingle = &DatabaseProvider{}
-		_DatabaseProviderSingle.Config = app.GetBean("config").(app.Bean).GetBean("database").(*services.Config)
-		app.AfterProvider(_DatabaseProviderSingle, "database")
+		_DatabaseProviderSingle.Config = GetBean("config").(Bean).GetBean("database").(*services.Config)
+		AfterProvider(_DatabaseProviderSingle, "database")
 	}
 	return _DatabaseProviderSingle
 }
@@ -44,30 +43,30 @@ func NewFrameworkProvider() *FrameworkProvider {
 		_FrameworkProviderSingle = &FrameworkProvider{}
 		_FrameworkProviderSingle.config = NewConfigProvider()
 		_FrameworkProviderSingle.database = NewDatabaseProvider()
-		app.AfterProvider(_FrameworkProviderSingle, "")
+		AfterProvider(_FrameworkProviderSingle, "")
 	}
 	return _FrameworkProviderSingle
 }
 func NewMysqlProvider() *MysqlProvider {
 	if _MysqlProviderSingle == nil {
 		_MysqlProviderSingle = &MysqlProvider{}
-		_MysqlProviderSingle.config = app.GetBean("config").(app.Bean).GetBean("database").(*services.Config)
-		app.AfterProvider(_MysqlProviderSingle, "mysql")
+		_MysqlProviderSingle.config = GetBean("config").(Bean).GetBean("database").(*services.Config)
+		AfterProvider(_MysqlProviderSingle, "mysql")
 	}
 	return _MysqlProviderSingle
 }
 func NewRedisProvider() *RedisProvider {
 	if _RedisProviderSingle == nil {
 		_RedisProviderSingle = &RedisProvider{}
-		_RedisProviderSingle.Config = app.GetBean("config").(app.Bean).GetBean("database").(*services.Config)
-		app.AfterProvider(_RedisProviderSingle, "redis")
+		_RedisProviderSingle.Config = GetBean("config").(Bean).GetBean("database").(*services.Config)
+		AfterProvider(_RedisProviderSingle, "redis")
 	}
 	return _RedisProviderSingle
 }
 func NewRouteProvider() *RouteProvider {
 	if _RouteProviderSingle == nil {
 		_RouteProviderSingle = &RouteProvider{}
-		app.AfterProvider(_RouteProviderSingle, "")
+		AfterProvider(_RouteProviderSingle, "")
 	}
 	return _RouteProviderSingle
 }

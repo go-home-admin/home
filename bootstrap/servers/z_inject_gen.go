@@ -4,7 +4,6 @@ package servers
 import (
 	providers "github.com/go-home-admin/home/bootstrap/providers"
 	services "github.com/go-home-admin/home/bootstrap/services"
-	app "github.com/go-home-admin/home/bootstrap/services/app"
 )
 
 var _CrontabSingle *Crontab
@@ -24,7 +23,7 @@ func GetAllProvider() []interface{} {
 func NewCrontab() *Crontab {
 	if _CrontabSingle == nil {
 		_CrontabSingle = &Crontab{}
-		app.AfterProvider(_CrontabSingle, "")
+		providers.AfterProvider(_CrontabSingle, "")
 	}
 	return _CrontabSingle
 }
@@ -33,23 +32,23 @@ func NewHttp() *Http {
 		_HttpSingle = &Http{}
 		_HttpSingle.RouteProvider = providers.NewRouteProvider()
 		_HttpSingle.HttpServer = services.NewHttpServer()
-		_HttpSingle.Config = app.GetBean("config").(app.Bean).GetBean("app.servers.http").(*services.Config)
-		app.AfterProvider(_HttpSingle, "http")
+		_HttpSingle.Config = providers.GetBean("config").(providers.Bean).GetBean("app.servers.http").(*services.Config)
+		providers.AfterProvider(_HttpSingle, "http")
 	}
 	return _HttpSingle
 }
 func NewQueue() *Queue {
 	if _QueueSingle == nil {
 		_QueueSingle = &Queue{}
-		_QueueSingle.queue = app.GetBean("config").(app.Bean).GetBean("queue").(*services.Config)
-		app.AfterProvider(_QueueSingle, "")
+		_QueueSingle.queue = providers.GetBean("config").(providers.Bean).GetBean("queue").(*services.Config)
+		providers.AfterProvider(_QueueSingle, "")
 	}
 	return _QueueSingle
 }
 func NewWebsocket() *Websocket {
 	if _WebsocketSingle == nil {
 		_WebsocketSingle = &Websocket{}
-		app.AfterProvider(_WebsocketSingle, "")
+		providers.AfterProvider(_WebsocketSingle, "")
 	}
 	return _WebsocketSingle
 }

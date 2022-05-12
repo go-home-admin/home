@@ -2,7 +2,7 @@
 package broker
 
 import (
-	app "github.com/go-home-admin/home/bootstrap/services/app"
+	providers "github.com/go-home-admin/home/bootstrap/providers"
 )
 
 var _RedisBrokerSingle *RedisBroker
@@ -16,7 +16,7 @@ func GetAllProvider() []interface{} {
 func NewRedisBroker() *RedisBroker {
 	if _RedisBrokerSingle == nil {
 		_RedisBrokerSingle = &RedisBroker{}
-		app.AfterProvider(_RedisBrokerSingle, "")
+		providers.AfterProvider(_RedisBrokerSingle, "")
 	}
 	return _RedisBrokerSingle
 }

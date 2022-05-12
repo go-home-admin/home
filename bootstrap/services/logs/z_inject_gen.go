@@ -2,7 +2,7 @@
 package logs
 
 import (
-	app "github.com/go-home-admin/home/bootstrap/services/app"
+	providers "github.com/go-home-admin/home/bootstrap/providers"
 )
 
 var _GinLogrusSingle *GinLogrus
@@ -16,7 +16,7 @@ func GetAllProvider() []interface{} {
 func NewGinLogrus() *GinLogrus {
 	if _GinLogrusSingle == nil {
 		_GinLogrusSingle = &GinLogrus{}
-		app.AfterProvider(_GinLogrusSingle, "")
+		providers.AfterProvider(_GinLogrusSingle, "")
 	}
 	return _GinLogrusSingle
 }

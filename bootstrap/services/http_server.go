@@ -7,7 +7,6 @@ import (
 )
 
 // HttpServer 封装一些被(工具生成的)代码调用的函数
-// @Bean
 type HttpServer struct {
 	isDebug bool
 	port    string

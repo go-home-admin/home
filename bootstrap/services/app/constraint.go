@@ -45,13 +45,22 @@ func GetBean(alias string) interface{} {
 	arr := strings.Split(alias, ", ")
 	bean, ok := beansAlias[arr[0]]
 	if !ok {
-		panic("提供者别名方式的使用需要提前注册, 可以写到app_provider.go文件注册。")
+		panic("提供者别名方式的使用需要提前注册, 可以写到app_provider.go文件注册。如果您在测试待遇中使用请调用providers.NewApp()")
 	}
 	if len(arr) == 1 {
 		return bean
 	}
 
 	return bean.(Bean).GetBean(strings.Join(arr[1:], "."))
+}
+
+func HasBean(alias string) bool {
+	arr := strings.Split(alias, ", ")
+	_, ok := beansAlias[arr[0]]
+	if !ok {
+		return false
+	}
+	return true
 }
 
 // RunBoot
