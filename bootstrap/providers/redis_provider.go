@@ -8,11 +8,11 @@ import (
 // RedisProvider @Bean("redis")
 type RedisProvider struct {
 	*services.Config `inject:"config, database"`
-	dbs              map[string]*redis.Client
+	dbs              map[string]*services.Redis
 }
 
 func (m *RedisProvider) Init() {
-	m.dbs = make(map[string]*redis.Client)
+	m.dbs = make(map[string]*services.Redis)
 
 	for name, dataT := range m.GetKey("connections") {
 		data, ok := dataT.(map[interface{}]interface{})
@@ -32,7 +32,9 @@ func (m *RedisProvider) Init() {
 			DB:       config.GetInt("database", 0),     // use default DB
 		})
 
-		m.dbs[name.(string)] = db
+		m.dbs[name.(string)] = &services.Redis{
+			Client: db,
+		}
 	}
 }
 

@@ -3,5 +3,6 @@ connection: redis
 
 # 队列默认配置
 default:
+  stream_name: home_stream
   group_name: home_group
-  consumer_name: home_consumer
+  consumer_name: home_{hostname}

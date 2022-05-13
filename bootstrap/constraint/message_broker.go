@@ -35,6 +35,15 @@ type SetQueue interface {
 	SetQueue() string
 }
 
+type SetGroup interface {
+	SetGroup() string
+}
+
+// SetSerial 设置为穿行消费
+type SetSerial interface {
+	SetSerial() bool
+}
+
 type Task struct {
 	ID    string
 	Group string

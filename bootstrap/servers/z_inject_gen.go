@@ -32,7 +32,7 @@ func NewHttp() *Http {
 		_HttpSingle = &Http{}
 		_HttpSingle.RouteProvider = providers.NewRouteProvider()
 		_HttpSingle.HttpServer = services.NewHttpServer()
-		_HttpSingle.Config = providers.GetBean("config").(providers.Bean).GetBean("app.servers.http").(*services.Config)
+		_HttpSingle.Config = providers.GetBean("queueConfig").(providers.Bean).GetBean("app.servers.http").(*services.Config)
 		providers.AfterProvider(_HttpSingle, "http")
 	}
 	return _HttpSingle
@@ -40,7 +40,7 @@ func NewHttp() *Http {
 func NewQueue() *Queue {
 	if _QueueSingle == nil {
 		_QueueSingle = &Queue{}
-		_QueueSingle.queue = providers.GetBean("config").(providers.Bean).GetBean("queue").(*services.Config)
+		_QueueSingle.Config = providers.GetBean("queueConfig").(providers.Bean).GetBean("config").(*services.Config)
 		providers.AfterProvider(_QueueSingle, "")
 	}
 	return _QueueSingle

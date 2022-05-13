@@ -21,23 +21,15 @@ func (m *DatabaseProvider) Init() {
 }
 
 func (m *DatabaseProvider) GetBean(alias string) interface{} {
-	connections := m.Config.GetKey("connections")
+	config := m.Config.GetConfig("connections." + alias)
 
-	for name, dataT := range connections {
-		data, ok := dataT.(map[interface{}]interface{})
-
-		if !ok {
-			continue
-		}
-		if name == alias {
-			driver := data["driver"].(string)
-			switch driver {
-			case "mysql":
-				return NewMysqlProvider().GetBean(name.(string))
-			default:
-				return app.GetBean(driver).(app.Bean).GetBean(name.(string))
-			}
-		}
+	driver := config.GetString("driver")
+	switch driver {
+	case "mysql":
+		return NewMysqlProvider().GetBean(alias)
+	case "redis":
+		return NewRedisProvider().GetBean(alias)
+	default:
+		return app.GetBean(driver).(app.Bean).GetBean(alias)
 	}
-	return nil
 }
