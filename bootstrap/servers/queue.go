@@ -6,6 +6,7 @@ import (
 	"github.com/go-home-admin/home/bootstrap/constraint"
 	"github.com/go-home-admin/home/bootstrap/providers"
 	"github.com/go-home-admin/home/bootstrap/services"
+	"github.com/go-home-admin/home/bootstrap/services/app"
 	"github.com/go-redis/redis/v8"
 	log "github.com/sirupsen/logrus"
 	"os"
@@ -62,7 +63,19 @@ func (q *Queue) Run() {
 		}
 	}
 	q.runBaseQueueList(baseQueue)
-	q.runSerialQueueList(serialQueue)
+
+	// 必须串行执行的job
+	if len(serialQueue) != 0 {
+		if app.HasBean("election") {
+			// 在选举服务之后启动
+			app.GetBean("election").(app.AppendRun).AppendRun(func() {
+				q.runSerialQueueList(serialQueue)
+			})
+		} else {
+			log.Info("存在串行执行的job, 但没有注册 election 服务, 如果有多个副本运行可能得不到预想效果")
+			q.runSerialQueueList(serialQueue)
+		}
+	}
 }
 
 func (q *Queue) runBaseQueueList(list []interface{}) {
@@ -137,7 +150,7 @@ func (q *Queue) runSerialQueueList(list []interface{}) {
 		groupQueue[group] = append(groupQueue[group], stream, ">")
 	}
 	for group, streams := range groupQueue {
-		go q.runBaseQueue(group, streams)
+		go q.runSerialQueue(group, streams)
 	}
 }
 
