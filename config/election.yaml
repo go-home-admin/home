@@ -1,0 +1,7 @@
+# database.connections.redis
+connection: redis
+
+# 选举服务默认配置
+default:
+  lock_time: 60
+  key: home_election

@@ -12,7 +12,7 @@ import (
 type Http struct {
 	*providers.RouteProvider `inject:""`
 	*services.HttpServer     `inject:""`
-	*services.Config         `inject:"queueConfig, app.servers.http"`
+	*services.Config         `inject:"config, app.servers.http"`
 
 	*gin.Engine
 	Middleware      []gin.HandlerFunc

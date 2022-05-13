@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"github.com/go-home-admin/home/bootstrap/constraint"
 	"strings"
 )
@@ -49,7 +50,9 @@ func GetBean(alias string) interface{} {
 	arr := strings.Split(alias, ", ")
 	bean, ok := beansAlias[arr[0]]
 	if !ok {
-		panic("提供者别名方式的使用需要提前注册, 可以写到app_provider.go文件注册。如果您在测试待遇中使用请调用providers.NewApp()")
+		fmt.Printf("无法找到服务 %v\n", alias)
+		fmt.Printf("如果您在测试待遇中使用请调用providers.NewApp()\n")
+		panic("提供者别名方式的使用需要提前注册, 可以写到app_provider.go文件注册。")
 	}
 	if len(arr) == 1 {
 		return bean

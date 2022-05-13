@@ -3,8 +3,8 @@ package constraint
 
 import "github.com/go-redis/redis/v8"
 
-var QueueName = "home_stream"
-var QueueGroup = "home_stream_group"
+var QueueName = "home_default_stream"
+var QueueGroup = "home_default_stream_group"
 
 // 信息中间人
 type Broker interface {

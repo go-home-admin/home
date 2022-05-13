@@ -16,10 +16,10 @@ import (
 	"time"
 )
 
-// Queue @Bean
+// Queue @Bean("queue")
 type Queue struct {
 	// 队列配置文件的所有配置
-	*services.Config `inject:"queueConfig, config"`
+	fileConfig *services.Config `inject:"config, queue"`
 	// 队列具体配置
 	queueConfig *services.Config
 	// 连接
@@ -35,16 +35,31 @@ type Queue struct {
 }
 
 func (q *Queue) Init() {
-	q.limit = uint(q.GetInt("worker_limit", 100))
-	q.limitChan = make(chan bool, q.limit)
-
 	q.route = make(map[string]constraint.Job)
-	q.queueConfig = services.NewConfig(q.GetKey("config"))
-	q.Connect = providers.NewRedisProvider().GetBean(q.GetString("connection")).(*services.Redis)
+	q.queueConfig = services.NewConfig(q.fileConfig.GetKey("default"))
+
+	q.limit = uint(q.queueConfig.GetInt("worker_limit", 100))
+	q.limitChan = make(chan bool, q.limit)
+	q.Connect = providers.NewRedisProvider().GetBean(q.fileConfig.GetString("connection")).(*services.Redis)
 }
 
 func (q *Queue) Push(message interface{}) {
-
+	jsonStr, err := json.Marshal(message)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	stream, _ := q.getJobInfo(message)
+	route := jobToRoute(message)
+	q.Connect.Client.XAdd(context.Background(), &redis.XAddArgs{
+		Stream: stream,
+		Approx: false,
+		Limit:  int64(q.queueConfig.GetInt("stream_limit", 10000)),
+		Values: map[string]interface{}{
+			"route": route,
+			"event": jsonStr,
+		},
+	})
 }
 
 func (q *Queue) Run() {
@@ -95,7 +110,7 @@ func (q *Queue) runBaseQueueList(list []interface{}) {
 func (q *Queue) runBaseQueue(group string, streams []string) {
 	ctx := context.Background()
 	Hostname, _ := os.Hostname()
-	consumer := strings.ReplaceAll(q.GetString("consumer_name"), "{hostname}", Hostname)
+	consumer := strings.ReplaceAll(q.queueConfig.GetString("consumer_name"), "{hostname}", Hostname)
 
 	for {
 		cmd := q.Connect.Client.XReadGroup(ctx, &redis.XReadGroupArgs{
@@ -157,7 +172,7 @@ func (q *Queue) runSerialQueueList(list []interface{}) {
 func (q *Queue) runSerialQueue(group string, streams []string) {
 	ctx := context.Background()
 	Hostname, _ := os.Hostname()
-	consumer := strings.ReplaceAll(q.GetString("consumer_name"), "{hostname}", Hostname)
+	consumer := strings.ReplaceAll(q.queueConfig.GetString("consumer_name"), "{hostname}", Hostname)
 
 	limitChan := make(chan bool, 1)
 	for {
@@ -271,6 +286,16 @@ func (q *Queue) initStream() {
 			if err.Error() != "ERR no such key" {
 				log.Warn(err)
 				continue
+			} else {
+				q.Connect.Client.XAdd(ctx, &redis.XAddArgs{
+					Stream: stream,
+					ID:     "1",
+					Values: map[string]interface{}{
+						"route": "",
+						"event": "init",
+					},
+				})
+				q.Connect.Client.XDel(ctx, stream, "1")
 			}
 		}
 		mInfoG := make(map[string]redis.XInfoGroup)
@@ -288,14 +313,14 @@ func (q *Queue) getJobInfo(job interface{}) (stream string, group string) {
 	if ok {
 		stream = jobStream.SetQueue()
 	} else {
-		stream = q.GetString("stream_name", "home_stream")
+		stream = q.queueConfig.GetString("stream_name", "home_default_stream")
 	}
 
 	jobGroup, ok := job.(constraint.SetGroup)
 	if ok {
 		group = jobGroup.SetGroup()
 	} else {
-		group = q.GetString("group_name", "home_group")
+		group = q.queueConfig.GetString("group_name", "home_default_group")
 	}
 	return stream, group
 }
@@ -305,7 +330,7 @@ func (q *Queue) jobToGroup(job interface{}) string {
 	if ok {
 		return g.SetGroup()
 	}
-	return q.GetString("group_name", "home_group")
+	return q.queueConfig.GetString("group_name", "home_default_group")
 }
 
 func (q *Queue) runJob(job reflect.Value, event string, id, stream, group string) {

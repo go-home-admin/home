@@ -1,13 +1,31 @@
 package providers
 
 import (
+	"github.com/go-home-admin/home/bootstrap/servers"
 	"github.com/go-home-admin/home/bootstrap/services/app"
+	"strings"
 )
 
 // GetBean 只能返回指针的值
 func GetBean(alias string) interface{} {
 	if !app.HasBean(alias) {
 		NewFrameworkProvider()
+
+		if !app.HasBean(alias) {
+			arr := strings.Split(alias, ", ")
+			// 如果是系统级服务, 并且默认不启动的
+			// 继续注册自动
+			switch arr[0] {
+			case "queue":
+				servers.NewQueue()
+			case "election":
+				servers.NewElection()
+			case "mysql":
+				NewMysqlProvider()
+			case "redis":
+				NewRedisProvider()
+			}
+		}
 	}
 
 	return app.GetBean(alias)

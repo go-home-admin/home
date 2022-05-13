@@ -4,3 +4,7 @@ debug: true
 servers:
   http:
     port: 80
+
+log:
+  level:
+  formatter: text

@@ -103,7 +103,11 @@ func (c *ConfigProvider) Boot() {
 func (c *ConfigProvider) GetBean(alias string) interface{} {
 	index := strings.Index(alias, ".")
 	if index == -1 {
-		return c.data[alias]
+		file, ok := c.data[alias]
+		if !ok {
+			file = services.NewConfig(make(map[interface{}]interface{}))
+		}
+		return file
 	}
 
 	fileConfig, ok := c.data[alias[:index]]

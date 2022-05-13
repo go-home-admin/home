@@ -3,6 +3,7 @@ connection: redis
 
 # 队列默认配置
 default:
-  stream_name: home_stream
-  group_name: home_group
-  consumer_name: home_{hostname}
+  stream_name: home_default_stream
+  group_name: home_default_group
+  consumer_name: home_default_{hostname}
+  stream_limit: 10000

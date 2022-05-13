@@ -8,6 +8,7 @@ import (
 var _ConfigProviderSingle *ConfigProvider
 var _DatabaseProviderSingle *DatabaseProvider
 var _FrameworkProviderSingle *FrameworkProvider
+var _LogProviderSingle *LogProvider
 var _MysqlProviderSingle *MysqlProvider
 var _RedisProviderSingle *RedisProvider
 var _RouteProviderSingle *RouteProvider
@@ -17,6 +18,7 @@ func GetAllProvider() []interface{} {
 		NewConfigProvider(),
 		NewDatabaseProvider(),
 		NewFrameworkProvider(),
+		NewLogProvider(),
 		NewMysqlProvider(),
 		NewRedisProvider(),
 		NewRouteProvider(),
@@ -43,9 +45,18 @@ func NewFrameworkProvider() *FrameworkProvider {
 		_FrameworkProviderSingle = &FrameworkProvider{}
 		_FrameworkProviderSingle.config = NewConfigProvider()
 		_FrameworkProviderSingle.database = NewDatabaseProvider()
+		_FrameworkProviderSingle.log = NewLogProvider()
 		AfterProvider(_FrameworkProviderSingle, "")
 	}
 	return _FrameworkProviderSingle
+}
+func NewLogProvider() *LogProvider {
+	if _LogProviderSingle == nil {
+		_LogProviderSingle = &LogProvider{}
+		_LogProviderSingle.Config = GetBean("config").(Bean).GetBean("app").(*services.Config)
+		AfterProvider(_LogProviderSingle, "")
+	}
+	return _LogProviderSingle
 }
 func NewMysqlProvider() *MysqlProvider {
 	if _MysqlProviderSingle == nil {

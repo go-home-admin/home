@@ -156,7 +156,7 @@ func (r *RedisBroker) read(group string, queueName string) {
 	for {
 		cmd := r.client.XReadGroup(ctx, &redis.XReadGroupArgs{
 			Group:    group,
-			Consumer: "home_consumer",
+			Consumer: "home_default_consumer",
 			Streams:  []string{queueName, ">"},
 			Count:    1,
 			Block:    30 * time.Second,

@@ -4,4 +4,5 @@ package providers
 type FrameworkProvider struct {
 	config   *ConfigProvider   `inject:""`
 	database *DatabaseProvider `inject:""`
+	log      *LogProvider      `inject:""`
 }
