@@ -1,6 +1,9 @@
 # database.connections.redis
 connection: redis
 
+broadcast:
+  topic: home_broadcast
+
 # 队列默认配置
 default:
   stream_name: home_default_stream

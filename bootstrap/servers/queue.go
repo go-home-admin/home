@@ -26,12 +26,15 @@ type Queue struct {
 	Connect *services.Redis
 
 	// 执行限速度
-	limit     uint
+	limit     uint // 如果 == 0 , 则停止
 	limitChan chan bool
 	// 所有路由注册
 	route map[string]constraint.Job
 	// 支持并发调用job, 这个是route副本保存结构
 	dispatch sync.Map
+
+	// 打开广播进程, 允许把某个message投递到广播队列, 所有服务都会收到
+	broadcast *Broadcast
 }
 
 func (q *Queue) Init() {
@@ -43,6 +46,18 @@ func (q *Queue) Init() {
 	q.Connect = providers.NewRedisProvider().GetBean(q.fileConfig.GetString("connection")).(*services.Redis)
 }
 
+func (q *Queue) StartBroadcast() {
+	q.broadcast = &Broadcast{
+		Connect: q.Connect,
+		queue:   q,
+	}
+}
+
+func (q *Queue) HasBroadcast() bool {
+	return q.broadcast != nil
+}
+
+// Push 投递队列
 func (q *Queue) Push(message interface{}) {
 	jsonStr, err := json.Marshal(message)
 	if err != nil {
@@ -59,6 +74,21 @@ func (q *Queue) Push(message interface{}) {
 			"route": route,
 			"event": jsonStr,
 		},
+	})
+}
+
+// Publish 对message广播
+func (q *Queue) Publish(topic string, message interface{}) {
+	jsonStr, err := json.Marshal(message)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	route := jobToRoute(message)
+	q.broadcast.Publish(topic, Msg{
+		Route: route,
+		Data:  string(jsonStr),
 	})
 }
 
@@ -91,6 +121,11 @@ func (q *Queue) Run() {
 			q.runSerialQueueList(serialQueue)
 		}
 	}
+
+	// 广播进程
+	if q.HasBroadcast() {
+		go q.broadcast.Subscribe(q.fileConfig.GetString("broadcast.topic", "home_broadcast"))
+	}
 }
 
 func (q *Queue) runBaseQueueList(list []interface{}) {
@@ -112,7 +147,7 @@ func (q *Queue) runBaseQueue(group string, streams []string) {
 	Hostname, _ := os.Hostname()
 	consumer := strings.ReplaceAll(q.queueConfig.GetString("consumer_name"), "{hostname}", Hostname)
 
-	for {
+	for q.limit > 0 {
 		cmd := q.Connect.Client.XReadGroup(ctx, &redis.XReadGroupArgs{
 			Group:    group,
 			Consumer: consumer,
@@ -149,7 +184,7 @@ func (q *Queue) runBaseQueue(group string, streams []string) {
 		} else if cmd.Err().Error() == "redis: nil" {
 			time.Sleep(3 * time.Second)
 		} else {
-			log.Error(cmd.Err().Error())
+			log.Errorf("redis命令未知错误, XReadGroup, %v", cmd.Err().Error())
 			time.Sleep(60 * time.Second)
 		}
 	}
@@ -175,7 +210,7 @@ func (q *Queue) runSerialQueue(group string, streams []string) {
 	consumer := strings.ReplaceAll(q.queueConfig.GetString("consumer_name"), "{hostname}", Hostname)
 
 	limitChan := make(chan bool, 1)
-	for {
+	for q.limit > 0 {
 		cmd := q.Connect.Client.XReadGroup(ctx, &redis.XReadGroupArgs{
 			Group:    group,
 			Consumer: consumer,
@@ -236,7 +271,9 @@ func (q *Queue) runSerialQueue(group string, streams []string) {
 	}
 }
 
-func (q *Queue) Exit() {}
+func (q *Queue) Exit() {
+	q.limit = 0
+}
 
 func (q *Queue) Listen(jobs []interface{}) {
 	// 注册路由绑定Job
@@ -252,19 +289,32 @@ func (q *Queue) Listen(jobs []interface{}) {
 				// route = message.*
 				route = jobToRoute(handle)
 			}
-			if _, o := q.route[route]; !o {
-				q.route[route] = handle
-			} else {
-				panic("队列路由: " + route + " 重复, 需要在您的message对象创建 SetRoute() string , 使用自定义路由避免重复。")
-			}
+			q.AddJob(route, handle)
 		}
 	}
 }
 
+func (q *Queue) AddJob(route string, handle constraint.Job) {
+	if _, o := q.route[route]; !o {
+		q.route[route] = handle
+	} else {
+		panic("队列路由: " + route + " 重复, 需要在您的message对象创建 SetRoute() string , 使用自定义路由避免重复。")
+	}
+}
+
+// 自动计算struct路径
 func jobToRoute(handle interface{}) string {
 	ref := reflect.TypeOf(handle)
-	ref = ref.Elem()
+	if ref.Kind() == reflect.Ptr {
+		ref = ref.Elem()
+	}
 
+	// message
+	mty := ref.String()
+	if strings.Index(mty, "message.") != -1 {
+		return mty
+	}
+	// job
 	for i := 0; i < ref.NumField(); i++ {
 		field := ref.Field(i)
 		ty := field.Type.String()
