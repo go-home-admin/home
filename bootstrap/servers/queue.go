@@ -129,16 +129,20 @@ func (q *Queue) Run() {
 }
 
 func (q *Queue) runBaseQueueList(list []interface{}) {
-	groupQueue := make(map[string][]string)
+	groupQueue := make(map[string]map[string]string)
 	for _, job := range list {
 		stream, group := q.getJobInfo(job)
 		if groupQueue[group] == nil {
-			groupQueue[group] = make([]string, 0)
+			groupQueue[group] = make(map[string]string)
 		}
-		groupQueue[group] = append(groupQueue[group], stream, ">")
+		groupQueue[group][stream] = ">"
 	}
 	for group, streams := range groupQueue {
-		go q.runBaseQueue(group, streams)
+		ruS := make([]string, 0)
+		for s, s2 := range streams {
+			ruS = append(ruS, s, s2)
+		}
+		go q.runBaseQueue(group, ruS)
 	}
 }
 
@@ -191,16 +195,20 @@ func (q *Queue) runBaseQueue(group string, streams []string) {
 }
 
 func (q *Queue) runSerialQueueList(list []interface{}) {
-	groupQueue := make(map[string][]string)
+	groupQueue := make(map[string]map[string]string)
 	for _, job := range list {
 		stream, group := q.getJobInfo(job)
 		if groupQueue[group] == nil {
-			groupQueue[group] = make([]string, 0)
+			groupQueue[group] = make(map[string]string)
 		}
-		groupQueue[group] = append(groupQueue[group], stream, ">")
+		groupQueue[group][stream] = ">"
 	}
 	for group, streams := range groupQueue {
-		go q.runSerialQueue(group, streams)
+		ruS := make([]string, 0)
+		for s, s2 := range streams {
+			ruS = append(ruS, s, s2)
+		}
+		go q.runSerialQueue(group, ruS)
 	}
 }
 
