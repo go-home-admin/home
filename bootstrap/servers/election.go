@@ -2,9 +2,12 @@ package servers
 
 import (
 	"context"
+	"github.com/go-home-admin/home/app/message"
+	"github.com/go-home-admin/home/app/queues"
 	"github.com/go-home-admin/home/bootstrap/constraint"
 	"github.com/go-home-admin/home/bootstrap/providers"
 	"github.com/go-home-admin/home/bootstrap/services"
+	"github.com/go-home-admin/home/bootstrap/services/app"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	"os"
@@ -38,6 +41,10 @@ func (k *Election) Init() {
 }
 
 func (k *Election) Run() {
+	if app.HasBean("queue") {
+		job := queues.NewElectionClose()
+		NewQueue().AddJob(jobToRoute(job), job)
+	}
 	// 标识当前节点抢到执行权利
 	for !k.check() {
 		time.Sleep(time.Duration(k.lockTime) * time.Second)
@@ -55,7 +62,18 @@ func (k *Election) Run() {
 	}
 }
 
-func (k *Election) Exit() {}
+func (k *Election) Exit() {
+	k.Connect.Client.Del(context.Background(), k.key)
+
+	if app.HasBean("queue") {
+		fileConfig := providers.GetBean("config").(providers.Bean).GetBean("queue").(*services.Config)
+		topic := fileConfig.GetString("broadcast.topic", "home_broadcast")
+		// 广播到其他副本
+		NewQueue().Publish(topic, message.ElectionClose{
+			Time: time.Now().Unix(),
+		})
+	}
+}
 
 func (k *Election) check() bool {
 	if k.isRunNode {

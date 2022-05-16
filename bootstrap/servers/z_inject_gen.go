@@ -51,7 +51,7 @@ func NewQueue() *Queue {
 	if _QueueSingle == nil {
 		_QueueSingle = &Queue{}
 		_QueueSingle.fileConfig = providers.GetBean("config").(providers.Bean).GetBean("queue").(*services.Config)
-		providers.AfterProvider(_QueueSingle, "")
+		providers.AfterProvider(_QueueSingle, "queue")
 	}
 	return _QueueSingle
 }
