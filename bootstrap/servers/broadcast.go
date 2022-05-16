@@ -13,10 +13,16 @@ import (
 type Broadcast struct {
 	Connect *services.Redis
 	queue   *Queue
+	Run     bool
+}
+
+func (b *Broadcast) Close() {
+	b.Run = false
 }
 
 // Subscribe 订阅主题
 func (b *Broadcast) Subscribe(topic string) {
+	b.Run = true
 	defer func() {
 		if err := recover(); err != nil {
 			log.Error("Subscribe 发生错误", err)
@@ -31,7 +37,7 @@ func (b *Broadcast) Subscribe(topic string) {
 		}
 	}(pubSub)
 
-	for true {
+	for b.Run {
 		for msg := range pubSub.Channel() {
 			m := &Msg{}
 			err := json.Unmarshal([]byte(msg.Payload), m)
