@@ -53,6 +53,10 @@ func (q *Queue) StartBroadcast() {
 	}
 }
 
+func (q *Queue) CloseBroadcast() {
+	q.broadcast.Close()
+}
+
 func (q *Queue) HasBroadcast() bool {
 	return q.broadcast != nil
 }
