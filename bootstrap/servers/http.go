@@ -33,6 +33,9 @@ func (http *Http) Boot() {
 	}
 	http.init = true
 
+	// 全局中间件设置
+	http.Engine.Use(http.Middleware...)
+
 	// 初始化所有配置
 	group := make(map[string]*gin.RouterGroup)
 	for gn, _ := range http.Route {
@@ -44,9 +47,6 @@ func (http *Http) Boot() {
 			group[gn] = http.Engine.Group("")
 		}
 	}
-
-	// 全局中间件设置
-	http.Engine.Use(http.Middleware...)
 
 	// 分组中间件设置
 	for gn, gm := range http.Route {
