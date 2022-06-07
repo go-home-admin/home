@@ -4,14 +4,17 @@ import (
 	"context"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm/logger"
+	"os"
 	"time"
 )
 
 // MysqlLog 调试的过程
-type MysqlLog struct{}
+type MysqlLog struct {
+	log.Logger
+}
 
 func (d *MysqlLog) LogMode(level logger.LogLevel) logger.Interface {
-	return newDebugLog()
+	return NewDebugLog()
 }
 
 func (d *MysqlLog) Info(ctx context.Context, s string, i ...interface{}) {
@@ -28,9 +31,18 @@ func (d *MysqlLog) Error(ctx context.Context, s string, i ...interface{}) {
 
 func (d *MysqlLog) Trace(ctx context.Context, begin time.Time, fc func() (sql string, rowsAffected int64), err error) {
 	sql, rows := fc()
-	log.WithFields(log.Fields{"path": "sql", "begin": begin, "row": rows}).Debug(sql)
+	d.Logger.WithFields(log.Fields{"path": "sql", "begin": begin, "row": rows}).Trace(sql)
 }
 
-func newDebugLog() logger.Interface {
-	return &MysqlLog{}
+func NewDebugLog() logger.Interface {
+	return &MysqlLog{
+		Logger: log.Logger{
+			Out:          os.Stderr,
+			Formatter:    new(log.TextFormatter),
+			Hooks:        make(log.LevelHooks),
+			Level:        log.TraceLevel,
+			ExitFunc:     os.Exit,
+			ReportCaller: false,
+		},
+	}
 }

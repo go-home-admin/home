@@ -43,7 +43,7 @@ func (m *MysqlProvider) Init() {
 		gConf := &gorm.Config{}
 		// 调试时, 记录sql
 		if app.IsDebug() {
-			gConf.Logger = &logs.MysqlLog{}
+			gConf.Logger = logs.NewDebugLog()
 		}
 		dsn := mysql.Open(fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?parseTime=true", username, password, hosts, port, dbname))
 		db, err := gorm.Open(dsn, gConf)
