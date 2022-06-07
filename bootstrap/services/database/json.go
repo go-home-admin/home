@@ -3,11 +3,21 @@ package database
 import (
 	"bytes"
 	"database/sql/driver"
+	"encoding/json"
 	"errors"
 	log "github.com/sirupsen/logrus"
 )
 
 type JSON []byte
+
+func NewJSON(v interface{}) JSON {
+	str, err := json.Marshal(v)
+	if err != nil {
+		log.Errorf("NewJSON err %v, arg %v", err, v)
+		return []byte("")
+	}
+	return str
+}
 
 func (j JSON) Value() (driver.Value, error) {
 	if j.IsNull() {
