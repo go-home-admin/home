@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// 调试的过程
+// MysqlLog 调试的过程
 type MysqlLog struct{}
 
 func (d *MysqlLog) LogMode(level logger.LogLevel) logger.Interface {

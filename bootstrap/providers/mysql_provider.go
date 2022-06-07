@@ -3,7 +3,9 @@ package providers
 import (
 	"database/sql"
 	"fmt"
+	"github.com/go-home-admin/home/app"
 	"github.com/go-home-admin/home/bootstrap/services"
+	"github.com/go-home-admin/home/bootstrap/services/logs"
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -40,9 +42,9 @@ func (m *MysqlProvider) Init() {
 
 		gConf := &gorm.Config{}
 		// 调试时, 记录sql
-		//if m.conf.IsDebug() {
-		//	gConf.Logger = &logs.MysqlLog{}
-		//}
+		if app.IsDebug() {
+			gConf.Logger = &logs.MysqlLog{}
+		}
 		dsn := mysql.Open(fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?parseTime=true", username, password, hosts, port, dbname))
 		db, err := gorm.Open(dsn, gConf)
 		if err != nil {
