@@ -2,6 +2,7 @@ package servers
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/go-home-admin/home/app"
 	"github.com/go-home-admin/home/bootstrap/providers"
 	"github.com/go-home-admin/home/bootstrap/services"
 	"github.com/sirupsen/logrus"
@@ -24,7 +25,7 @@ type Http struct {
 
 func (http *Http) Init() {
 	http.Port = http.GetString("port", "80")
-	http.Engine = gin.New()
+	http.Engine = gin.Default()
 }
 
 func (http *Http) Boot() {
@@ -34,7 +35,11 @@ func (http *Http) Boot() {
 	http.init = true
 
 	// 全局中间件设置
-	http.Engine.Use(http.Middleware...)
+	g := make([]gin.HandlerFunc, 0)
+	if app.IsDebug() {
+		g = append(g, gin.Logger())
+	}
+	http.Engine.Use(append(append(g, gin.Recovery()), http.Middleware...)...)
 
 	// 初始化所有配置
 	group := make(map[string]*gin.RouterGroup)
