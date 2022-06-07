@@ -5,7 +5,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// @Bean
 type GinLogrus struct{}
 
 func (g *GinLogrus) Write(p []byte) (n int, err error) {
