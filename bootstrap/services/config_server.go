@@ -144,7 +144,7 @@ func (c *Config) GetBool(key string, def ...bool) bool {
 		if v, ok := m[s]; ok {
 			if ll == i {
 				switch v.(type) {
-				case string:
+				case bool:
 					return v.(bool)
 				default:
 					if len(def) == 0 {
