@@ -25,7 +25,7 @@ type Http struct {
 
 func (http *Http) Init() {
 	http.Port = http.GetString("port", "80")
-	http.Engine = gin.Default()
+	http.Engine = gin.New()
 }
 
 func (http *Http) Boot() {
