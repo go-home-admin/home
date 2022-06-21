@@ -45,7 +45,7 @@ func (m *MysqlProvider) Init() {
 		if app.IsDebug() {
 			gConf.Logger = logs.NewDebugLog()
 		}
-		dsn := mysql.Open(fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?parseTime=true", username, password, hosts, port, dbname))
+		dsn := mysql.Open(fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?parseTime=true&loc=Local", username, password, hosts, port, dbname))
 		db, err := gorm.Open(dsn, gConf)
 		if err != nil {
 			logrus.Error("mysql 链接错误")
