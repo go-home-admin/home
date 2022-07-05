@@ -22,7 +22,16 @@ func (a *RouteProvider) LoadRoute(routes []interface{}) {
 	for _, inf := range routes {
 		route, ok := inf.(constraint.Route)
 		if ok {
-			a.Route[route.GetGroup()] = route.GetRoutes()
+			g := route.GetGroup()
+			gg, gok := a.Route[g]
+			if gok {
+				for config, f := range route.GetRoutes() {
+					gg[config] = f
+				}
+				a.Route[g] = gg
+			} else {
+				a.Route[route.GetGroup()] = route.GetRoutes()
+			}
 		}
 	}
 }
