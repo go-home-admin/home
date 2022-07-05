@@ -50,8 +50,8 @@ func SetEnv(fileContext []byte) []byte {
 			key = strings.Trim(key, "\"")
 			val = strings.Trim(val, "\"")
 
-			envVal := os.Getenv(key)
-			if envVal != "" {
+			envVal, has := os.LookupEnv(key)
+			if has {
 				val = envVal
 			}
 
