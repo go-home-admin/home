@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql/driver"
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -41,6 +42,33 @@ func (t *Time) Scan(v interface{}) error {
 	return fmt.Errorf("can not convert %v to timestamp", v)
 }
 
-func (t *Time) YmdHis() string {
+func (t *Time) UnmarshalJSON(data []byte) error {
+	*t = StrToTime(strings.Replace(string(data), `"`, "", -1))
+	return nil
+}
+
+func (t Time) MarshalJSON() ([]byte, error) {
+	data := `"` + t.YmdHis() + `"`
+	return []byte(data), nil
+}
+
+func (t Time) YmdHis() string {
 	return t.Format("2006-01-02 15:04:05")
+}
+
+func (t Time) Ymd() string {
+	return t.Format("2006-01-02")
+}
+
+func (t Time) DayEnd() string {
+	return t.Format("2006-01-02") + " 23:59:59"
+}
+
+// StrToTime 字符串转时间类型，仅支持两种格式
+func StrToTime(str string) Time {
+	tm, err := time.ParseInLocation("2006-01-02 15:04:05", str, time.Local)
+	if err != nil {
+		tm, err = time.ParseInLocation("2006-01-02", str, time.Local)
+	}
+	return Time{tm}
 }
