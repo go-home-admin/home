@@ -72,3 +72,8 @@ func StrToTime(str string) Time {
 	}
 	return Time{tm}
 }
+
+// UnixToTime 时间戳转时间类型
+func UnixToTime(unix int64) Time {
+	return Time{time.Unix(unix, 0)}
+}
