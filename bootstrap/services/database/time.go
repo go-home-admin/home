@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql/driver"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -76,4 +77,16 @@ func StrToTime(str string) Time {
 // UnixToTime 时间戳转时间类型
 func UnixToTime(unix int64) Time {
 	return Time{time.Unix(unix, 0)}
+}
+
+// TimeToIntDate 时间转为INT的日期格式（20060102）
+func (t Time) TimeToIntDate() int32 {
+	v, _ := strconv.ParseInt(t.Format("20060102"), 10, 32)
+	return int32(v)
+}
+
+// IntDateToTime INT的日期格式转为时间
+func IntDateToTime(date int32) Time {
+	tm, _ := time.ParseInLocation("20060102", fmt.Sprint(date), time.Local)
+	return Time{tm}
 }
