@@ -27,7 +27,7 @@ func (m *RedisProvider) Init() {
 		config := services.NewConfig(data)
 
 		db := redis.NewClient(&redis.Options{
-			Addr:     config.GetString("ip", "127.0.0.1") + ":" + config.GetString("port", "6379"),
+			Addr:     config.GetString("host", "127.0.0.1") + ":" + config.GetString("port", "6379"),
 			Password: config.GetString("password", ""), // no password set
 			DB:       config.GetInt("database", 0),     // use default DB
 		})
