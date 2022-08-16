@@ -42,6 +42,7 @@ func (k *Election) Init() {
 
 func (k *Election) Run() {
 	if app.HasBean("queue") {
+		// 注册停止广播
 		job := queues.NewElectionClose()
 		NewQueue().AddJob(jobToRoute(job), job)
 	}

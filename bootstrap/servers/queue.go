@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/go-home-admin/home/bootstrap/constraint"
-	"github.com/go-home-admin/home/bootstrap/providers"
 	"github.com/go-home-admin/home/bootstrap/services"
 	"github.com/go-home-admin/home/bootstrap/services/app"
 	"github.com/go-redis/redis/v8"
@@ -23,7 +22,7 @@ type Queue struct {
 	// 队列具体配置
 	queueConfig *services.Config
 	// 连接
-	Connect *services.Redis
+	Connect *services.Redis `inject:"database, @config(queue.connection)"`
 
 	// 执行限速度
 	limit     uint // 如果 == 0 , 则停止
@@ -43,7 +42,6 @@ func (q *Queue) Init() {
 
 	q.limit = uint(q.queueConfig.GetInt("worker_limit", 100))
 	q.limitChan = make(chan bool, q.limit)
-	q.Connect = providers.NewRedisProvider().GetBean(q.fileConfig.GetString("connection")).(*services.Redis)
 }
 
 func (q *Queue) StartBroadcast() {
@@ -79,6 +77,15 @@ func (q *Queue) Push(message interface{}) {
 			"event": jsonStr,
 		},
 	})
+}
+
+// Delay 延后投递执行
+func (q *Queue) Delay(t time.Duration) delayTask {
+	return delayTask{
+		interval: t,
+		queue:    q,
+		message:  nil,
+	}
 }
 
 // Publish 对message广播
@@ -419,4 +426,26 @@ func (q *Queue) runJob(job reflect.Value, event string, id, stream, group string
 			log.Errorf("runJob, json.Unmarshal data err = %v", err)
 		}
 	}
+}
+
+// StartDelayQueue 开启延时队列
+func (q *Queue) StartDelayQueue() {
+	// 只有election选中的节点才启动
+	app.GetBean("election").(app.AppendRun).AppendRun(func() {
+
+	})
+}
+
+// 延时队列包装
+type delayTask struct {
+	// 延后多少时间投递
+	interval time.Duration
+	queue    *Queue
+	message  interface{}
+}
+
+func (d *delayTask) Push(message interface{}) {
+	d.message = message
+
+	//d.queue.Connect.ZAdd()
 }
