@@ -67,27 +67,41 @@ func (c *ConfigProvider) initFile() {
 		if _FrameworkProviderSingle == nil {
 			NewFrameworkProvider()
 		}
+		for _, entry := range DirEntry {
+			if path.Ext(entry.Name()) == ".yaml" {
+				fileContext, err := os.ReadFile(defaultDir + "/" + entry.Name())
+				if err != nil {
+					panic(err)
+				}
+				fileContext = utils.SetEnv(fileContext)
+				m := make(map[interface{}]interface{})
+				err = yaml.Unmarshal(fileContext, &m)
+				if err != nil {
+					panic(err)
+				}
+				c.data[strings.TrimSuffix(entry.Name(), ".yaml")] = services.NewConfig(m)
+			}
+		}
 	} else {
 		_ = godotenv.Load()
 		DirEntry, err = defaultConfigDir.ReadDir(defaultDir)
 		if err != nil {
 			panic(err)
 		}
-	}
-
-	for _, entry := range DirEntry {
-		if path.Ext(entry.Name()) == ".yaml" {
-			fileContext, err := os.ReadFile(defaultDir + "/" + entry.Name())
-			if err != nil {
-				panic(err)
+		for _, entry := range DirEntry {
+			if path.Ext(entry.Name()) == ".yaml" {
+				fileContext, err := defaultConfigDir.ReadFile(defaultDir + "/" + entry.Name())
+				if err != nil {
+					panic(err)
+				}
+				fileContext = utils.SetEnv(fileContext)
+				m := make(map[interface{}]interface{})
+				err = yaml.Unmarshal(fileContext, &m)
+				if err != nil {
+					panic(err)
+				}
+				c.data[strings.TrimSuffix(entry.Name(), ".yaml")] = services.NewConfig(m)
 			}
-			fileContext = utils.SetEnv(fileContext)
-			m := make(map[interface{}]interface{})
-			err = yaml.Unmarshal(fileContext, &m)
-			if err != nil {
-				panic(err)
-			}
-			c.data[strings.TrimSuffix(entry.Name(), ".yaml")] = services.NewConfig(m)
 		}
 	}
 }
