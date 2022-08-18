@@ -329,19 +329,19 @@ func jobToRoute(handle interface{}) string {
 	}
 
 	// message
-	mty := ref.PkgPath()
-	if strings.Index(mty, "message.") != -1 {
+	mty := ref.PkgPath() + ref.String()
+	if strings.Index(mty, "message") != -1 {
 		return mty
 	}
 	// job
 	for i := 0; i < ref.NumField(); i++ {
 		field := ref.Field(i)
-		ty := field.Type.String()
-		if strings.Index(ty, "message.") != -1 {
+		ty := field.Type.PkgPath() + field.Type.String()
+		if strings.Index(ty, "message") != -1 {
 			return ty
 		}
 	}
-	panic("自动注册路由的信息总线的对象路径必须包含 `message.`。")
+	panic("自动注册路由的信息总线的对象路径必须包含 `message`。")
 }
 
 func (q *Queue) initStream() {
