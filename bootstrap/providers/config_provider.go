@@ -83,7 +83,7 @@ func (c *ConfigProvider) initFile() {
 			}
 		}
 	} else {
-		_ = godotenv.Load()
+		_ = godotenv.Load(c.path)
 		DirEntry, err = defaultConfigDir.ReadDir(defaultDir)
 		if err != nil {
 			panic(err)
