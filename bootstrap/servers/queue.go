@@ -329,7 +329,7 @@ func jobToRoute(handle interface{}) string {
 	}
 
 	// message
-	mty := ref.String()
+	mty := ref.PkgPath()
 	if strings.Index(mty, "message.") != -1 {
 		return mty
 	}
