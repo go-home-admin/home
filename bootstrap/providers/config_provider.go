@@ -6,6 +6,7 @@ import (
 	"github.com/go-home-admin/home/bootstrap/services"
 	"github.com/go-home-admin/home/bootstrap/utils"
 	"github.com/joho/godotenv"
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 	"io/fs"
 	"os"
@@ -83,7 +84,15 @@ func (c *ConfigProvider) initFile() {
 			}
 		}
 	} else {
-		_ = godotenv.Load(c.path)
+		if _, err := os.Stat(c.path); err != nil {
+			log.Error(".env file, " + err.Error())
+		} else {
+			err = godotenv.Load(c.path)
+			if err != nil {
+				panic("godotenv.Load error: " + err.Error())
+			}
+		}
+
 		DirEntry, err = defaultConfigDir.ReadDir(defaultDir)
 		if err != nil {
 			panic(err)
