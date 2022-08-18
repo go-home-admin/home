@@ -65,6 +65,26 @@ func (t Time) DayEnd() string {
 	return t.Format("2006-01-02") + " 23:59:59"
 }
 
+func (t Time) After(u time.Time) bool {
+	return t.Time.After(u)
+}
+
+func (t Time) Add(d time.Duration) Time {
+	return Time{
+		Time: t.Time.Add(d),
+	}
+}
+
+func (t Time) AddDate(years int, months int, days int) Time {
+	return Time{
+		Time: t.Time.AddDate(years, months, days),
+	}
+}
+
+func (t Time) Sub(u Time) time.Duration {
+	return t.Time.Sub(u.Time)
+}
+
 // StrToTime 字符串转时间类型，仅支持两种格式
 func StrToTime(str string) Time {
 	tm, err := time.ParseInLocation("2006-01-02 15:04:05", str, time.Local)
