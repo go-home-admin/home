@@ -68,15 +68,17 @@ func (q *Queue) Push(message interface{}) {
 	}
 	stream, _ := q.getJobInfo(message)
 	route := jobToRoute(message)
-	q.Connect.Client.XAdd(context.Background(), &redis.XAddArgs{
+	d := q.Connect.Client.XAdd(context.Background(), &redis.XAddArgs{
 		Stream: stream,
-		Approx: false,
-		Limit:  int64(q.queueConfig.GetInt("stream_limit", 10000)),
+		MaxLen: int64(q.queueConfig.GetInt("stream_limit", 10000)),
 		Values: map[string]interface{}{
 			"route": route,
 			"event": jsonStr,
 		},
 	})
+	if d.Err() != nil {
+		log.Error("Queue push, redis xadd error: ", d.Err())
+	}
 }
 
 // Delay 延后投递执行
