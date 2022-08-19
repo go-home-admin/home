@@ -331,14 +331,14 @@ func jobToRoute(handle interface{}) string {
 	}
 
 	// message
-	mty := ref.PkgPath() + ref.String()
+	mty := ref.PkgPath() + ref.Name()
 	if strings.Index(mty, "message") != -1 {
 		return mty
 	}
 	// job
 	for i := 0; i < ref.NumField(); i++ {
 		field := ref.Field(i)
-		ty := field.Type.PkgPath() + field.Type.String()
+		ty := field.Type.PkgPath() + field.Type.Name()
 		if strings.Index(ty, "message") != -1 {
 			return ty
 		}
