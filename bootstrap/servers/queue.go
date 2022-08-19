@@ -33,7 +33,8 @@ type Queue struct {
 	dispatch sync.Map
 
 	// 打开广播进程, 允许把某个message投递到广播队列, 所有服务都会收到
-	broadcast *Broadcast
+	broadcast  *Broadcast
+	delayQueue DelayQueue
 }
 
 func (q *Queue) Init() {
@@ -82,8 +83,8 @@ func (q *Queue) Push(message interface{}) {
 }
 
 // Delay 延后投递执行
-func (q *Queue) Delay(t time.Duration) delayTask {
-	return delayTask{
+func (q *Queue) Delay(t time.Duration) DelayTask {
+	return DelayTask{
 		interval: t,
 		queue:    q,
 		message:  nil,
@@ -432,22 +433,25 @@ func (q *Queue) runJob(job reflect.Value, event string, id, stream, group string
 
 // StartDelayQueue 开启延时队列
 func (q *Queue) StartDelayQueue() {
-	// 只有election选中的节点才启动
-	app.GetBean("election").(app.AppendRun).AppendRun(func() {
+	if app.HasBean("delay_queue") {
+		q.delayQueue = app.GetBean("delay_queue").(DelayQueue)
+	} else {
+		q.delayQueue = NewDelayQueueServer()
+	}
 
-	})
+	q.delayQueue.Run()
 }
 
-// 延时队列包装
-type delayTask struct {
+// DelayTask 延时队列包装
+type DelayTask struct {
 	// 延后多少时间投递
 	interval time.Duration
 	queue    *Queue
 	message  interface{}
 }
 
-func (d *delayTask) Push(message interface{}) {
+func (d *DelayTask) Push(message interface{}) {
 	d.message = message
 
-	//d.queue.Connect.ZAdd()
+	d.queue.delayQueue.Push(*d)
 }

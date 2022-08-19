@@ -10,6 +10,7 @@ var _CrontabSingle *Crontab
 var _ElectionSingle *Election
 var _HttpSingle *Http
 var _QueueSingle *Queue
+var _DelayQueueServerSingle *DelayQueueForMysql
 var _WebsocketSingle *Websocket
 
 func GetAllProvider() []interface{} {
@@ -18,6 +19,7 @@ func GetAllProvider() []interface{} {
 		NewElection(),
 		NewHttp(),
 		NewQueue(),
+		NewDelayQueueServer(),
 		NewWebsocket(),
 	}
 }
@@ -55,6 +57,13 @@ func NewQueue() *Queue {
 		providers.AfterProvider(_QueueSingle, "queue")
 	}
 	return _QueueSingle
+}
+func NewDelayQueueServer() *DelayQueueForMysql {
+	if _DelayQueueServerSingle == nil {
+		_DelayQueueServerSingle = &DelayQueueForMysql{}
+		providers.AfterProvider(_DelayQueueServerSingle, "delay_queue")
+	}
+	return _DelayQueueServerSingle
 }
 func NewWebsocket() *Websocket {
 	if _WebsocketSingle == nil {
