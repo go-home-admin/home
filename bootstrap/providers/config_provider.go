@@ -48,9 +48,8 @@ func (c *ConfigProvider) initFile() {
 	if defaultConfigDir == nil {
 		// 单元测试中, 可能未初始化框架, 从本目录开始往上查找go.mod文件确定跟目录
 		pwd, _ := os.Getwd()
-		pwdArr := strings.Split(pwd, "/")
 		parDir := ""
-		for i := 0; i < len(pwdArr)-1; i++ {
+		for i := 0; i <= 100; i++ {
 			checkDir := pwd + parDir
 			if _, err := os.Stat(checkDir + "/go.mod"); err == nil {
 				dirs, _ := filepath.Abs(checkDir + "/" + defaultDir)

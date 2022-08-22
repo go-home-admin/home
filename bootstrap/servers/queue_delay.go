@@ -1,10 +1,15 @@
 package servers
 
 import (
+	"encoding/json"
+	"github.com/go-home-admin/home/bootstrap/constraint"
 	"github.com/go-home-admin/home/bootstrap/services/app"
 	"github.com/go-home-admin/home/bootstrap/services/database"
 	uuid "github.com/satori/go.uuid"
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"reflect"
+	"time"
 )
 
 type DelayQueue interface {
@@ -15,8 +20,10 @@ type DelayQueue interface {
 
 // OrmDelayQueue @Bean
 type OrmDelayQueue struct {
-	Id        string        `gorm:"primaryKey;column:id;type:varchar;not null" json:"id"`
-	Job       database.JSON `gorm:"column:job;type:json;not null" json:"job"`
+	Id        string        `gorm:"primaryKey;autoIncrement;column:id;type:varchar(64);not null" json:"id"`
+	Fail      int           `gorm:"column:fail;type:int" json:"fail"`
+	Route     string        `gorm:"column:route;type:varchar(254)" json:"route"`
+	Job       database.JSON `gorm:"column:job;type:json" json:"job"`
 	RunAt     database.Time `gorm:"column:run_at;type:timestamp;not null" json:"run_at"`
 	CreatedAt database.Time `gorm:"column:created_at;type:timestamp;not null" json:"created_at"`
 }
@@ -27,7 +34,8 @@ func (receiver *OrmDelayQueue) TableName() string {
 
 // DelayQueueForMysql @Bean("delay_queue")
 type DelayQueueForMysql struct {
-	mysql *gorm.DB `inject:"database, @config(queue, delay.connect)"`
+	mysql *gorm.DB `inject:"database, @config(queue.delay.connect)"`
+	queue *Queue   `inject:""`
 }
 
 func (d *DelayQueueForMysql) Init() {
@@ -43,9 +51,43 @@ func (d *DelayQueueForMysql) Run() {
 	}
 }
 
+// Loop TODO 待优化，如果启动了广播，可以内存维护多个节点的最近任务，可以去掉定时查询
 func (d *DelayQueueForMysql) Loop() {
 	for {
+		list := make([]*OrmDelayQueue, 0)
+		dbRet := d.mysql.Model(&OrmDelayQueue{}).Where("run_at <= ? and fail = 0", time.Now()).Limit(100).Order("Id desc").Find(&list)
 
+		if dbRet.Error != nil {
+			logrus.Error(dbRet.Error)
+		} else if len(list) != 0 {
+			delIds := make([]string, 0)
+			for _, delayMsg := range list {
+				handle, ok := d.queue.dispatch.Load(delayMsg.Route)
+				if !ok {
+					logrus.Errorf("无法处理的route: %v", delayMsg.Route)
+					d.mysql.Model(&OrmDelayQueue{}).Where("id <= ?", delayMsg.Id).Update("fail", "1")
+					continue
+				}
+
+				event := delayMsg.Job
+				job := handle.(reflect.Value)
+				v := job.Interface()
+				newJob, ok := v.(constraint.Job)
+				if ok {
+					err := json.Unmarshal([]byte(event), newJob)
+					if err == nil {
+						newJob.Handler()
+						delIds = append(delIds, delayMsg.Id)
+					} else {
+						logrus.Errorf("run delay job, json.Unmarshal data err = %v", err)
+						d.mysql.Model(&OrmDelayQueue{}).Where("id <= ?", delayMsg.Id).Update("fail", "1")
+					}
+				}
+			}
+			d.mysql.Where("id in ?", delIds).Delete(&OrmDelayQueue{})
+		}
+
+		time.Sleep(60 * time.Second)
 	}
 }
 
@@ -54,6 +96,8 @@ func (d *DelayQueueForMysql) Push(task DelayTask) string {
 
 	d.mysql.Model(&OrmDelayQueue{}).Create(&OrmDelayQueue{
 		Id:        uid,
+		Fail:      0,
+		Route:     jobToRoute(task.message),
 		Job:       database.NewJSON(task.message),
 		RunAt:     database.Now().Add(task.interval),
 		CreatedAt: database.Now(),

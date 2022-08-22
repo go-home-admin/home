@@ -4,13 +4,15 @@ package servers
 import (
 	providers "github.com/go-home-admin/home/bootstrap/providers"
 	services "github.com/go-home-admin/home/bootstrap/services"
+	gorm "gorm.io/gorm"
 )
 
 var _CrontabSingle *Crontab
 var _ElectionSingle *Election
 var _HttpSingle *Http
 var _QueueSingle *Queue
-var _DelayQueueServerSingle *DelayQueueForMysql
+var _OrmDelayQueueSingle *OrmDelayQueue
+var _DelayQueueForMysqlSingle *DelayQueueForMysql
 var _WebsocketSingle *Websocket
 
 func GetAllProvider() []interface{} {
@@ -19,7 +21,8 @@ func GetAllProvider() []interface{} {
 		NewElection(),
 		NewHttp(),
 		NewQueue(),
-		NewDelayQueueServer(),
+		NewOrmDelayQueue(),
+		NewDelayQueueForMysql(),
 		NewWebsocket(),
 	}
 }
@@ -58,12 +61,21 @@ func NewQueue() *Queue {
 	}
 	return _QueueSingle
 }
-func NewDelayQueueServer() *DelayQueueForMysql {
-	if _DelayQueueServerSingle == nil {
-		_DelayQueueServerSingle = &DelayQueueForMysql{}
-		providers.AfterProvider(_DelayQueueServerSingle, "delay_queue")
+func NewOrmDelayQueue() *OrmDelayQueue {
+	if _OrmDelayQueueSingle == nil {
+		_OrmDelayQueueSingle = &OrmDelayQueue{}
+		providers.AfterProvider(_OrmDelayQueueSingle, "")
 	}
-	return _DelayQueueServerSingle
+	return _OrmDelayQueueSingle
+}
+func NewDelayQueueForMysql() *DelayQueueForMysql {
+	if _DelayQueueForMysqlSingle == nil {
+		_DelayQueueForMysqlSingle = &DelayQueueForMysql{}
+		_DelayQueueForMysqlSingle.mysql = providers.GetBean("database").(providers.Bean).GetBean(*(providers.GetBean("config").(providers.Bean).GetBean("queue.delay.connect").(*string))).(*gorm.DB)
+		_DelayQueueForMysqlSingle.queue = NewQueue()
+		providers.AfterProvider(_DelayQueueForMysqlSingle, "delay_queue")
+	}
+	return _DelayQueueForMysqlSingle
 }
 func NewWebsocket() *Websocket {
 	if _WebsocketSingle == nil {

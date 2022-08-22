@@ -80,11 +80,12 @@ func (q *Queue) Push(message interface{}) {
 	if d.Err() != nil {
 		log.Error("Queue push, redis xadd error: ", d.Err())
 	}
+	q.Delay(time.Second)
 }
 
 // Delay 延后投递执行
-func (q *Queue) Delay(t time.Duration) DelayTask {
-	return DelayTask{
+func (q *Queue) Delay(t time.Duration) *DelayTask {
+	return &DelayTask{
 		interval: t,
 		queue:    q,
 		message:  nil,
@@ -273,7 +274,7 @@ func (q *Queue) runSerialQueue(group string, streams []string) {
 						newJob, ok := v.(constraint.Job)
 						if ok {
 							err := json.Unmarshal([]byte(event), newJob)
-							if err != nil {
+							if err == nil {
 								newJob.Handler()
 								q.Connect.Client.XAck(context.Background(), group, stream, id)
 							} else {
@@ -326,6 +327,11 @@ func (q *Queue) AddJob(route string, handle constraint.Job) {
 
 // 自动计算struct路径
 func jobToRoute(handle interface{}) string {
+	mr, ok := handle.(constraint.SetRoute)
+	if ok {
+		return mr.SetRoute()
+	}
+
 	ref := reflect.TypeOf(handle)
 	if ref.Kind() == reflect.Ptr {
 		ref = ref.Elem()
@@ -417,7 +423,7 @@ func (q *Queue) runJob(job reflect.Value, event string, id, stream, group string
 	newJob, ok := v.(constraint.Job)
 	if ok {
 		err := json.Unmarshal([]byte(event), newJob)
-		if err != nil {
+		if err == nil {
 			newJob.Handler()
 			q.Connect.Client.XAck(
 				context.Background(),
@@ -436,7 +442,7 @@ func (q *Queue) StartDelayQueue() {
 	if app.HasBean("delay_queue") {
 		q.delayQueue = app.GetBean("delay_queue").(DelayQueue)
 	} else {
-		q.delayQueue = NewDelayQueueServer()
+		q.delayQueue = NewDelayQueueForMysql()
 	}
 
 	q.delayQueue.Run()
