@@ -64,9 +64,7 @@ func (c *ConfigProvider) initFile() {
 			}
 			parDir += "/.."
 		}
-		if _FrameworkProviderSingle == nil {
-			NewFrameworkProvider()
-		}
+
 		for _, entry := range DirEntry {
 			if path.Ext(entry.Name()) == ".yaml" {
 				fileContext, err := os.ReadFile(defaultDir + "/" + entry.Name())
@@ -81,6 +79,10 @@ func (c *ConfigProvider) initFile() {
 				}
 				c.data[strings.TrimSuffix(entry.Name(), ".yaml")] = services.NewConfig(m)
 			}
+		}
+
+		if _FrameworkProviderSingle == nil {
+			NewFrameworkProvider()
 		}
 	} else {
 		if _, err := os.Stat(c.path); err != nil {
