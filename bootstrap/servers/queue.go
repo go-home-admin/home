@@ -39,7 +39,7 @@ type Queue struct {
 
 func (q *Queue) Init() {
 	q.route = make(map[string]constraint.Job)
-	q.queueConfig = services.NewConfig(q.fileConfig.GetKey("default"))
+	q.queueConfig = services.NewConfig(q.fileConfig.GetKey("queue"))
 
 	q.limit = uint(q.queueConfig.GetInt("worker_limit", 100))
 	q.limitChan = make(chan bool, q.limit)
