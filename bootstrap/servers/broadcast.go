@@ -76,7 +76,7 @@ func (b *Broadcast) runJob(job reflect.Value, event string) {
 	newJob, ok := v.(constraint.Job)
 	if ok {
 		err := json.Unmarshal([]byte(event), newJob)
-		if err != nil {
+		if err == nil {
 			newJob.Handler()
 		} else {
 			log.Errorf("broadcast runJob, json.Unmarshal data err = %v", err)

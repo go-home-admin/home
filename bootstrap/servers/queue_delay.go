@@ -25,8 +25,8 @@ type OrmDelayQueue struct {
 	Fail      int           `gorm:"column:fail;type:int" json:"fail"`
 	Route     string        `gorm:"column:route;type:varchar(254)" json:"route"`
 	Job       database.JSON `gorm:"column:job;type:json" json:"job"`
-	RunAt     database.Time `gorm:"column:run_at;type:timestamp;not null" json:"run_at"`
-	CreatedAt database.Time `gorm:"column:created_at;type:timestamp;not null" json:"created_at"`
+	RunAt     database.Time `gorm:"column:run_at;type:timestamp;index;not null" json:"run_at"`
+	CreatedAt database.Time `gorm:"column:created_at;type:timestamp;not null;default:'2022-08-25 00:00:00'" json:"created_at"`
 }
 
 func (receiver *OrmDelayQueue) TableName() string {
@@ -40,7 +40,14 @@ type DelayQueueForMysql struct {
 }
 
 func (d *DelayQueueForMysql) Init() {
-	d.mysql.AutoMigrate(&OrmDelayQueue{})
+	if app2.Config("queue.delay.auth_migrate", true) {
+		logrus.Info("你可以修改queue.delay.auth_migrate = false; 关闭自动迁移delay_queue表")
+		err := d.mysql.AutoMigrate(&OrmDelayQueue{})
+		if err != nil {
+			panic(err)
+			return
+		}
+	}
 }
 
 func (d *DelayQueueForMysql) Run() {

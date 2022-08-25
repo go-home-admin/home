@@ -3,7 +3,6 @@ package servers
 import (
 	"context"
 	"github.com/go-home-admin/home/app/message"
-	"github.com/go-home-admin/home/app/queues"
 	"github.com/go-home-admin/home/bootstrap/constraint"
 	"github.com/go-home-admin/home/bootstrap/providers"
 	"github.com/go-home-admin/home/bootstrap/services"
@@ -41,11 +40,6 @@ func (k *Election) Init() {
 }
 
 func (k *Election) Run() {
-	if app.HasBean("queue") {
-		// 注册停止广播
-		job := queues.NewElectionClose()
-		NewQueue().AddJob(jobToRoute(job), job)
-	}
 	// 标识当前节点抢到执行权利
 	for !k.check() {
 		time.Sleep(time.Duration(k.lockTime) * time.Second)
@@ -103,7 +97,7 @@ func (k *Election) check() bool {
 }
 
 // GetServer 提供统一命名规范的独立服务
-func GetServer(leaders []interface{}) constraint.KernelServer {
+func GetServer(leaders ...interface{}) constraint.KernelServer {
 	server := NewElection()
 
 	server.awakens = append(server.awakens, leaders...)

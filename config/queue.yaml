@@ -15,5 +15,6 @@ queue:
 
 # 延时队列配置
 delay:
+  auth_migrate: true
   connect: mysql
   interval: 60

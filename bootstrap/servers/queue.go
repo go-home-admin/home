@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	app2 "github.com/go-home-admin/home/app"
+	"github.com/go-home-admin/home/app/queues"
 	"github.com/go-home-admin/home/bootstrap/constraint"
 	"github.com/go-home-admin/home/bootstrap/services"
 	"github.com/go-home-admin/home/bootstrap/services/app"
@@ -42,6 +43,8 @@ func (q *Queue) Init() {
 	q.route = make(map[string]constraint.Job)
 	q.limit = uint(q.queueConfig.GetInt("worker_limit", 100))
 	q.limitChan = make(chan bool, q.limit)
+
+	q.Listen(queues.GetAllProvider())
 }
 
 func (q *Queue) StartBroadcast() {
@@ -114,6 +117,7 @@ func (q *Queue) Publish(message interface{}, topics ...string) {
 
 func (q *Queue) Run() {
 	q.initStream()
+
 	for route, job := range q.route {
 		q.dispatch.Store(route, reflect.New(reflect.TypeOf(job).Elem()))
 	}
@@ -145,6 +149,10 @@ func (q *Queue) Run() {
 	// 广播进程
 	if q.HasBroadcast() {
 		go q.broadcast.Subscribe(q.fileConfig.GetString("broadcast.topic", "home_broadcast"))
+	}
+
+	if q.delayQueue != nil {
+		q.delayQueue.Run()
 	}
 }
 
@@ -360,11 +368,14 @@ func jobToRoute(handle interface{}) string {
 
 func (q *Queue) initStream() {
 	ctx := context.Background()
-
+	streams := make(map[string]bool)
 	for _, job := range q.route {
 		stream, group := q.getJobInfo(job)
-
+		if !streams[stream] {
+			continue
+		}
 		xInfoG, err := q.Connect.Client.XInfoGroups(ctx, stream).Result()
+		streams[stream] = true
 		if err != nil {
 			if err.Error() != "ERR no such key" {
 				log.Warn(err)
@@ -449,8 +460,6 @@ func (q *Queue) StartDelayQueue() {
 	} else {
 		q.delayQueue = NewDelayQueueForMysql()
 	}
-
-	q.delayQueue.Run()
 }
 
 // DelayTask 延时队列包装
