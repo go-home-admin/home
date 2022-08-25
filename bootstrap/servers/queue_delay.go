@@ -2,6 +2,7 @@ package servers
 
 import (
 	"encoding/json"
+	app2 "github.com/go-home-admin/home/app"
 	"github.com/go-home-admin/home/bootstrap/constraint"
 	"github.com/go-home-admin/home/bootstrap/services/app"
 	"github.com/go-home-admin/home/bootstrap/services/database"
@@ -53,6 +54,7 @@ func (d *DelayQueueForMysql) Run() {
 
 // Loop TODO 待优化，如果启动了广播，可以内存维护多个节点的最近任务，可以去掉定时查询
 func (d *DelayQueueForMysql) Loop() {
+	interval := app2.Config("queue.delay.interval", 60)
 	for {
 		list := make([]*OrmDelayQueue, 0)
 		dbRet := d.mysql.Model(&OrmDelayQueue{}).Where("run_at <= ? and fail = 0", time.Now()).Limit(100).Order("Id desc").Find(&list)
@@ -87,7 +89,7 @@ func (d *DelayQueueForMysql) Loop() {
 			d.mysql.Where("id in ?", delIds).Delete(&OrmDelayQueue{})
 		}
 
-		time.Sleep(60 * time.Second)
+		time.Sleep(time.Duration(interval) * time.Second)
 	}
 }
 

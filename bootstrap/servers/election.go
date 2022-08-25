@@ -67,11 +67,9 @@ func (k *Election) Exit() {
 	k.Connect.Client.Del(context.Background(), k.key)
 
 	if app.HasBean("queue") {
-		fileConfig := providers.GetBean("config").(providers.Bean).GetBean("queue").(*services.Config)
-		topic := fileConfig.GetString("broadcast.topic", "home_broadcast")
 		NewQueue().CloseBroadcast()
 		// 广播到其他副本
-		NewQueue().Publish(topic, message.ElectionClose{
+		NewQueue().Publish(message.ElectionClose{
 			Time: time.Now().Unix(),
 		})
 	}

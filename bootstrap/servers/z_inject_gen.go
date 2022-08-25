@@ -56,6 +56,7 @@ func NewQueue() *Queue {
 	if _QueueSingle == nil {
 		_QueueSingle = &Queue{}
 		_QueueSingle.fileConfig = providers.GetBean("config").(providers.Bean).GetBean("queue").(*services.Config)
+		_QueueSingle.queueConfig = providers.GetBean("config").(providers.Bean).GetBean("queue.queue").(*services.Config)
 		_QueueSingle.Connect = providers.GetBean("database").(providers.Bean).GetBean(*(providers.GetBean("config").(providers.Bean).GetBean("queue.connection").(*string))).(*services.Redis)
 		providers.AfterProvider(_QueueSingle, "queue")
 	}

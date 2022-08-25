@@ -3,6 +3,7 @@ package servers
 import (
 	"context"
 	"encoding/json"
+	app2 "github.com/go-home-admin/home/app"
 	"github.com/go-home-admin/home/bootstrap/constraint"
 	"github.com/go-home-admin/home/bootstrap/services"
 	"github.com/go-home-admin/home/bootstrap/services/app"
@@ -20,7 +21,7 @@ type Queue struct {
 	// 队列配置文件的所有配置
 	fileConfig *services.Config `inject:"config, queue"`
 	// 队列具体配置
-	queueConfig *services.Config
+	queueConfig *services.Config `inject:"config, queue.queue"`
 	// 连接
 	Connect *services.Redis `inject:"database, @config(queue.connection)"`
 
@@ -39,8 +40,6 @@ type Queue struct {
 
 func (q *Queue) Init() {
 	q.route = make(map[string]constraint.Job)
-	q.queueConfig = services.NewConfig(q.fileConfig.GetKey("queue"))
-
 	q.limit = uint(q.queueConfig.GetInt("worker_limit", 100))
 	q.limitChan = make(chan bool, q.limit)
 }
@@ -93,18 +92,24 @@ func (q *Queue) Delay(t time.Duration) *DelayTask {
 }
 
 // Publish 对message广播
-func (q *Queue) Publish(topic string, message interface{}) {
+func (q *Queue) Publish(message interface{}, topics ...string) {
 	jsonStr, err := json.Marshal(message)
 	if err != nil {
 		log.Error(err)
 		return
 	}
 
+	if len(topics) == 0 {
+		topics = append(topics, app2.Config("queue.broadcast.topic", "home_broadcast"))
+	}
+
 	route := jobToRoute(message)
-	q.broadcast.Publish(topic, Msg{
-		Route: route,
-		Data:  string(jsonStr),
-	})
+	for _, topic := range topics {
+		q.broadcast.Publish(topic, Msg{
+			Route: route,
+			Data:  string(jsonStr),
+		})
+	}
 }
 
 func (q *Queue) Run() {
@@ -165,14 +170,14 @@ func (q *Queue) runBaseQueue(group string, streams []string) {
 	ctx := context.Background()
 	Hostname, _ := os.Hostname()
 	consumer := strings.ReplaceAll(q.queueConfig.GetString("consumer_name"), "{hostname}", Hostname)
-
+	block := time.Duration(q.queueConfig.GetInt("stream_block", 60)) * time.Second
 	for q.limit > 0 {
 		cmd := q.Connect.Client.XReadGroup(ctx, &redis.XReadGroupArgs{
 			Group:    group,
 			Consumer: consumer,
 			Streams:  streams,
 			Count:    1,
-			Block:    60 * time.Second,
+			Block:    block,
 			NoAck:    false,
 		})
 
@@ -231,7 +236,7 @@ func (q *Queue) runSerialQueue(group string, streams []string) {
 	ctx := context.Background()
 	Hostname, _ := os.Hostname()
 	consumer := strings.ReplaceAll(q.queueConfig.GetString("consumer_name"), "{hostname}", Hostname)
-
+	block := time.Duration(q.queueConfig.GetInt("stream_block", 60)) * time.Second
 	limitChan := make(chan bool, 1)
 	for q.limit > 0 {
 		cmd := q.Connect.Client.XReadGroup(ctx, &redis.XReadGroupArgs{
@@ -239,7 +244,7 @@ func (q *Queue) runSerialQueue(group string, streams []string) {
 			Consumer: consumer,
 			Streams:  streams,
 			Count:    1,
-			Block:    60 * time.Second,
+			Block:    block,
 			NoAck:    false,
 		})
 
