@@ -124,8 +124,17 @@ func (c *ConfigProvider) Boot() {
 }
 
 // GetBean 约定大于一切, 自己接收的代码和配置结构要人工约束成一致
+// , 后面的字符作为默认值
 func (c *ConfigProvider) GetBean(alias string) interface{} {
-	index := strings.Index(alias, ".")
+	index := strings.Index(alias, ",")
+	var aliasDef interface{}
+	if index != -1 {
+		aliasKey := alias[:index]
+		aliasDef = strings.Trim(alias[index+1:], " ")
+		alias = aliasKey
+	}
+
+	index = strings.Index(alias, ".")
 	if index == -1 {
 		file, ok := c.data[alias]
 		if !ok {
@@ -136,7 +145,7 @@ func (c *ConfigProvider) GetBean(alias string) interface{} {
 
 	fileConfig, ok := c.data[alias[:index]]
 	if !ok {
-		return nil
+		return aliasDef
 	}
 	arr := strings.Split(alias[index+1:], ".")
 	m := fileConfig.M
@@ -172,12 +181,12 @@ func (c *ConfigProvider) GetBean(alias string) interface{} {
 			if ook {
 				m = val
 			} else {
-				return nil
+				return aliasDef
 			}
 		} else {
-			return nil
+			return aliasDef
 		}
 	}
 
-	return nil
+	return aliasDef
 }

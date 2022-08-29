@@ -1,6 +1,7 @@
 package providers
 
 import (
+	"fmt"
 	"github.com/go-home-admin/home/bootstrap/services"
 	"github.com/go-home-admin/home/bootstrap/services/app"
 	"github.com/go-home-admin/home/database"
@@ -22,6 +23,13 @@ func (m *DatabaseProvider) Init() {
 
 func (m *DatabaseProvider) GetBean(alias string) interface{} {
 	config := m.Config.GetConfig("connections." + alias)
+	if config == nil {
+		if alias == "default" {
+			d := m.GetString("default")
+			return NewDatabaseProvider().GetBean(d).(*gorm.DB)
+		}
+		panic(fmt.Sprintf("你需要在config/database.yaml添加您的%v数据库配置", alias))
+	}
 
 	driver := config.GetString("driver")
 	switch driver {

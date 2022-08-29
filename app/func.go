@@ -1,8 +1,11 @@
 package app
 
 import (
+	"bytes"
 	"github.com/go-home-admin/home/bootstrap/services"
 	"github.com/go-home-admin/home/bootstrap/services/app"
+	"runtime"
+	"strconv"
 )
 
 var isDebug = 0
@@ -50,4 +53,16 @@ func Config[T int | string | bool | *services.Config](key string, def T) T {
 	}
 
 	return *val.(*T)
+}
+
+// GetGoId
+// 获取跟踪ID, 严禁非开发模式使用
+// github.com/bigwhite/experiments/blob/master/trace-function-call-chain/trace3/trace.go
+func GetGoId() uint64 {
+	b := make([]byte, 64)
+	b = b[:runtime.Stack(b, false)]
+	b = bytes.TrimPrefix(b, []byte("goroutine "))
+	b = b[:bytes.IndexByte(b, ' ')]
+	n, _ := strconv.ParseUint(string(b), 10, 64)
+	return n
 }
