@@ -1,8 +1,11 @@
 package app
 
 import (
+	"bytes"
 	"github.com/go-home-admin/home/bootstrap/services"
 	"github.com/go-home-admin/home/bootstrap/services/app"
+	"runtime"
+	"strconv"
 )
 
 var isDebug = 0
@@ -28,18 +31,38 @@ func IsDebug() bool {
 
 // Name 应用名称
 func Name() string {
-	config := app.GetBean("config").(app.Bean).GetBean("app").(*services.Config)
-	return config.GetString("name", "go-admin")
+	return Config("app.name", "go-admin")
 }
 
 // Env 获取环境
 func Env() string {
-	config := app.GetBean("config").(app.Bean).GetBean("app").(*services.Config)
-	return config.GetString("env", "local")
+	return Config("app.env", "local")
 }
 
 // Key 如果敏感信息需要加密, 可以使用这个函数获取盐值
 func Key() string {
-	config := app.GetBean("config").(app.Bean).GetBean("app").(*services.Config)
-	return config.GetString("key", "go-admin-key")
+	return Config("app.key", "go-admin-key")
+}
+
+// Config 获取config，格式必须是group.key，第二个可选参数为默认值
+func Config[T int | string | bool | *services.Config](key string, def T) T {
+	val := app.GetBean("config").(app.Bean).GetBean(key)
+
+	if val == nil {
+		return def
+	}
+
+	return *val.(*T)
+}
+
+// GetGoId
+// 获取跟踪ID, 严禁非开发模式使用
+// github.com/bigwhite/experiments/blob/master/trace-function-call-chain/trace3/trace.go
+func GetGoId() uint64 {
+	b := make([]byte, 64)
+	b = b[:runtime.Stack(b, false)]
+	b = bytes.TrimPrefix(b, []byte("goroutine "))
+	b = b[:bytes.IndexByte(b, ' ')]
+	n, _ := strconv.ParseUint(string(b), 10, 64)
+	return n
 }

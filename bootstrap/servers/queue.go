@@ -3,8 +3,9 @@ package servers
 import (
 	"context"
 	"encoding/json"
+	app2 "github.com/go-home-admin/home/app"
+	"github.com/go-home-admin/home/app/queues"
 	"github.com/go-home-admin/home/bootstrap/constraint"
-	"github.com/go-home-admin/home/bootstrap/providers"
 	"github.com/go-home-admin/home/bootstrap/services"
 	"github.com/go-home-admin/home/bootstrap/services/app"
 	"github.com/go-redis/redis/v8"
@@ -21,9 +22,9 @@ type Queue struct {
 	// 队列配置文件的所有配置
 	fileConfig *services.Config `inject:"config, queue"`
 	// 队列具体配置
-	queueConfig *services.Config
+	queueConfig *services.Config `inject:"config, queue.queue"`
 	// 连接
-	Connect *services.Redis
+	Connect *services.Redis `inject:"database, @config(queue.connection)"`
 
 	// 执行限速度
 	limit     uint // 如果 == 0 , 则停止
@@ -34,16 +35,16 @@ type Queue struct {
 	dispatch sync.Map
 
 	// 打开广播进程, 允许把某个message投递到广播队列, 所有服务都会收到
-	broadcast *Broadcast
+	broadcast  *Broadcast
+	delayQueue DelayQueue
 }
 
 func (q *Queue) Init() {
 	q.route = make(map[string]constraint.Job)
-	q.queueConfig = services.NewConfig(q.fileConfig.GetKey("default"))
-
 	q.limit = uint(q.queueConfig.GetInt("worker_limit", 100))
 	q.limitChan = make(chan bool, q.limit)
-	q.Connect = providers.NewRedisProvider().GetBean(q.fileConfig.GetString("connection")).(*services.Redis)
+
+	q.Listen(queues.GetAllProvider())
 }
 
 func (q *Queue) StartBroadcast() {
@@ -70,34 +71,53 @@ func (q *Queue) Push(message interface{}) {
 	}
 	stream, _ := q.getJobInfo(message)
 	route := jobToRoute(message)
-	q.Connect.Client.XAdd(context.Background(), &redis.XAddArgs{
+	d := q.Connect.Client.XAdd(context.Background(), &redis.XAddArgs{
 		Stream: stream,
-		Approx: false,
-		Limit:  int64(q.queueConfig.GetInt("stream_limit", 10000)),
+		MaxLen: int64(q.queueConfig.GetInt("stream_limit", 10000)),
 		Values: map[string]interface{}{
 			"route": route,
 			"event": jsonStr,
 		},
 	})
+	if d.Err() != nil {
+		log.Error("Queue push, redis xadd error: ", d.Err())
+	}
+	q.Delay(time.Second)
+}
+
+// Delay 延后投递执行
+func (q *Queue) Delay(t time.Duration) *DelayTask {
+	return &DelayTask{
+		interval: t,
+		queue:    q,
+		message:  nil,
+	}
 }
 
 // Publish 对message广播
-func (q *Queue) Publish(topic string, message interface{}) {
+func (q *Queue) Publish(message interface{}, topics ...string) {
 	jsonStr, err := json.Marshal(message)
 	if err != nil {
 		log.Error(err)
 		return
 	}
 
+	if len(topics) == 0 {
+		topics = append(topics, app2.Config("queue.broadcast.topic", "home_broadcast"))
+	}
+
 	route := jobToRoute(message)
-	q.broadcast.Publish(topic, Msg{
-		Route: route,
-		Data:  string(jsonStr),
-	})
+	for _, topic := range topics {
+		q.broadcast.Publish(topic, Msg{
+			Route: route,
+			Data:  string(jsonStr),
+		})
+	}
 }
 
 func (q *Queue) Run() {
 	q.initStream()
+
 	for route, job := range q.route {
 		q.dispatch.Store(route, reflect.New(reflect.TypeOf(job).Elem()))
 	}
@@ -130,6 +150,10 @@ func (q *Queue) Run() {
 	if q.HasBroadcast() {
 		go q.broadcast.Subscribe(q.fileConfig.GetString("broadcast.topic", "home_broadcast"))
 	}
+
+	if q.delayQueue != nil {
+		q.delayQueue.Run()
+	}
 }
 
 func (q *Queue) runBaseQueueList(list []interface{}) {
@@ -154,14 +178,14 @@ func (q *Queue) runBaseQueue(group string, streams []string) {
 	ctx := context.Background()
 	Hostname, _ := os.Hostname()
 	consumer := strings.ReplaceAll(q.queueConfig.GetString("consumer_name"), "{hostname}", Hostname)
-
+	block := time.Duration(q.queueConfig.GetInt("stream_block", 60)) * time.Second
 	for q.limit > 0 {
 		cmd := q.Connect.Client.XReadGroup(ctx, &redis.XReadGroupArgs{
 			Group:    group,
 			Consumer: consumer,
 			Streams:  streams,
 			Count:    1,
-			Block:    60 * time.Second,
+			Block:    block,
 			NoAck:    false,
 		})
 
@@ -220,7 +244,7 @@ func (q *Queue) runSerialQueue(group string, streams []string) {
 	ctx := context.Background()
 	Hostname, _ := os.Hostname()
 	consumer := strings.ReplaceAll(q.queueConfig.GetString("consumer_name"), "{hostname}", Hostname)
-
+	block := time.Duration(q.queueConfig.GetInt("stream_block", 60)) * time.Second
 	limitChan := make(chan bool, 1)
 	for q.limit > 0 {
 		cmd := q.Connect.Client.XReadGroup(ctx, &redis.XReadGroupArgs{
@@ -228,7 +252,7 @@ func (q *Queue) runSerialQueue(group string, streams []string) {
 			Consumer: consumer,
 			Streams:  streams,
 			Count:    1,
-			Block:    60 * time.Second,
+			Block:    block,
 			NoAck:    false,
 		})
 
@@ -263,7 +287,7 @@ func (q *Queue) runSerialQueue(group string, streams []string) {
 						newJob, ok := v.(constraint.Job)
 						if ok {
 							err := json.Unmarshal([]byte(event), newJob)
-							if err != nil {
+							if err == nil {
 								newJob.Handler()
 								q.Connect.Client.XAck(context.Background(), group, stream, id)
 							} else {
@@ -316,34 +340,42 @@ func (q *Queue) AddJob(route string, handle constraint.Job) {
 
 // 自动计算struct路径
 func jobToRoute(handle interface{}) string {
+	mr, ok := handle.(constraint.SetRoute)
+	if ok {
+		return mr.SetRoute()
+	}
+
 	ref := reflect.TypeOf(handle)
 	if ref.Kind() == reflect.Ptr {
 		ref = ref.Elem()
 	}
 
 	// message
-	mty := ref.String()
-	if strings.Index(mty, "message.") != -1 {
+	mty := ref.PkgPath() + ref.Name()
+	if strings.Index(mty, "message") != -1 {
 		return mty
 	}
 	// job
 	for i := 0; i < ref.NumField(); i++ {
 		field := ref.Field(i)
-		ty := field.Type.String()
-		if strings.Index(ty, "message.") != -1 {
+		ty := field.Type.PkgPath() + field.Type.Name()
+		if strings.Index(ty, "message") != -1 {
 			return ty
 		}
 	}
-	panic("自动注册路由的信息总线的对象路径必须包含 `message.`。")
+	panic("自动注册路由的信息总线的对象路径必须包含 `message`。")
 }
 
 func (q *Queue) initStream() {
 	ctx := context.Background()
-
+	streams := make(map[string]bool)
 	for _, job := range q.route {
 		stream, group := q.getJobInfo(job)
-
+		if !streams[stream] {
+			continue
+		}
 		xInfoG, err := q.Connect.Client.XInfoGroups(ctx, stream).Result()
+		streams[stream] = true
 		if err != nil {
 			if err.Error() != "ERR no such key" {
 				log.Warn(err)
@@ -407,7 +439,7 @@ func (q *Queue) runJob(job reflect.Value, event string, id, stream, group string
 	newJob, ok := v.(constraint.Job)
 	if ok {
 		err := json.Unmarshal([]byte(event), newJob)
-		if err != nil {
+		if err == nil {
 			newJob.Handler()
 			q.Connect.Client.XAck(
 				context.Background(),
@@ -419,4 +451,27 @@ func (q *Queue) runJob(job reflect.Value, event string, id, stream, group string
 			log.Errorf("runJob, json.Unmarshal data err = %v", err)
 		}
 	}
+}
+
+// StartDelayQueue 开启延时队列
+func (q *Queue) StartDelayQueue() {
+	if app.HasBean("delay_queue") {
+		q.delayQueue = app.GetBean("delay_queue").(DelayQueue)
+	} else {
+		q.delayQueue = NewDelayQueueForMysql()
+	}
+}
+
+// DelayTask 延时队列包装
+type DelayTask struct {
+	// 延后多少时间投递
+	interval time.Duration
+	queue    *Queue
+	message  interface{}
+}
+
+func (d *DelayTask) Push(message interface{}) {
+	d.message = message
+
+	d.queue.delayQueue.Push(*d)
 }

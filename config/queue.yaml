@@ -1,12 +1,20 @@
 # database.connections.redis
 connection: redis
 
+# 广播配置
 broadcast:
   topic: home_broadcast
 
 # 队列默认配置
-default:
+queue:
   stream_name: home_default_stream
   group_name: home_default_group
   consumer_name: home_default_{hostname}
   stream_limit: 10000
+  stream_block: 60
+
+# 延时队列配置
+delay:
+  auth_migrate: true
+  connect: mysql
+  interval: 60

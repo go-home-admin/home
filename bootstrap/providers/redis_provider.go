@@ -1,8 +1,11 @@
 package providers
 
 import (
+	"context"
 	"github.com/go-home-admin/home/bootstrap/services"
+	"github.com/go-home-admin/home/bootstrap/services/logs"
 	"github.com/go-redis/redis/v8"
+	log "github.com/sirupsen/logrus"
 )
 
 // RedisProvider @Bean("redis")
@@ -27,11 +30,17 @@ func (m *RedisProvider) Init() {
 		config := services.NewConfig(data)
 
 		db := redis.NewClient(&redis.Options{
-			Addr:     config.GetString("ip", "127.0.0.1") + ":" + config.GetString("port", "6379"),
+			Addr:     config.GetString("host", "127.0.0.1") + ":" + config.GetString("port", "6379"),
 			Password: config.GetString("password", ""), // no password set
 			DB:       config.GetInt("database", 0),     // use default DB
 		})
 
+		cmd := db.Ping(context.Background())
+		if cmd.Err() != nil {
+			log.Errorf("redis connect err, %v", cmd.Err())
+			panic(cmd.Err())
+		}
+		db.AddHook(&logs.Hook{})
 		m.dbs[name.(string)] = &services.Redis{
 			Client: db,
 		}

@@ -6,6 +6,7 @@ import (
 	"github.com/go-home-admin/home/bootstrap/services"
 	"github.com/go-home-admin/home/bootstrap/utils"
 	"github.com/joho/godotenv"
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 	"io/fs"
 	"os"
@@ -47,9 +48,8 @@ func (c *ConfigProvider) initFile() {
 	if defaultConfigDir == nil {
 		// 单元测试中, 可能未初始化框架, 从本目录开始往上查找go.mod文件确定跟目录
 		pwd, _ := os.Getwd()
-		pwdArr := strings.Split(pwd, "/")
 		parDir := ""
-		for i := 0; i < len(pwdArr)-1; i++ {
+		for i := 0; i <= 100; i++ {
 			checkDir := pwd + parDir
 			if _, err := os.Stat(checkDir + "/go.mod"); err == nil {
 				dirs, _ := filepath.Abs(checkDir + "/" + defaultDir)
@@ -64,30 +64,54 @@ func (c *ConfigProvider) initFile() {
 			}
 			parDir += "/.."
 		}
+
+		for _, entry := range DirEntry {
+			if path.Ext(entry.Name()) == ".yaml" {
+				fileContext, err := os.ReadFile(defaultDir + "/" + entry.Name())
+				if err != nil {
+					panic(err)
+				}
+				fileContext = utils.SetEnv(fileContext)
+				m := make(map[interface{}]interface{})
+				err = yaml.Unmarshal(fileContext, &m)
+				if err != nil {
+					panic(err)
+				}
+				c.data[strings.TrimSuffix(entry.Name(), ".yaml")] = services.NewConfig(m)
+			}
+		}
+
 		if _FrameworkProviderSingle == nil {
 			NewFrameworkProvider()
 		}
 	} else {
-		_ = godotenv.Load()
+		if _, err := os.Stat(c.path); err != nil {
+			log.Error(".env file, " + err.Error())
+		} else {
+			err = godotenv.Load(c.path)
+			if err != nil {
+				panic("godotenv.Load error: " + err.Error())
+			}
+		}
+
 		DirEntry, err = defaultConfigDir.ReadDir(defaultDir)
 		if err != nil {
 			panic(err)
 		}
-	}
-
-	for _, entry := range DirEntry {
-		if path.Ext(entry.Name()) == ".yaml" {
-			fileContext, err := os.ReadFile(defaultDir + "/" + entry.Name())
-			if err != nil {
-				panic(err)
+		for _, entry := range DirEntry {
+			if path.Ext(entry.Name()) == ".yaml" {
+				fileContext, err := defaultConfigDir.ReadFile(defaultDir + "/" + entry.Name())
+				if err != nil {
+					panic(err)
+				}
+				fileContext = utils.SetEnv(fileContext)
+				m := make(map[interface{}]interface{})
+				err = yaml.Unmarshal(fileContext, &m)
+				if err != nil {
+					panic(err)
+				}
+				c.data[strings.TrimSuffix(entry.Name(), ".yaml")] = services.NewConfig(m)
 			}
-			fileContext = utils.SetEnv(fileContext)
-			m := make(map[interface{}]interface{})
-			err = yaml.Unmarshal(fileContext, &m)
-			if err != nil {
-				panic(err)
-			}
-			c.data[strings.TrimSuffix(entry.Name(), ".yaml")] = services.NewConfig(m)
 		}
 	}
 }
@@ -100,8 +124,17 @@ func (c *ConfigProvider) Boot() {
 }
 
 // GetBean 约定大于一切, 自己接收的代码和配置结构要人工约束成一致
+// , 后面的字符作为默认值
 func (c *ConfigProvider) GetBean(alias string) interface{} {
-	index := strings.Index(alias, ".")
+	index := strings.Index(alias, ",")
+	var aliasDef interface{}
+	if index != -1 {
+		aliasKey := alias[:index]
+		aliasDef = strings.Trim(alias[index+1:], " ")
+		alias = aliasKey
+	}
+
+	index = strings.Index(alias, ".")
 	if index == -1 {
 		file, ok := c.data[alias]
 		if !ok {
@@ -112,7 +145,7 @@ func (c *ConfigProvider) GetBean(alias string) interface{} {
 
 	fileConfig, ok := c.data[alias[:index]]
 	if !ok {
-		return nil
+		return aliasDef
 	}
 	arr := strings.Split(alias[index+1:], ".")
 	m := fileConfig.M
@@ -148,12 +181,12 @@ func (c *ConfigProvider) GetBean(alias string) interface{} {
 			if ook {
 				m = val
 			} else {
-				return nil
+				return aliasDef
 			}
 		} else {
-			return nil
+			return aliasDef
 		}
 	}
 
-	return nil
+	return aliasDef
 }

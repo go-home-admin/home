@@ -9,6 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"time"
 )
 
@@ -40,11 +41,17 @@ func (m *MysqlProvider) Init() {
 		password := config.GetString("password")
 		dbname := config.GetString("database")
 
-		gConf := &gorm.Config{}
-		// 调试时, 记录sql
-		if app.IsDebug() {
-			gConf.Logger = logs.NewDebugLog()
+		gConf := &gorm.Config{
+			Logger: logs.NewMysqlLog(logrus.StandardLogger(), logger.Config{
+				SlowThreshold: 0,
+				LogLevel:      logger.Warn,
+				Colorful:      true,
+			}),
 		}
+		if app.IsDebug() {
+			gConf.Logger.LogMode(logger.LogLevel(logrus.DebugLevel))
+		}
+
 		dsn := mysql.Open(fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?parseTime=true&loc=Local", username, password, hosts, port, dbname))
 		db, err := gorm.Open(dsn, gConf)
 		if err != nil {
