@@ -22,3 +22,11 @@ connections:
     password:
     port: 6379
     database: 0
+  mongo:
+    driver: mongo
+    port: env("MONGODB_PORT", "27017")
+    host: env("MONGODB_HOST", "127.0.0.1")
+    database: env("MONGODB_DATABASE", "")
+    username: env("MONGODB_USERNAME", "admin")
+    password: env("MONGODB_PASSWORD", "123456")
+    auth_source: env("MONGODB_AUTH_SOURCE", "admin")
