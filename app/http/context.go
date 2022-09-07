@@ -1,8 +1,6 @@
 package http
 
 import (
-	"encoding/base64"
-	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
@@ -42,18 +40,6 @@ func (receiver Ctx) User() interface{} {
 }
 
 func (receiver Ctx) Id() uint64 {
-	parts := strings.Split(receiver.Token(), ".")
-	if len(parts) == 3 {
-		if l := len(parts[1]) % 4; l > 0 {
-			parts[1] += strings.Repeat("=", 4-l)
-		}
-		b, err := base64.URLEncoding.DecodeString(parts[1])
-		if err == nil {
-			var res = map[string]uint64{"id": 0}
-			_ = json.Unmarshal(b, &res)
-			return res["id"]
-		}
-	}
 	return 0
 }
 
@@ -72,4 +58,5 @@ type Context interface {
 	Gin() *gin.Context
 	Token() string
 	Id() uint64
+	User() interface{}
 }
