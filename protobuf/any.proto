@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package home.protobuf;
 
-option go_package = "github.com/home/protobuf";
+option go_package = "github.com/go-home-admin/home/protobuf";
 
 message Any {
 	bytes b = 1;
