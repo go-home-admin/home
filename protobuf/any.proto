@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package protobuf;
+
+option go_package = "github.com/admin/protobuf";
+
+message Any {
+	bytes b = 1;
+}
+
+// protoc --proto_path=./ --go_out=./ ./*.proto
