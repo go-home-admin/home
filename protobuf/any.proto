@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package protobuf;
+package home.protobuf;
 
-option go_package = "github.com/admin/protobuf";
+option go_package = "github.com/home/protobuf";
 
 message Any {
 	bytes b = 1;
