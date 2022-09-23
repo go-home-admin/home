@@ -287,11 +287,12 @@ func (q *Queue) runSerialQueue(group string, streams []string) {
 						newJob, ok := v.(constraint.Job)
 						if ok {
 							err := json.Unmarshal([]byte(event), newJob)
-							if err == nil {
+							if err != nil && len(event) <= 2 {
+								// "[]"无需报错
+								log.Errorf("runJob, json.Unmarshal data err = %v", err)
+							} else {
 								newJob.Handler()
 								q.Connect.Client.XAck(context.Background(), group, stream, id)
-							} else {
-								log.Errorf("runJob, json.Unmarshal data err = %v", err)
 							}
 						}
 					}(job.(reflect.Value), event.(string), xMessage.ID, XStream.Stream, group)
@@ -439,7 +440,9 @@ func (q *Queue) runJob(job reflect.Value, event string, id, stream, group string
 	newJob, ok := v.(constraint.Job)
 	if ok {
 		err := json.Unmarshal([]byte(event), newJob)
-		if err == nil {
+		if err != nil && len(event) <= 2 {
+			log.Errorf("runJob, json.Unmarshal data err = %v", err)
+		} else {
 			newJob.Handler()
 			q.Connect.Client.XAck(
 				context.Background(),
@@ -447,8 +450,6 @@ func (q *Queue) runJob(job reflect.Value, event string, id, stream, group string
 				stream,
 				id,
 			)
-		} else {
-			log.Errorf("runJob, json.Unmarshal data err = %v", err)
 		}
 	}
 }
