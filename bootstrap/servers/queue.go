@@ -98,6 +98,11 @@ func (q *Queue) Delay(t time.Duration) *DelayTask {
 
 // Publish 对message广播
 func (q *Queue) Publish(message interface{}, topics ...string) {
+	if q.broadcast == nil {
+		log.Info("广播服务未开启")
+		return
+	}
+
 	jsonStr, err := json.Marshal(message)
 	if err != nil {
 		log.Error(err)
