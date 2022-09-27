@@ -224,9 +224,7 @@ func (q *Queue) runBaseQueue(group string, streams []string) {
 			time.Sleep(3 * time.Second)
 		} else if strings.Contains(cmd.Err().Error(), "NOGROUP") {
 			// 初始化Stream和Group
-			for _, stream := range streams {
-				q.Connect.Client.XGroupCreateMkStream(ctx, stream, group, "0")
-			}
+			q.Connect.Client.XGroupCreateMkStream(ctx, streams[0], group, "0")
 			time.Sleep(3 * time.Second)
 		} else {
 			log.Errorf("redis命令未知错误, XReadGroup, %v", cmd.Err().Error())
