@@ -6,5 +6,6 @@ servers:
     port: 80
 
 log:
-  level:
+  level: env("LOG_LEVEL", "trace")
   formatter: text
+  path: "/data/logs/"

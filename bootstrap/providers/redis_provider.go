@@ -6,6 +6,7 @@ import (
 	"github.com/go-home-admin/home/bootstrap/services/logs"
 	"github.com/go-redis/redis/v8"
 	log "github.com/sirupsen/logrus"
+	"time"
 )
 
 // RedisProvider @Bean("redis")
@@ -35,7 +36,9 @@ func (m *RedisProvider) Init() {
 			DB:       config.GetInt("database", 0),     // use default DB
 		})
 
-		cmd := db.Ping(context.Background())
+		ctx, cancel := context.WithTimeout(context.TODO(), time.Second*3)
+		defer cancel()
+		cmd := db.Ping(ctx)
 		if cmd.Err() != nil {
 			log.Errorf("redis connect err, %v", cmd.Err())
 			panic(cmd.Err())

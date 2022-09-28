@@ -84,7 +84,6 @@ func (q *Queue) Push(message interface{}) {
 	if d.Err() != nil {
 		log.Error("Queue push, redis xadd error: ", d.Err())
 	}
-	q.Delay(time.Second)
 }
 
 // Delay 延后投递执行
@@ -303,7 +302,7 @@ func (q *Queue) runSerialQueue(group string, streams []string) {
 								log.Errorf("runJob, json.Unmarshal data err = %v", err)
 							} else {
 								newJob.Handler()
-								q.Connect.Client.XAck(context.Background(), group, stream, id)
+								q.Connect.Client.XAck(context.Background(), stream, group, id)
 							}
 						}
 					}(job.(reflect.Value), event.(string), xMessage.ID, XStream.Stream, group)
@@ -461,8 +460,8 @@ func (q *Queue) runJob(job reflect.Value, event string, id, stream, group string
 			newJob.Handler()
 			q.Connect.Client.XAck(
 				context.Background(),
-				group,
 				stream,
+				group,
 				id,
 			)
 		}

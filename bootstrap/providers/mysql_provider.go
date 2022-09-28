@@ -55,7 +55,7 @@ func (m *MysqlProvider) Init() {
 		dsn := mysql.Open(fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?parseTime=true&loc=Local", username, password, hosts, port, dbname))
 		db, err := gorm.Open(dsn, gConf)
 		if err != nil {
-			logrus.Error("mysql 链接错误")
+			logrus.Error("mysql 链接错误", err)
 			panic(err)
 		}
 		// https://github.com/go-sql-driver/mysql/issues/1120
