@@ -107,6 +107,11 @@ func (c *Config) GetInt(key string, def ...int) int {
 				switch v.(type) {
 				case int:
 					return v.(int)
+				case string:
+					ii, err := strconv.Atoi(v.(string))
+					if err != nil {
+						return ii
+					}
 				default:
 					if len(def) == 0 {
 						return 0
@@ -146,6 +151,13 @@ func (c *Config) GetBool(key string, def ...bool) bool {
 				switch v.(type) {
 				case bool:
 					return v.(bool)
+				case string:
+					switch v.(string) {
+					case "false":
+						return false
+					case "true":
+						return true
+					}
 				default:
 					if len(def) == 0 {
 						return false
