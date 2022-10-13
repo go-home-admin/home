@@ -59,6 +59,7 @@ func SetEnv(fileContext []byte) []byte {
 					key = strings.Trim(key, "\"")
 					val = strings.Trim(val, "\"")
 				} else {
+					key = strings.Trim(key, "\"")
 					val = strings.Trim(nS, ")")
 				}
 			}
