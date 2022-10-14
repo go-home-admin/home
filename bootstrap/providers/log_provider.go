@@ -52,7 +52,7 @@ func (l *LogProvider) Init() {
 		})
 	}
 	// 是否输出到文件
-	logPath := l.GetString("path", "")
+	logPath := l.GetString("log.path", "")
 	if logPath != "" {
 		dir := path.Dir(logPath)
 		err := os.MkdirAll(dir, 0755)
