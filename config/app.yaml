@@ -8,4 +8,4 @@ servers:
 log:
   level: env("LOG_LEVEL", "trace")
   formatter: text
-  path: "/data/logs/"
+  path: "/data/logs/app.log"
