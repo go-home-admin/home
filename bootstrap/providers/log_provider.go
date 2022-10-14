@@ -1,6 +1,7 @@
 package providers
 
 import (
+	"fmt"
 	"github.com/go-home-admin/home/bootstrap/services"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/sirupsen/logrus"
@@ -60,16 +61,19 @@ func (l *LogProvider) Init() {
 			logrus.Warning("无法创建log目录", err, dir)
 		}
 
-		file, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		file, err := os.OpenFile(logPath, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0666)
 		if err == nil {
 			log.SetOutput(file)
 			//下面配置日志每隔 1 天轮转一个新文件，保留最近 30 天的日志文件，多余的自动清理掉。
-			writer, _ := rotatelogs.New(
+			writer, err := rotatelogs.New(
 				logPath+".%Y%m%d",
 				rotatelogs.WithLinkName(logPath),
 				rotatelogs.WithMaxAge(time.Duration(24*30)*time.Hour),
 				rotatelogs.WithRotationTime(time.Duration(24)*time.Hour),
 			)
+			if err != nil {
+				panic(fmt.Errorf("log file: err", err))
+			}
 			log.SetOutput(writer)
 		} else {
 			logrus.Warnf("LOG文件无法打开记录, %v", logPath)
