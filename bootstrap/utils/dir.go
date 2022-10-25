@@ -1,14 +1,13 @@
 package utils
 
 import (
-	"io/ioutil"
 	"os"
 	"strings"
 )
 
 // GetFiles 获取目录下所有文件
 func GetFiles(dirPath string) ([]string, error) {
-	dir, err := ioutil.ReadDir(dirPath)
+	dir, err := os.ReadDir(dirPath)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +42,7 @@ func SetEnv(fileContext []byte) []byte {
 			}
 			nS := arr2[1]
 			st, et := GetBrackets(nS, '"', '"')
-			key := nS[st : et+1]
+			key := nS[st+1 : et]
 			nS = nS[et+1:]
 
 			// 尝试获取默认值
@@ -55,11 +54,8 @@ func SetEnv(fileContext []byte) []byte {
 					// 使用双引号括起来的就是字符串
 					valIsStr = true
 					st, et = GetBrackets(nS, '"', '"')
-					val = nS[st : et+1]
-					key = strings.Trim(key, "\"")
-					val = strings.Trim(val, "\"")
+					val = nS[st+1 : et]
 				} else {
-					key = strings.Trim(key, "\"")
 					val = strings.Trim(nS, ")")
 				}
 			}
