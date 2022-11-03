@@ -49,14 +49,15 @@ func SetEnv(fileContext []byte) []byte {
 			val := ""
 			valIsStr := false
 			if len(nS) > 2 && nS[0:1] == "," {
-				nS = strings.Trim(nS[1:], " ")
+				nS = strings.TrimSpace(nS[1:])
+				nS = strings.Trim(nS, ")") // 得到 "val" or val
 				if nS[0:1] == "\"" {
 					// 使用双引号括起来的就是字符串
 					valIsStr = true
 					st, et = GetBrackets(nS, '"', '"')
 					val = nS[st+1 : et]
 				} else {
-					val = strings.Trim(nS, ")")
+					val = nS
 				}
 			}
 

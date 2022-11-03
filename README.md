@@ -1,6 +1,11 @@
-# home
+# Home
+这是一个框架核心引导库。你可以开发属于自己的框架结构。
+
 文档先行, 舒适、工具化、开箱即用的、统一编程风格框架; 系统地集成各种热门组件到框架中, 对web后端业务开发封装最佳实践。您项目的家。
 
 
-# 使用
-    https://github.com/go-home-admin/go-admin
+# 前往使用
+
+这是一个开箱即用的框架结构
+[go-admin](https://github.com/go-home-admin/go-admin)
+    
