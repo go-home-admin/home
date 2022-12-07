@@ -109,7 +109,7 @@ func (c *Config) GetInt(key string, def ...int) int {
 					return v.(int)
 				case string:
 					ii, err := strconv.Atoi(v.(string))
-					if err != nil {
+					if err == nil {
 						return ii
 					}
 				default:
