@@ -15,6 +15,12 @@ import (
 	"strings"
 )
 
+var envPath string
+
+func init() {
+	flag.StringVar(&envPath, "env", "./.env", "加载配置文件")
+}
+
 // 默认配置加载目录
 var defaultConfigDir *embed.FS
 var defaultDir = "config"
@@ -32,14 +38,13 @@ type ConfigProvider struct {
 }
 
 func (c *ConfigProvider) Init() {
+	if !flag.Parsed() {
+		flag.Parse()
+	}
+
 	c.data = make(map[string]*services.Config)
-
-	c.initFlag()
+	c.path = envPath
 	c.initFile()
-}
-
-func (c *ConfigProvider) initFlag() {
-	flag.StringVar(&c.path, "env", "./.env", "加载配置文件")
 }
 
 func (c *ConfigProvider) initFile() {
@@ -117,9 +122,6 @@ func (c *ConfigProvider) initFile() {
 }
 
 func (c *ConfigProvider) Boot() {
-	if !flag.Parsed() {
-		flag.Parse()
-	}
 	services.Init = true
 }
 

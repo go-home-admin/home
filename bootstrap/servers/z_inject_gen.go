@@ -57,7 +57,7 @@ func NewQueue() *Queue {
 		_QueueSingle = &Queue{}
 		_QueueSingle.fileConfig = providers.GetBean("config").(providers.Bean).GetBean("queue").(*services.Config)
 		_QueueSingle.queueConfig = providers.GetBean("config").(providers.Bean).GetBean("queue.queue").(*services.Config)
-		_QueueSingle.Connect = providers.GetBean("database").(providers.Bean).GetBean(providers.GetBean("config").(providers.Bean).GetBean("queue.connection").(string)).(*services.Redis)
+		_QueueSingle.Connect = providers.GetBean("database").(providers.Bean).GetBean(*providers.GetBean("config").(providers.Bean).GetBean("queue.connection").(*string)).(*services.Redis)
 		providers.AfterProvider(_QueueSingle, "queue")
 	}
 	return _QueueSingle
@@ -72,7 +72,7 @@ func NewOrmDelayQueue() *OrmDelayQueue {
 func NewDelayQueueForMysql() *DelayQueueForMysql {
 	if _DelayQueueForMysqlSingle == nil {
 		_DelayQueueForMysqlSingle = &DelayQueueForMysql{}
-		_DelayQueueForMysqlSingle.mysql = providers.GetBean("database").(providers.Bean).GetBean(providers.GetBean("config").(providers.Bean).GetBean("queue.delay.connect").(string)).(*gorm.DB)
+		_DelayQueueForMysqlSingle.mysql = providers.GetBean("database").(providers.Bean).GetBean(*providers.GetBean("config").(providers.Bean).GetBean("queue.delay.connect").(*string)).(*gorm.DB)
 		_DelayQueueForMysqlSingle.queue = NewQueue()
 		providers.AfterProvider(_DelayQueueForMysqlSingle, "delay_queue")
 	}
