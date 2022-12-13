@@ -32,12 +32,15 @@ func (m *DatabaseProvider) GetBean(alias string) interface{} {
 	}
 
 	driver := config.GetString("driver")
-	switch driver {
-	case "mysql":
-		return NewMysqlProvider().GetBean(alias)
-	case "redis":
-		return NewRedisProvider().GetBean(alias)
-	default:
-		return app.GetBean(driver).(app.Bean).GetBean(alias)
+	if !app.HasBean(driver) {
+		switch driver {
+		case "mysql":
+			return NewMysqlProvider().GetBean(alias)
+		case "redis":
+			return NewRedisProvider().GetBean(alias)
+		default:
+			panic("您的数据库驱动, 必须在使用前注册")
+		}
 	}
+	return app.GetBean(driver).(app.Bean).GetBean(alias)
 }
