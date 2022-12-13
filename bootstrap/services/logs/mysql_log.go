@@ -87,7 +87,7 @@ func (l *MysqlLog) Trace(ctx context.Context, begin time.Time, fc func() (sql st
 
 		for _, skip := range l.skips {
 			if strings.Index(sql, skip) != -1 {
-				break
+				return
 			}
 		}
 		l.L.WithFields(log.Fields{"type": "query", "begin": begin, "row": rows, "t": float64(elapsed.Nanoseconds()) / 1e6}).Debug(sql)
