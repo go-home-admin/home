@@ -6,6 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/utils"
+	"strings"
 	"time"
 )
 
@@ -15,9 +16,12 @@ type MysqlLog struct {
 
 	infoStr, warnStr, errStr            string
 	traceStr, traceErrStr, traceWarnStr string
+	// 只要存在这个字符串就跳过
+	skips []string
 }
 
-func NewMysqlLog(l *log.Logger, config logger.Config) logger.Interface {
+// NewMysqlLog skip 需要屏蔽的sql
+func NewMysqlLog(l *log.Logger, config logger.Config, skips ...string) logger.Interface {
 	var (
 		infoStr      = "\n[info] "
 		warnStr      = "\n[warn] "
@@ -27,7 +31,7 @@ func NewMysqlLog(l *log.Logger, config logger.Config) logger.Interface {
 		traceErrStr  = "%s\n[%.3fms] [rows:%v] %s"
 	)
 
-	return &MysqlLog{
+	got := &MysqlLog{
 		L:      l,
 		Config: config,
 
@@ -37,7 +41,11 @@ func NewMysqlLog(l *log.Logger, config logger.Config) logger.Interface {
 		traceStr:     traceStr,
 		traceWarnStr: traceWarnStr,
 		traceErrStr:  traceErrStr,
+
+		skips: skips,
 	}
+
+	return got
 }
 
 // LogMode log mode
@@ -76,6 +84,12 @@ func (l *MysqlLog) Trace(ctx context.Context, begin time.Time, fc func() (sql st
 	case l.LogLevel >= logger.Info:
 		elapsed := time.Since(begin)
 		sql, rows := fc()
+
+		for _, skip := range l.skips {
+			if strings.Index(sql, skip) != -1 {
+				break
+			}
+		}
 		l.L.WithFields(log.Fields{"type": "query", "begin": begin, "row": rows, "t": float64(elapsed.Nanoseconds()) / 1e6}).Debug(sql)
 	}
 }
