@@ -85,7 +85,7 @@ func (d *DelayQueueForMysql) Loop() {
 
 	// 从把in_cache全部加入缓存
 	list := make([]*OrmDelayQueue, 0)
-	d.mysql.Model(&OrmDelayQueue{}).Where("in_cache = 1").
+	d.mysql.Model(&OrmDelayQueue{}).Where("fail = 0 and in_cache = 1").
 		Limit(int(d.RunAfterFuncLimit)).Order("id desc").
 		Find(&list)
 	for _, queue := range list {
