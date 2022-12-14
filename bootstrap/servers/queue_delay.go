@@ -25,7 +25,7 @@ CREATE TABLE ` + "`" + `delay_queue` + "`" + ` (
   ` + "`" + `fail` + "`" + ` bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT '失败次数',
   ` + "`" + `route` + "`" + ` varchar(254) NOT NULL COMMENT '路由',
   ` + "`" + `job` + "`" + ` json NOT NULL COMMENT '任务信息',
-  ` + "`" + `run_at` + "`" + ` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '执行时间点',
+  ` + "`" + `run_at` + "`" + ` timestamp NOT NULL DEFAULT '2022-08-25 00:00:00' COMMENT '执行时间点',
   ` + "`" + `created_at` + "`" + ` timestamp NOT NULL DEFAULT '2022-08-25 00:00:00' COMMENT '创建时间',
   PRIMARY KEY (` + "`" + `id` + "`" + `),
   KEY ` + "`" + `idx_delay_queue_run_at` + "`" + ` (` + "`" + `run_at` + "`" + `)
