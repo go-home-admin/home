@@ -77,7 +77,7 @@ func (d *DelayQueueForMysql) Loop() {
 	interval := app2.Config("queue.delay.interval", 60)
 	for {
 		list := make([]*OrmDelayQueue, 0)
-		dbRet := d.mysql.Model(&OrmDelayQueue{}).Where("run_at <= ? and fail = 0", time.Now()).Limit(100).Order("Id desc").Find(&list)
+		dbRet := d.mysql.Model(&OrmDelayQueue{}).Where("run_at <= ? and fail = 0", time.Now()).Limit(100).Order("id desc").Find(&list)
 
 		if dbRet.Error != nil {
 			logrus.Error(dbRet.Error)
