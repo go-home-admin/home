@@ -184,10 +184,18 @@ func (d *DelayQueueForMysql) Del(id string) bool {
 func (d *DelayQueueForMysql) RunAfterFunc(delayMsg *OrmDelayQueue) {
 	atomic.AddInt64(&d.RunAfterFuncLimit, -1)
 	dTime := delayMsg.RunAt.Unix() - time.Now().Unix()
-	time.AfterFunc(time.Duration(dTime)*time.Second, func() {
+
+	if dTime > 0 {
+		time.AfterFunc(time.Duration(dTime)*time.Second, func() {
+			atomic.AddInt64(&d.RunAfterFuncLimit, 1)
+			if d.RunDelayJob(delayMsg) {
+				d.mysql.Where("id = ?", delayMsg.Id).Delete(&OrmDelayQueue{})
+			}
+		})
+	} else {
 		atomic.AddInt64(&d.RunAfterFuncLimit, 1)
 		if d.RunDelayJob(delayMsg) {
 			d.mysql.Where("id = ?", delayMsg.Id).Delete(&OrmDelayQueue{})
 		}
-	})
+	}
 }
