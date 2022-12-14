@@ -116,9 +116,10 @@ func (d *DelayQueueForMysql) Loop() {
 			}
 			if len(delIds) != 0 {
 				d.mysql.Where("id in ?", delIds).Delete(&OrmDelayQueue{})
+				// 有正常处理内容, 不需要睡眠
+				continue
 			}
 		}
-
 		time.Sleep(time.Duration(interval) * time.Second)
 	}
 }
