@@ -23,6 +23,12 @@ func (b *Broadcast) Close() {
 // Subscribe 订阅主题
 func (b *Broadcast) Subscribe(topic string) {
 	b.Run = true
+	for b.Run {
+		b.subscribeFor(topic)
+	}
+}
+
+func (b *Broadcast) subscribeFor(topic string) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Error("Subscribe 发生错误", err)
@@ -36,6 +42,10 @@ func (b *Broadcast) Subscribe(topic string) {
 			log.Error(err)
 		}
 	}(pubSub)
+	if _, err := pubSub.Receive(context.Background()); err != nil {
+		log.Error("failed to receive from control PubSub", err)
+		return
+	}
 
 	for b.Run {
 		for msg := range pubSub.Channel() {

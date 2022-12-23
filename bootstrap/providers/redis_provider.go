@@ -31,9 +31,10 @@ func (m *RedisProvider) Init() {
 		config := services.NewConfig(data)
 
 		db := redis.NewClient(&redis.Options{
-			Addr:     config.GetString("host", "127.0.0.1") + ":" + config.GetString("port", "6379"),
-			Password: config.GetString("password", ""), // no password set
-			DB:       config.GetInt("database", 0),     // use default DB
+			Addr:        config.GetString("host", "127.0.0.1") + ":" + config.GetString("port", "6379"),
+			Password:    config.GetString("password", ""), // no password set
+			DB:          config.GetInt("database", 0),     // use default DB
+			ReadTimeout: time.Duration(config.GetInt("read_timeout", -1)),
 		})
 
 		ctx, cancel := context.WithTimeout(context.TODO(), time.Second*3)
