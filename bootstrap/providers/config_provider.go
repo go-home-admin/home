@@ -147,7 +147,7 @@ func (c *ConfigProvider) GetBean(alias string) interface{} {
 
 	fileConfig, ok := c.data[alias[:index]]
 	if !ok {
-		return aliasDef
+		return &aliasDef
 	}
 	arr := strings.Split(alias[index+1:], ".")
 	m := fileConfig.M
@@ -183,12 +183,12 @@ func (c *ConfigProvider) GetBean(alias string) interface{} {
 			if ook {
 				m = val
 			} else {
-				return aliasDef
+				return &aliasDef
 			}
 		} else {
-			return aliasDef
+			return &aliasDef
 		}
 	}
 
-	return aliasDef
+	return &aliasDef
 }
