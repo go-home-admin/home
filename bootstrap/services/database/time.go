@@ -35,12 +35,22 @@ func (t Time) Value() (driver.Value, error) {
 
 // Scan 读取数据库时会调用该方法将时间数据转换成自定义时间类型
 func (t *Time) Scan(v interface{}) error {
-	value, ok := v.(time.Time)
-	if ok {
+	switch v.(type) {
+	case time.Time:
+		value, _ := v.(time.Time)
 		t.Time = value
 		return nil
+	case []byte:
+		value, _ := v.([]byte)
+		dateString := string(value)
+		var err error
+		t.Time, err = time.Parse("2006-01-02 15:04:05", dateString)
+		if err != nil {
+			return fmt.Errorf("无法格式化数据, 时间当前支持Y-m-d H:i:s %v to timestamp", v)
+		}
+		return nil
 	}
-	return fmt.Errorf("can not convert %v to timestamp", v)
+	return fmt.Errorf("无法格式化数据 %v to timestamp", v)
 }
 
 func (t *Time) UnmarshalJSON(data []byte) error {
