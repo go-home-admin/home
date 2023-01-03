@@ -48,8 +48,11 @@ func Key() string {
 func Config[T int | string | bool | *services.Config](key string, def T) T {
 	val := app.GetBean("config").(app.Bean).GetBean(key)
 
-	if val == nil {
-		return def
+	switch val.(type) {
+	case *interface{}:
+		if *val.(*interface{}) == nil {
+			return def
+		}
 	}
 
 	return *val.(*T)
