@@ -79,7 +79,9 @@ func (d *DelayQueueForMysql) Run() {
 	}
 }
 
-// Loop TODO 待优化，如果启动了广播，可以内存维护多个节点的最近任务，可以去掉定时查询
+// Loop 监控执行
+// 一分钟内的任务，如果系统空闲，直接维护在内存，同时设置数据库in_cache=1
+// 超过一分钟的任务，放到数据库，每分钟加载到内存
 func (d *DelayQueueForMysql) Loop() {
 	interval := app2.Config("queue.delay.interval", 60)
 
@@ -153,9 +155,9 @@ func (d *DelayQueueForMysql) RunDelayJob(delayMsg *OrmDelayQueue) bool {
 }
 
 func (d *DelayQueueForMysql) Push(task DelayTask) string {
-	uid := uuid.NewV4().String()
+	uuid := uuid.NewV4().String()
 	delayMsg := &OrmDelayQueue{
-		Id:        uid,
+		Id:        uuid,
 		Fail:      0,
 		Route:     jobToRoute(task.message),
 		Job:       database.NewJSON(task.message),
@@ -170,11 +172,12 @@ func (d *DelayQueueForMysql) Push(task DelayTask) string {
 
 	ret := d.mysql.Model(&OrmDelayQueue{}).Create(delayMsg)
 	if ret.Error != nil {
-		if delayMsg.InCache == 1 {
-			d.RunAfterFunc(delayMsg)
-		}
+		logrus.Error(ret.Error)
 	}
-	return uid
+	if delayMsg.InCache == 1 {
+		d.RunAfterFunc(delayMsg)
+	}
+	return uuid
 }
 
 func (d *DelayQueueForMysql) Del(id string) bool {
