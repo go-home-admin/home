@@ -106,7 +106,7 @@ func (d *DelayQueueForMysql) Loop() {
 			delIds := make([]string, 0)
 			for _, delayMsg := range list {
 				// 还没有到时间就读出来, 设置到系统定时执行
-				if delayMsg.RunAt.Time.Before(time.Now()) {
+				if !delayMsg.RunAt.Time.Before(time.Now()) {
 					if d.RunAfterFuncLimit > 0 {
 						d.RunAfterFunc(delayMsg)
 						d.mysql.Model(&OrmDelayQueue{}).Where("id = ?", delayMsg.Id).Update("in_cache", "1")
