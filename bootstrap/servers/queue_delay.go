@@ -95,7 +95,8 @@ func (d *DelayQueueForMysql) Loop() {
 	}
 	for {
 		list := make([]*OrmDelayQueue, 0)
-		dbRet := d.mysql.Model(&OrmDelayQueue{}).Where("run_at <= ? and fail = 0 and in_cache = 0", time.Now().Add(time.Duration(60))).
+		// 以后一分钟的任务也加载进来
+		dbRet := d.mysql.Model(&OrmDelayQueue{}).Where("run_at <= ? and fail = 0 and in_cache = 0", time.Now().Add(time.Second*60)).
 			Limit(100).
 			Find(&list)
 
