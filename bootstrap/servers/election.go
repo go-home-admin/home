@@ -10,6 +10,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -24,6 +25,8 @@ type Election struct {
 	isRunNode bool
 	lockTime  int
 	awakens   []interface{}
+
+	once sync.Once
 }
 
 func (k *Election) AppendRun(fun func()) {
@@ -45,23 +48,24 @@ func (k *Election) Run() {
 		time.Sleep(time.Duration(k.lockTime) * time.Second)
 	}
 	// 执行节点才可以走下去
-	for _, awaken := range k.awakens {
-		switch awaken.(type) {
-		case func():
-			awaken.(func())()
-		case constraint.KernelServer:
-			awaken.(constraint.KernelServer).Run()
-		default:
-			log.Warning("选举后才启动的参数, 请传入闭包或者constraint.KernelServer")
+	k.once.Do(func() {
+		for _, awaken := range k.awakens {
+			switch awaken.(type) {
+			case func():
+				awaken.(func())()
+			case constraint.KernelServer:
+				awaken.(constraint.KernelServer).Run()
+			default:
+				log.Warning("选举后才启动的参数, 请传入闭包或者constraint.KernelServer")
+			}
 		}
-	}
+	})
 }
 
 func (k *Election) Exit() {
 	k.Connect.Client.Del(context.Background(), k.key)
 
-	if app.HasBean("queue") {
-		NewQueue().CloseBroadcast()
+	if app.HasBean("queue") && k.check() {
 		// 广播到其他副本
 		NewQueue().Publish(message.ElectionClose{
 			Time: time.Now().Unix(),
