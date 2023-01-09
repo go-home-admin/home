@@ -17,6 +17,8 @@ import (
 	"time"
 )
 
+type Task func(job constraint.Job, next func(constraint.Job))
+
 // Queue @Bean("queue")
 type Queue struct {
 	// 队列配置文件的所有配置
@@ -37,6 +39,9 @@ type Queue struct {
 	// 打开广播进程, 允许把某个message投递到广播队列, 所有服务都会收到
 	broadcast  *Broadcast
 	delayQueue DelayQueue
+
+	middlewares    []Task
+	middlewaresLen int
 }
 
 func (q *Queue) Init() {
@@ -301,8 +306,12 @@ func (q *Queue) runSerialQueue(group string, streams []string) {
 								// "[]"无需报错
 								log.Errorf("runJob, json.Unmarshal data err = %v", err)
 							} else {
-								newJob.Handler()
-								q.Connect.Client.XAck(context.Background(), stream, group, id)
+								next := func(job constraint.Job) {
+									newJob.Handler()
+									q.Connect.Client.XAck(context.Background(), stream, group, id)
+								}
+
+								q.middlewareDispatcher(newJob, next)
 							}
 						}
 					}(job.(reflect.Value), event.(string), xMessage.ID, XStream.Stream, group)
@@ -457,14 +466,36 @@ func (q *Queue) runJob(job reflect.Value, event string, id, stream, group string
 		if err != nil && len(event) <= 2 {
 			log.Errorf("runJob, json.Unmarshal data err = %v", err)
 		} else {
-			newJob.Handler()
-			q.Connect.Client.XAck(
-				context.Background(),
-				stream,
-				group,
-				id,
-			)
+			next := func(job constraint.Job) {
+				job.Handler()
+				q.Connect.Client.XAck(context.Background(), stream, group, id)
+			}
+
+			q.middlewareDispatcher(newJob, next)
 		}
+	}
+}
+
+func (q *Queue) AddMiddleware(task Task) {
+	ml := len(q.middlewares)
+	if ml == 0 {
+		q.middlewares = []Task{task}
+	} else {
+		nextTask := q.middlewares[ml-1]
+		q.middlewares = append(q.middlewares, func(job constraint.Job, next func(constraint.Job)) {
+			task(job, func(job constraint.Job) {
+				nextTask(job, next)
+			})
+		})
+	}
+	q.middlewaresLen = ml + 1
+}
+
+func (q *Queue) middlewareDispatcher(job constraint.Job, next func(job constraint.Job)) {
+	if q.middlewaresLen == 0 {
+		next(job)
+	} else {
+		q.middlewares[q.middlewaresLen-1](job, next)
 	}
 }
 
