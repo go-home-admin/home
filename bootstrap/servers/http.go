@@ -30,6 +30,7 @@ func (http *Http) Init() {
 
 	http.Port = http.GetString("port", "80")
 	http.Engine = gin.New()
+	http.Engine.Use(gin.Recovery())
 }
 
 func (http *Http) Boot() {
@@ -43,7 +44,7 @@ func (http *Http) Boot() {
 	if app.IsDebug() {
 		g = append(g, gin.Logger())
 	}
-	http.Engine.Use(append(append(g, gin.Recovery()), http.Middleware...)...)
+	http.Engine.Use(append(g, http.Middleware...)...)
 
 	// 初始化所有配置
 	group := make(map[string]*gin.RouterGroup)
