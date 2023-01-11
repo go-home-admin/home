@@ -39,7 +39,7 @@ func (k *Election) Init() {
 	k.key = k.GetString("default.key", "home_default_election")
 	k.lockTime = k.GetInt("default.lock_time", 60)
 
-	k.Connect = providers.NewRedisProvider().GetBean(k.GetString("connection", "redis")).(*services.Redis)
+	k.Connect = providers.GetBean("redis").(app.Bean).GetBean(k.GetString("connection", "redis")).(*services.Redis)
 }
 
 func (k *Election) Run() {
