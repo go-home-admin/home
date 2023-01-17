@@ -49,6 +49,7 @@ func (a *RouteProvider) Group(group string) *GroupConfig {
 type GroupConfig struct {
 	prefix     string
 	middleware []string
+	skip       bool
 }
 
 func (g *GroupConfig) GetPrefix() string {
@@ -61,6 +62,16 @@ func (g *GroupConfig) GetMiddleware() []string {
 func (g *GroupConfig) Prefix(prefix string) *GroupConfig {
 	g.prefix = prefix
 	return g
+}
+
+// SetSkip 可以设置某些分组路由在一些场景不注册
+func (g *GroupConfig) SetSkip() *GroupConfig {
+	g.skip = true
+	return g
+}
+
+func (g *GroupConfig) GetSkip() bool {
+	return g.skip
 }
 
 func (g *GroupConfig) Middleware(m ...string) *GroupConfig {

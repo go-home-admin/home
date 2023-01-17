@@ -61,8 +61,11 @@ func (http *Http) Boot() {
 	// 分组中间件设置
 	for gn, gm := range http.Route {
 		gc, _ := http.RouteGroupConfig[gn]
-		gr := group[gn]
+		if gc.GetSkip() {
+			continue
+		}
 
+		gr := group[gn]
 		for _, middlewareGroupName := range gc.GetMiddleware() {
 			gorpMics, ok := http.MiddlewareGroup[middlewareGroupName]
 			if ok {
