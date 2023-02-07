@@ -33,7 +33,12 @@ func (j *JSON) Scan(value interface{}) error {
 	}
 	s, ok := value.([]byte)
 	if !ok {
-		log.Warnf("json scan value error, %v", value)
+		st, ok := value.(string)
+		if !ok {
+			log.Warnf("json scan value error, %v; 只支持[]byte|string", value)
+		} else {
+			s = []byte(st)
+		}
 	}
 	*j = append((*j)[0:0], s...)
 	return nil
