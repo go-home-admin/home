@@ -9,6 +9,7 @@ import (
 
 var beansAlias = sync.Map{}
 var beansBoot = make([]constraint.AfterRegistration, 0)
+var beansRunAfter = make([]constraint.RunAfter, 0)
 var exitBoot = make([]constraint.Exit, 0)
 
 // AfterProvider 在 Initialize 函数后执行
@@ -29,6 +30,11 @@ func AfterProvider(bean interface{}, alias string) {
 	boot, ok := bean.(constraint.AfterRegistration)
 	if ok {
 		beansBoot = append(beansBoot, boot)
+	}
+
+	runAfter, ok := bean.(constraint.RunAfter)
+	if ok {
+		beansRunAfter = append(beansRunAfter, runAfter)
 	}
 
 	exit, ok := bean.(constraint.Exit)
@@ -78,6 +84,12 @@ func HasBean(alias string) bool {
 func RunBoot() {
 	for _, b := range beansBoot {
 		b.Boot()
+	}
+}
+
+func RunRunAfter() {
+	for i := len(beansRunAfter) - 1; i >= 0; i-- {
+		beansRunAfter[i].RunAfter()
 	}
 }
 

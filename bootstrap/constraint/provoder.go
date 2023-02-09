@@ -21,6 +21,11 @@ type AfterRegistration interface {
 	Boot()
 }
 
+// RunAfter 在Run执行后执行, 可以做服务准备好状态维护等
+type RunAfter interface {
+	RunAfter()
+}
+
 type Exit interface {
 	Exit()
 }
