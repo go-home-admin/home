@@ -44,8 +44,12 @@ func Key() string {
 	return Config("app.key", "go-admin-key")
 }
 
+type ConfigT interface {
+	int | string | bool | []int | []string | []interface{}
+}
+
 // Config 获取config，格式必须是group.key，第二个可选参数为默认值
-func Config[T int | string | bool | []int | []string | interface{} | []interface{}](key string, def T) T {
+func Config[T ConfigT](key string, def T) T {
 	val := app.GetBean("config").(app.Bean).GetBean(key)
 
 	switch val.(type) {
@@ -53,6 +57,8 @@ func Config[T int | string | bool | []int | []string | interface{} | []interface
 		if *val.(*interface{}) == nil {
 			return def
 		}
+	case []interface{}:
+		return val.(T)
 	}
 
 	return *val.(*T)
