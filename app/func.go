@@ -64,6 +64,10 @@ func Config[T ConfigT](key string, def T) T {
 	return *val.(*T)
 }
 
+func GetConfigAny(key string) interface{} {
+	return app.GetBean("config").(app.Bean).GetBean(key)
+}
+
 // GetGoId
 // 获取跟踪ID, 严禁非开发模式使用
 // github.com/bigwhite/experiments/blob/master/trace-function-call-chain/trace3/trace.go
