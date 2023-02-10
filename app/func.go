@@ -45,7 +45,7 @@ func Key() string {
 }
 
 // Config 获取config，格式必须是group.key，第二个可选参数为默认值
-func Config[T int | string | bool | *services.Config](key string, def T) T {
+func Config[T int | string | bool | []int | []string | interface{} | []interface{}](key string, def T) T {
 	val := app.GetBean("config").(app.Bean).GetBean(key)
 
 	switch val.(type) {
