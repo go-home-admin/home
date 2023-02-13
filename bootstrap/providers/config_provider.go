@@ -126,10 +126,10 @@ func (c *ConfigProvider) Boot() {
 }
 
 // GetBean 约定大于一切, 自己接收的代码和配置结构要人工约束成一致
-// , 后面的字符作为默认值
+// , 后面的字符作为默认值, 默认值只能是字符串返回
 func (c *ConfigProvider) GetBean(alias string) interface{} {
 	index := strings.Index(alias, ",")
-	var aliasDef interface{}
+	var aliasDef string
 	if index != -1 {
 		aliasKey := alias[:index]
 		aliasDef = strings.Trim(alias[index+1:], " ")
