@@ -147,7 +147,7 @@ func (c *ConfigProvider) GetBean(alias string) interface{} {
 
 	fileConfig, ok := c.data[alias[:index]]
 	if !ok {
-		if index != -1 {
+		if index == -1 {
 			var aliasDef interface{}
 			// 不存在分隔符=没有默认值
 			return &aliasDef
