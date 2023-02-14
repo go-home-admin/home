@@ -52,11 +52,14 @@ func (q *Queue) Init() {
 	q.Listen(queues.GetAllProvider())
 }
 
-func (q *Queue) StartBroadcast() {
-	q.broadcast = &Broadcast{
-		Connect: q.Connect,
-		queue:   q,
+func (q *Queue) StartBroadcast() *Broadcast {
+	if q.broadcast == nil {
+		q.broadcast = &Broadcast{
+			Connect: q.Connect,
+			queue:   q,
+		}
 	}
+	return q.broadcast
 }
 
 func (q *Queue) CloseBroadcast() {
