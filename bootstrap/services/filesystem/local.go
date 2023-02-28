@@ -26,7 +26,7 @@ func (l *Local) FormFile(c *gin.Context, up, to string) (string, error) {
 	}
 	// 创建目标文件夹，如果不存在
 	dst := l.root + to
-	dst = strings.ReplaceAll(l.url+dst, "//", "")
+	dst = strings.ReplaceAll(dst, "//", "")
 	if _, err := os.Stat(dst); os.IsNotExist(err) {
 		err = os.MkdirAll(dst, 0755)
 		if err != nil {
@@ -35,7 +35,7 @@ func (l *Local) FormFile(c *gin.Context, up, to string) (string, error) {
 	}
 	// 拼接目标文件路径
 	dst = dst + "/" + file.Filename
-	dst = strings.ReplaceAll(l.url+dst, "//", "")
+	dst = strings.ReplaceAll(dst, "//", "")
 	// 保存文件到目标路径
 	if err := c.SaveUploadedFile(file, dst); err != nil {
 		return "", err
