@@ -26,6 +26,7 @@ func (l *Local) FormFile(c *gin.Context, up, to string) (string, error) {
 	}
 	// 创建目标文件夹，如果不存在
 	dst := l.root + to
+	dst = strings.ReplaceAll(l.url+dst, "//", "")
 	if _, err := os.Stat(dst); os.IsNotExist(err) {
 		err = os.MkdirAll(dst, 0755)
 		if err != nil {
