@@ -14,8 +14,8 @@ type Local struct {
 }
 
 func (l *Local) Init() {
-	l.root = app.Config("filesystem.local.root", "/storage/")
-	l.url = app.Config("filesystem.local.url", "http://127.0.0.1/web/")
+	l.root = app.Config("filesystem.disks.local.root", "/storage/")
+	l.url = app.Config("filesystem.disks.local.url", "http://127.0.0.1/web/")
 }
 
 func (l *Local) FormFile(c *gin.Context, up, to string) (string, error) {
