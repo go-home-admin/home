@@ -53,6 +53,10 @@ func Config[T ConfigT](key string, def T) T {
 	val := app.GetBean("config").(app.Bean).GetBean(key)
 
 	switch val.(type) {
+	case *string:
+		if *val.(*string) == "" {
+			return def
+		}
 	case *services.Config:
 		m := val.(*services.Config)
 		if len(m.M) == 0 {
