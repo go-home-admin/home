@@ -1,0 +1,13 @@
+# 文件系统
+default: local
+
+disks:
+  local:
+    bean: local
+    # 保存路径
+    root: ./storage/files
+    url:
+  oss:
+    # 依赖的名称, @Bean(oss_alias)
+    bean:
+    root:
