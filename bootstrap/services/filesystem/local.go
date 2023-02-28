@@ -33,7 +33,7 @@ func (l *Local) FormFile(c *gin.Context, up, to string) (string, error) {
 		}
 	}
 	// 拼接目标文件路径
-	dst = dst + file.Filename
+	dst = dst + "/" + file.Filename
 	dst = strings.ReplaceAll(l.url+dst, "//", "")
 	// 保存文件到目标路径
 	if err := c.SaveUploadedFile(file, dst); err != nil {
