@@ -15,7 +15,7 @@ type Local struct {
 
 func (l *Local) Init() {
 	l.root = app.Config("filesystem.disks.local.root", "/storage/")
-	l.url = app.Config("filesystem.disks.local.url", "http://127.0.0.1/web/")
+	l.url = app.Config("filesystem.disks.local.url", "http://127.0.0.1/web")
 }
 
 func (l *Local) FormFile(c *gin.Context, up, to string) (string, error) {
@@ -41,5 +41,5 @@ func (l *Local) FormFile(c *gin.Context, up, to string) (string, error) {
 		return "", err
 	}
 	dst = strings.Trim(dst, "/")
-	return l.url + dst, nil
+	return l.url + to, nil
 }
