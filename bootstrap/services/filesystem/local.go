@@ -3,6 +3,7 @@ package filesystem
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-home-admin/home/app"
+	uuid "github.com/satori/go.uuid"
 	"os"
 	"strings"
 )
@@ -33,13 +34,14 @@ func (l *Local) FormFile(c *gin.Context, up, to string) (string, error) {
 			return "", err
 		}
 	}
+	newFileName := uuid.NewV4().String()
 	// 拼接目标文件路径
-	dst = dst + "/" + file.Filename
+	dst = dst + "/" + newFileName
 	dst = strings.ReplaceAll(dst, "//", "")
 	// 保存文件到目标路径
 	if err := c.SaveUploadedFile(file, dst); err != nil {
 		return "", err
 	}
-
+	to = to + "/" + newFileName
 	return l.url + to, nil
 }
