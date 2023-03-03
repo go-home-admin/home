@@ -5,6 +5,7 @@ import (
 	"github.com/go-home-admin/home/app"
 	uuid "github.com/satori/go.uuid"
 	"os"
+	"path"
 	"strings"
 )
 
@@ -34,7 +35,7 @@ func (l *Local) FormFile(c *gin.Context, up, to string) (string, error) {
 			return "", err
 		}
 	}
-	newFileName := uuid.NewV4().String()
+	newFileName := uuid.NewV4().String() + "." + path.Ext(file.Filename)
 	// 拼接目标文件路径
 	dst = dst + "/" + newFileName
 	dst = strings.ReplaceAll(dst, "//", "")
