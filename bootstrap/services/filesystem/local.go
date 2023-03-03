@@ -35,7 +35,7 @@ func (l *Local) FormFile(c *gin.Context, up, to string) (string, error) {
 			return "", err
 		}
 	}
-	newFileName := uuid.NewV4().String() + "." + path.Ext(file.Filename)
+	newFileName := uuid.NewV4().String() + path.Ext(file.Filename)
 	// 拼接目标文件路径
 	dst = dst + "/" + newFileName
 	dst = strings.ReplaceAll(dst, "//", "")
