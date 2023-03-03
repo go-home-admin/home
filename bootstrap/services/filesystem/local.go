@@ -40,6 +40,6 @@ func (l *Local) FormFile(c *gin.Context, up, to string) (string, error) {
 	if err := c.SaveUploadedFile(file, dst); err != nil {
 		return "", err
 	}
-	dst = strings.Trim(dst, "/")
+
 	return l.url + to, nil
 }
