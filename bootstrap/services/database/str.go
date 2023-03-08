@@ -1,5 +1,6 @@
 package database
 
+// StrPointer 字符串转指针
 func StrPointer(str interface{}) *string {
 	switch str.(type) {
 	case string:
@@ -15,6 +16,7 @@ func StrPointer(str interface{}) *string {
 	return nil
 }
 
+// IntPointer 转指针
 func IntPointer(i interface{}) *int {
 	switch i.(type) {
 	case int:
