@@ -57,6 +57,14 @@ func (receiver Ctx) Id() uint64 {
 	return u.(uint64)
 }
 
+func (receiver Ctx) IdStr() string {
+	u, ok := receiver.Context.Get(UserIdKey)
+	if !ok {
+		return ""
+	}
+	return u.(string)
+}
+
 func (receiver Ctx) Token() string {
 	tokenString := receiver.Context.GetHeader("Authorization")
 
@@ -72,5 +80,6 @@ type Context interface {
 	Gin() *gin.Context
 	Token() string
 	Id() uint64
+	IdStr() string
 	User() interface{}
 }
