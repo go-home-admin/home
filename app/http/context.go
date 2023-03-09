@@ -2,12 +2,16 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/go-home-admin/home/database"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"strings"
 )
 
-const UserKey = "user"
 const UserIdKey = "user_id"
+
+// UserModel 不能赋值指针
+var UserModel interface{}
 
 // NewContext 最好在中间件已经赋值以下两个参数
 // ginCtx.Set("user", nil)
@@ -20,6 +24,8 @@ var NewContext = func(ctx *gin.Context) Context {
 
 type Ctx struct {
 	*gin.Context
+
+	UserInfo interface{}
 }
 
 func (receiver Ctx) Success(data interface{}) {
@@ -42,16 +48,16 @@ func (receiver Ctx) Gin() *gin.Context {
 }
 
 func (receiver Ctx) User() interface{} {
-	u, ok := receiver.Context.Get(UserKey)
-	if !ok {
-		return nil
+	if receiver.UserInfo == nil {
+		receiver.InitUser()
 	}
-	return u
+	return receiver.UserInfo
 }
 
 func (receiver Ctx) Id() uint64 {
 	u, ok := receiver.Context.Get(UserIdKey)
 	if !ok {
+		logrus.Fatal("id 不存在, todo Context.Set(UserIdKey, Uid)")
 		return 0
 	}
 	return u.(uint64)
@@ -72,6 +78,18 @@ func (receiver Ctx) Token() string {
 		tokenString = tokenString[7:]
 	}
 	return tokenString
+}
+
+func (receiver Ctx) InitUser() {
+	if receiver.UserInfo == nil {
+		uid, ok := receiver.Context.Get(UserIdKey)
+		if ok {
+			user := UserModel
+			database.DB().Model(UserModel).First(&user, uid)
+
+			receiver.UserInfo = user
+		}
+	}
 }
 
 type Context interface {
