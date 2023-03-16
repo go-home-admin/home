@@ -67,7 +67,7 @@ func (j JSON) Equals(j1 JSON) bool {
 	return bytes.Equal([]byte(j), []byte(j1))
 }
 
-func (j *JSON) Trans(v interface{}) error {
+func (j JSON) Trans(v interface{}) error {
 	b, _ := j.Value()
 	err := json.Unmarshal([]byte(b.(string)), &v)
 	return err
