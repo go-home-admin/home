@@ -69,6 +69,9 @@ func (j JSON) Equals(j1 JSON) bool {
 
 func (j JSON) Trans(v interface{}) error {
 	b, _ := j.Value()
+	if b == nil {
+		return nil
+	}
 	err := json.Unmarshal([]byte(b.(string)), &v)
 	return err
 }
