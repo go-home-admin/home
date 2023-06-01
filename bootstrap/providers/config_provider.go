@@ -56,7 +56,9 @@ func (c *ConfigProvider) initFile() {
 		parDir := ""
 		for i := 0; i <= 100; i++ {
 			checkDir := pwd + parDir
-			if _, err := os.Stat(checkDir + "/go.mod"); err == nil {
+			_, err1 := os.Stat(checkDir + "/go.mod")
+			_, err2 := os.Stat(checkDir + "/.env")
+			if err1 == nil || err2 == nil {
 				dirs, _ := filepath.Abs(checkDir + "/" + defaultDir)
 				DirEntry, err = os.ReadDir(dirs)
 				if err != nil {
