@@ -2,11 +2,13 @@ package servers
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-home-admin/home/app/message"
 	"github.com/go-home-admin/home/bootstrap/constraint"
 	"github.com/go-home-admin/home/bootstrap/providers"
 	"github.com/go-home-admin/home/bootstrap/services"
 	"github.com/go-home-admin/home/bootstrap/services/app"
+	"github.com/go-home-admin/home/bootstrap/services/database"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	"os"
@@ -34,8 +36,10 @@ func (k *Election) AppendRun(fun func()) {
 }
 
 func (k *Election) Init() {
+	machine, _ := os.Hostname()
+
 	k.awakens = make([]interface{}, 0)
-	k.runUid = uuid.NewV4().String()
+	k.runUid = fmt.Sprintf("%v@%v#%v", uuid.NewV4().String(), machine, database.Now().YmdHis())
 	k.key = k.GetString("default.key", "home_default_election")
 	k.lockTime = k.GetInt("default.lock_time", 60)
 
