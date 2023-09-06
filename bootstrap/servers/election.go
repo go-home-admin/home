@@ -67,7 +67,9 @@ func (k *Election) Run() {
 }
 
 func (k *Election) Exit() {
-	k.Connect.Client.Del(context.Background(), k.key)
+	if k.isRunNode {
+		k.Connect.Client.Del(context.Background(), k.key)
+	}
 
 	if app.HasBean("queue") && k.isRunNode {
 		// 广播到其他副本
