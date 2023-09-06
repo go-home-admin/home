@@ -69,13 +69,13 @@ func (k *Election) Run() {
 func (k *Election) Exit() {
 	if k.isRunNode {
 		k.Connect.Client.Del(context.Background(), k.key)
-	}
 
-	if app.HasBean("queue") && k.isRunNode {
-		// 广播到其他副本
-		NewQueue().Publish(message.ElectionClose{
-			Time: time.Now().Unix(),
-		})
+		if app.HasBean("queue") {
+			// 广播到其他副本
+			NewQueue().Publish(message.ElectionClose{
+				Time: time.Now().Unix(),
+			})
+		}
 	}
 }
 
