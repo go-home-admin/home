@@ -89,6 +89,10 @@ func (k *Election) check() bool {
 	ok := k.Connect.Client.SetNX(ctx, k.key, k.runUid, time.Duration(k.lockTime+10)*time.Second)
 
 	if ok.Val() {
+		if k.Connect.Client.Get(ctx, k.key).Val() != k.runUid {
+			return false
+		}
+		// 同时检查值
 		k.isRunNode = true
 		// 设置一个保持心跳的循环
 		go func() {
