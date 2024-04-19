@@ -199,3 +199,32 @@ func (c *ConfigProvider) GetBean(alias string) interface{} {
 
 	return &aliasDef
 }
+
+var ROOT string = ""
+
+func (c *ConfigProvider) GetRoot() string {
+	if ROOT != "" {
+		return ROOT
+	}
+
+	pwd, _ := os.Getwd()
+	parDir := ""
+
+	if defaultConfigDir == nil {
+		// 单元测试中, 可能未初始化框架, 从本目录开始往上查找go.mod文件确定跟目录
+		for i := 0; i <= 100; i++ {
+			checkDir := pwd + parDir
+			_, err1 := os.Stat(checkDir + "/go.mod")
+			_, err2 := os.Stat(checkDir + "/.env")
+			if err1 == nil || err2 == nil {
+				parDir = checkDir
+				break
+			}
+			parDir += "/.."
+		}
+	} else {
+		parDir = pwd
+	}
+	ROOT = parDir
+	return parDir
+}

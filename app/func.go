@@ -114,3 +114,7 @@ func StringToHump(s string) string {
 	}
 	return string(data[:])
 }
+
+func GetRoot() string {
+	return app.GetBean("config").(app.GetRoot).GetRoot()
+}

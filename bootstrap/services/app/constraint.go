@@ -52,6 +52,10 @@ type AppendRun interface {
 	AppendRun(fun func())
 }
 
+type GetRoot interface {
+	GetRoot() string
+}
+
 // GetBean 只能返回指针的值
 func GetBean(alias string) interface{} {
 	arr := strings.Split(alias, ", ")
