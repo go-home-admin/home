@@ -19,6 +19,8 @@ func GetBean(alias string) interface{} {
 				NewMysqlProvider()
 			case "redis":
 				NewRedisProvider()
+			case "config":
+				NewConfigProvider()
 			}
 		}
 	}

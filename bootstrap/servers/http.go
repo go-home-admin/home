@@ -41,9 +41,6 @@ func (http *Http) Boot() {
 
 	// 全局中间件设置
 	g := make([]gin.HandlerFunc, 0)
-	if app.IsDebug() {
-		g = append(g, gin.Logger())
-	}
 	http.Engine.Use(append(g, http.Middleware...)...)
 
 	// 初始化所有配置
