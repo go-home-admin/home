@@ -46,6 +46,6 @@ func (receiver *HttpServer) SetPort(port int) {
 func (receiver *HttpServer) RunListener() {
 	err := receiver.GetEngine().Run(":" + receiver.port)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{"port": receiver.port}).Error("http发送错误")
+		logrus.WithFields(logrus.Fields{"port": receiver.port}).Error("http server 启动发生错误")
 	}
 }

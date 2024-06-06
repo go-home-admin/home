@@ -115,6 +115,7 @@ func StringToHump(s string) string {
 	return string(data[:])
 }
 
+// GetRoot 获取项目根目录，在一些单元测试中可以便捷获取
 func GetRoot() string {
 	return app.GetBean("config").(app.GetRoot).GetRoot()
 }

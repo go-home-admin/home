@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"github.com/go-redis/redis/v8"
 	log "github.com/sirupsen/logrus"
 	"time"
@@ -22,7 +23,7 @@ func (r Redis) Get(key string) *redis.StringCmd {
 func (r Redis) GetString(key string) (string, bool) {
 	cmd := r.Client.Get(context.Background(), key)
 	err := cmd.Err()
-	if err == redis.Nil {
+	if errors.Is(err, redis.Nil) {
 		return "", false
 	} else if err != nil {
 		log.Error(err)
@@ -34,7 +35,7 @@ func (r Redis) GetString(key string) (string, bool) {
 func (r Redis) GetInt(key string) (int, bool) {
 	i, err := r.Client.Get(context.Background(), key).Int()
 	if err != nil {
-		if err == redis.Nil {
+		if errors.Is(err, redis.Nil) {
 			return 0, false
 		}
 		log.Errorf("GetInt %v", err)
@@ -45,7 +46,7 @@ func (r Redis) GetInt(key string) (int, bool) {
 func (r Redis) GetInt64(key string) (int64, bool) {
 	i, err := r.Client.Get(context.Background(), key).Int64()
 	if err != nil {
-		if err == redis.Nil {
+		if errors.Is(err, redis.Nil) {
 			return 0, false
 		}
 		log.Errorf("GetInt64 %v", err)
@@ -56,7 +57,7 @@ func (r Redis) GetInt64(key string) (int64, bool) {
 func (r Redis) GetFloat32(key string) (float32, bool) {
 	i, err := r.Client.Get(context.Background(), key).Float32()
 	if err != nil {
-		if err == redis.Nil {
+		if errors.Is(err, redis.Nil) {
 			return 0, false
 		}
 		log.Errorf("GetFloat32 %v", err)
@@ -67,7 +68,7 @@ func (r Redis) GetFloat32(key string) (float32, bool) {
 func (r Redis) GetFloat64(key string) (float64, bool) {
 	i, err := r.Client.Get(context.Background(), key).Float64()
 	if err != nil {
-		if err == redis.Nil {
+		if errors.Is(err, redis.Nil) {
 			return 0, false
 		}
 		log.Errorf("GetFloat32 %v", err)
@@ -78,7 +79,7 @@ func (r Redis) GetFloat64(key string) (float64, bool) {
 func (r Redis) GetBool(key string) (bool, bool) {
 	i, err := r.Client.Get(context.Background(), key).Bool()
 	if err != nil {
-		if err == redis.Nil {
+		if errors.Is(err, redis.Nil) {
 			return false, false
 		}
 		log.Errorf("GetFloat32 %v", err)
@@ -89,7 +90,7 @@ func (r Redis) GetBool(key string) (bool, bool) {
 func (r Redis) Incr(key string) (int64, bool) {
 	cmd := r.Client.Incr(context.Background(), key)
 	err := cmd.Err()
-	if err == redis.Nil {
+	if errors.Is(err, redis.Nil) {
 		return 0, true
 	} else if err != nil {
 		log.Error(err)
