@@ -44,6 +44,10 @@ func (k *Election) Init() {
 	k.lockTime = k.GetInt("default.lock_time", 60)
 
 	k.Connect = providers.GetBean("redis").(app.Bean).GetBean(k.GetString("connection", "redis")).(*services.Redis)
+
+	if k.Connect == nil {
+		panic("启动选举服务, 必须配置redis连接")
+	}
 }
 
 func (k *Election) Run() {
