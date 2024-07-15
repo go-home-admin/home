@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-type MysqlLog struct {
+type SqlLog struct {
 	L *log.Logger
 	logger.Config
 
@@ -20,8 +20,8 @@ type MysqlLog struct {
 	skips []string
 }
 
-// NewMysqlLog skip 需要屏蔽的sql
-func NewMysqlLog(l *log.Logger, config logger.Config, skips ...string) logger.Interface {
+// NewSqlLog skip 需要屏蔽的sql
+func NewSqlLog(l *log.Logger, config logger.Config, skips ...string) logger.Interface {
 	var (
 		infoStr      = "\n[info] "
 		warnStr      = "\n[warn] "
@@ -31,7 +31,7 @@ func NewMysqlLog(l *log.Logger, config logger.Config, skips ...string) logger.In
 		traceErrStr  = "%s\n[%.3fms] [rows:%v] %s"
 	)
 
-	got := &MysqlLog{
+	got := &SqlLog{
 		L:      l,
 		Config: config,
 
@@ -49,31 +49,31 @@ func NewMysqlLog(l *log.Logger, config logger.Config, skips ...string) logger.In
 }
 
 // LogMode log mode
-func (l *MysqlLog) LogMode(level logger.LogLevel) logger.Interface {
+func (l *SqlLog) LogMode(level logger.LogLevel) logger.Interface {
 	l.LogLevel = level
 	return l
 }
-func (l *MysqlLog) Info(ctx context.Context, msg string, data ...interface{}) {
+func (l *SqlLog) Info(ctx context.Context, msg string, data ...interface{}) {
 	if l.LogLevel >= logger.Info {
 		l.L.Info(msg, append([]interface{}{utils.FileWithLineNum()}, data...))
 	}
 }
-func (l *MysqlLog) Warn(ctx context.Context, msg string, data ...interface{}) {
+func (l *SqlLog) Warn(ctx context.Context, msg string, data ...interface{}) {
 	if l.LogLevel >= logger.Warn {
 		l.L.Warn(msg, append([]interface{}{utils.FileWithLineNum()}, data...))
 	}
 }
-func (l *MysqlLog) Error(ctx context.Context, msg string, data ...interface{}) {
+func (l *SqlLog) Error(ctx context.Context, msg string, data ...interface{}) {
 	if l.LogLevel >= logger.Error {
 		l.L.Error(msg, append([]interface{}{utils.FileWithLineNum()}, data...))
 	}
 }
 
-func (l *MysqlLog) Printf(format string, args ...interface{}) {
+func (l *SqlLog) Printf(format string, args ...interface{}) {
 	l.L.Printf(format, args...)
 }
 
-func (l *MysqlLog) Trace(ctx context.Context, begin time.Time, fc func() (sql string, rowsAffected int64), err error) {
+func (l *SqlLog) Trace(ctx context.Context, begin time.Time, fc func() (sql string, rowsAffected int64), err error) {
 	if l.LogLevel <= logger.Silent {
 		return
 	}

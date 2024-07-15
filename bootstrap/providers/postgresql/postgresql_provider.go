@@ -1,28 +1,26 @@
-package providers
+package postgresql
 
 import (
-	"database/sql"
 	"fmt"
 	"github.com/go-home-admin/home/app"
 	"github.com/go-home-admin/home/bootstrap/services"
 	"github.com/go-home-admin/home/bootstrap/services/logs"
 	"github.com/sirupsen/logrus"
-	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"time"
 )
 
-// MysqlProvider @Bean("mysql")
-type MysqlProvider struct {
+// PostgresqlProvider @Bean("postgresql")
+type PostgresqlProvider struct {
 	config *services.Config `inject:"config, database"`
 	dbs    map[string]*gorm.DB
 }
 
-func (m *MysqlProvider) Init() {
-	m.dbs = make(map[string]*gorm.DB)
+func (p *PostgresqlProvider) Init() {
+	p.dbs = make(map[string]*gorm.DB)
 
-	connections := m.config.GetKey("connections")
+	connections := p.config.GetKey("connections")
 
 	for name, dataT := range connections {
 		data, ok := dataT.(map[interface{}]interface{})
@@ -31,15 +29,16 @@ func (m *MysqlProvider) Init() {
 			continue
 		}
 		driver := data["driver"].(string)
-		if driver != "mysql" {
+		if driver != "postgresql" {
 			continue
 		}
 		config := services.NewConfig(data)
 		host := config.GetString("host", "127.0.0.1")
-		port := config.GetInt("port", 3306)
+		port := config.GetInt("port", 5432)
 		username := config.GetString("username")
 		password := config.GetString("password")
 		dbname := config.GetString("database")
+		timezone := config.GetString("timezone", "Asia/Shanghai")
 
 		gConf := &gorm.Config{
 			Logger: logs.NewSqlLog(logrus.StandardLogger(), logger.Config{
@@ -52,19 +51,16 @@ func (m *MysqlProvider) Init() {
 			gConf.Logger.LogMode(logger.LogLevel(logrus.DebugLevel))
 		}
 
-		dsn := mysql.Open(fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?parseTime=true&loc=Local", username, password, host, port, dbname))
+		dsn := postgres.Open(fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v sslmode=disable TimeZone=%v", host, username, password, dbname, port, timezone))
 		db, err := gorm.Open(dsn, gConf)
 		if err != nil {
-			logrus.Error("mysql 链接错误", err)
+			logrus.Error("postgresql 链接错误", err)
 			panic(err)
 		}
-		// https://github.com/go-sql-driver/mysql/issues/1120
-		d := db.ConnPool.(*sql.DB)
-		d.SetConnMaxIdleTime(60 * time.Second)
-		m.dbs[name.(string)] = db
+		p.dbs[name.(string)] = db
 	}
 }
 
-func (m *MysqlProvider) GetBean(alias string) interface{} {
-	return m.dbs[alias]
+func (p *PostgresqlProvider) GetBean(alias string) interface{} {
+	return p.dbs[alias]
 }
