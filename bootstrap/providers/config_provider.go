@@ -62,7 +62,7 @@ func (c *ConfigProvider) initFile() {
 				dirs, _ := filepath.Abs(checkDir + "/" + defaultDir)
 				DirEntry, err = os.ReadDir(dirs)
 				if err != nil {
-					panic(err)
+					// panic(err) // 如果不是 web 项目, 允许有.env 文件
 				}
 				// checkDir as root
 				_ = godotenv.Load(checkDir + "/.env")
