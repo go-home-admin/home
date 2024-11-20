@@ -9,6 +9,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"strings"
 )
 
 // PostgresqlProvider @Bean("postgresql")
@@ -51,11 +52,16 @@ func (p *PostgresqlProvider) Init() {
 			gConf.Logger.LogMode(logger.LogLevel(logrus.DebugLevel))
 		}
 
-		dsn := postgres.Open(fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v sslmode=disable TimeZone=%v", host, username, password, dbname, port, timezone))
+		dsnStr := fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v sslmode=require TimeZone=%v", host, username, password, dbname, port, timezone)
+		dsn := postgres.Open(dsnStr)
 		db, err := gorm.Open(dsn, gConf)
 		if err != nil {
-			logrus.Error("postgresql 链接错误", err)
-			panic(err)
+			dsn = postgres.Open(strings.Replace(dsnStr, "require", "disable", 1))
+			db, err = gorm.Open(dsn, gConf)
+			if err != nil {
+				logrus.Error("postgresql 链接错误", err)
+				panic(err)
+			}
 		}
 		p.dbs[name.(string)] = db
 	}
