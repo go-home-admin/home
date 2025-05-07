@@ -13,7 +13,7 @@ type PgTime struct {
 // Value Implements Valuer interface for writing to DB
 func (pt PgTime) Value() (driver.Value, error) {
 	// 格式化为 HH:MM:SS.ssssss
-	return pt.Time.Format("15:04:05.999999"), nil
+	return pt.String(), nil
 }
 
 // Scan Implements Scanner interface for reading from DB
@@ -42,11 +42,11 @@ func (pt *PgTime) Scan(value interface{}) error {
 }
 
 func (pt PgTime) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf(`"%s"`, pt.Format("15:04:05"))), nil
+	return []byte(fmt.Sprintf(`"%s"`, pt.String())), nil
 }
 
 func (pt *PgTime) UnmarshalJSON(data []byte) error {
-	t, err := time.Parse(`"15:04:05"`, string(data))
+	t, err := time.Parse(`"15:04:05.999999"`, string(data))
 	if err != nil {
 		return err
 	}
@@ -58,6 +58,10 @@ func (pt PgTime) String() string {
 	return pt.Format("15:04:05.999999")
 }
 
+func (pt PgTime) His() string {
+	return pt.Format("15:04:05")
+}
+
 func (pt PgTime) Add(d time.Duration) PgTime {
 	return PgTime{
 		Time: pt.Time.Add(d),
@@ -65,6 +69,6 @@ func (pt PgTime) Add(d time.Duration) PgTime {
 }
 
 func StrToPgTime(str string) PgTime {
-	tm, _ := time.ParseInLocation("15:04:05.999999", str, time.Local)
+	tm, _ := time.Parse("15:04:05.999999", str)
 	return PgTime{tm}
 }
