@@ -38,6 +38,6 @@ type Bean interface {
 	GetBean(alias string) interface{}
 }
 
-type SetValue interface {
-	SetValue(alias string, value interface{})
+type InjectValue interface {
+	InjectValue(alias string, value interface{})
 }
