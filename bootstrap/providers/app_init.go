@@ -38,6 +38,7 @@ type Bean interface {
 	GetBean(alias string) interface{}
 }
 
+// InjectValue dest 为字段地址（toolset 生成 &field）；config 实现在 ConfigProvider.InjectValue。
 type InjectValue interface {
-	InjectValue(alias string, value interface{})
+	InjectValue(alias string, dest interface{})
 }

@@ -2,17 +2,21 @@ package providers
 
 import (
 	"embed"
+	"encoding/json"
 	"flag"
+	"io/fs"
+	"os"
+	"path"
+	"path/filepath"
+	"reflect"
+	"strconv"
+	"strings"
+
 	"github.com/go-home-admin/home/bootstrap/services"
 	"github.com/go-home-admin/home/bootstrap/utils"
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
-	"io/fs"
-	"os"
-	"path"
-	"path/filepath"
-	"strings"
 )
 
 var envPath string
@@ -172,6 +176,9 @@ func (c *ConfigProvider) GetBean(alias string) interface{} {
 					case int:
 						got := v.(int)
 						return &got
+					case int64:
+						got := v.(int64)
+						return &got
 					case uint:
 						got := v.(uint)
 						return &got
@@ -227,4 +234,224 @@ func (c *ConfigProvider) GetRoot() string {
 	}
 	ROOT = parDir
 	return parDir
+}
+
+// InjectValue 将配置写入 dest。dest 必须为字段地址（toolset 生成 &field），与 GetBean 返回值配合用反射赋值。
+func (c *ConfigProvider) InjectValue(alias string, dest interface{}) {
+	c.writeInjectDest(alias, dest, c.GetBean(alias))
+}
+
+func (c *ConfigProvider) writeInjectDest(configKey string, dest, src interface{}) {
+	if dest == nil {
+		c.panicInjectAssign(configKey, "dest 为 nil")
+	}
+	destVal := reflect.ValueOf(dest)
+	if destVal.Kind() != reflect.Ptr || destVal.IsNil() {
+		c.panicInjectAssign(configKey, "dest 必须为非 nil 的字段地址（生成代码请使用 &field）")
+	}
+	fieldVal := destVal.Elem()
+	if !fieldVal.CanSet() {
+		c.panicInjectAssign(configKey, "dest 指向的字段不可赋值（生成代码请使用 &field）")
+	}
+
+	if src != nil && c.tryInjectUnmarshaler(configKey, dest, fieldVal, src) {
+		return
+	}
+
+	if src == nil {
+		if fieldVal.Kind() == reflect.Ptr {
+			fieldVal.Set(reflect.Zero(fieldVal.Type()))
+			return
+		}
+		c.panicInjectAssign(configKey, "GetBean 返回 nil 且目标字段非指针类型")
+	}
+
+	srcVal := reflect.ValueOf(src)
+
+	// GetBean 返回 *T，写入值类型字段 T（如 bool、int）
+	if fieldVal.Kind() != reflect.Ptr && srcVal.Kind() == reflect.Ptr {
+		if srcVal.IsNil() {
+			fieldVal.Set(reflect.Zero(fieldVal.Type()))
+			return
+		}
+		if configSetAssignable(fieldVal, srcVal.Elem()) {
+			return
+		}
+		c.panicInjectAssign(configKey, "GetBean 指针与值类型字段不匹配")
+	}
+
+	// 目标为 *T：只写入元素值（复制），不把 GetBean 返回的指针地址赋给字段
+	if fieldVal.Kind() == reflect.Ptr {
+		if srcVal.Kind() == reflect.Ptr {
+			if srcVal.IsNil() {
+				fieldVal.Set(reflect.Zero(fieldVal.Type()))
+				return
+			}
+			srcVal = srcVal.Elem()
+		}
+		elemTyp := fieldVal.Type().Elem()
+		if fieldVal.IsNil() {
+			newPtr := reflect.New(elemTyp)
+			if configSetAssignable(newPtr.Elem(), srcVal) {
+				fieldVal.Set(newPtr)
+				return
+			}
+		} else if configSetAssignable(fieldVal.Elem(), srcVal) {
+			return
+		}
+		c.panicInjectAssign(configKey, "GetBean 与指针字段元素类型不匹配")
+	}
+
+	if configSetAssignable(fieldVal, srcVal) {
+		return
+	}
+	c.panicInjectAssign(configKey, "GetBean 值与字段类型不匹配")
+}
+
+// tryInjectUnmarshaler 当注入目标实现 json.Unmarshaler 且配置值为 JSON 文本（string / *string / []byte）时直接 UnmarshalJSON。
+func (c *ConfigProvider) tryInjectUnmarshaler(configKey string, dest interface{}, fieldVal reflect.Value, src interface{}) bool {
+	u := configJSONUnmarshalerTarget(dest, fieldVal)
+	if u == nil {
+		return false
+	}
+	data, ok := configJSONPayload(src)
+	if !ok {
+		return false
+	}
+	if err := u.UnmarshalJSON(data); err != nil {
+		c.panicInjectAssign(configKey, "UnmarshalJSON: "+err.Error())
+	}
+	return true
+}
+
+func configJSONUnmarshalerTarget(dest interface{}, fieldVal reflect.Value) json.Unmarshaler {
+	if u, ok := dest.(json.Unmarshaler); ok {
+		return u
+	}
+	if fieldVal.Kind() == reflect.Ptr {
+		if fieldVal.IsNil() {
+			fieldVal.Set(reflect.New(fieldVal.Type().Elem()))
+		}
+		if u, ok := fieldVal.Interface().(json.Unmarshaler); ok {
+			return u
+		}
+	}
+	if fieldVal.CanAddr() {
+		if u, ok := fieldVal.Addr().Interface().(json.Unmarshaler); ok {
+			return u
+		}
+	}
+	return nil
+}
+
+func configJSONPayload(src interface{}) ([]byte, bool) {
+	if src == nil {
+		return nil, false
+	}
+	switch v := src.(type) {
+	case string:
+		return []byte(v), true
+	case *string:
+		if v == nil {
+			return nil, false
+		}
+		return []byte(*v), true
+	case []byte:
+		return v, true
+	case *[]byte:
+		if v == nil {
+			return nil, false
+		}
+		return *v, true
+	}
+	sv := reflect.ValueOf(src)
+	if sv.Kind() == reflect.Ptr {
+		if sv.IsNil() {
+			return nil, false
+		}
+		return configJSONPayload(sv.Elem().Interface())
+	}
+	if sv.Kind() == reflect.String {
+		return []byte(sv.String()), true
+	}
+	return nil, false
+}
+
+func configSetAssignable(field, src reflect.Value) bool {
+	if src.Kind() == reflect.Ptr {
+		if src.IsNil() {
+			return false
+		}
+		src = src.Elem()
+	}
+	if !src.IsValid() {
+		return false
+	}
+	if configTryCoerce(field, src) {
+		return true
+	}
+	if src.Type().AssignableTo(field.Type()) {
+		field.Set(src)
+		return true
+	}
+	// 勿对 string 使用 reflect.Convert（如 int→string 会得到乱码）
+	if field.Kind() != reflect.String && src.Type().ConvertibleTo(field.Type()) {
+		field.Set(src.Convert(field.Type()))
+		return true
+	}
+	return false
+}
+
+// configTryCoerce 处理 yaml/env 常见类型与注入字段不一致（如 app.port 为 int 8080，字段为 string / *string）。
+func configTryCoerce(field, src reflect.Value) bool {
+	if !src.IsValid() {
+		return false
+	}
+	if field.Kind() == reflect.String {
+		return configScalarToString(field, src)
+	}
+	if field.Kind() == reflect.Ptr && field.Type().Elem().Kind() == reflect.String {
+		s := configFormatScalarString(src)
+		if s == "" && src.Kind() != reflect.String && src.Kind() != reflect.Bool {
+			return false
+		}
+		str := s
+		field.Set(reflect.ValueOf(&str))
+		return true
+	}
+	return false
+}
+
+func configScalarToString(field, src reflect.Value) bool {
+	s := configFormatScalarString(src)
+	if s == "" && src.Kind() != reflect.String && src.Kind() != reflect.Bool {
+		return false
+	}
+	field.SetString(s)
+	return true
+}
+
+func configFormatScalarString(src reflect.Value) string {
+	switch src.Kind() {
+	case reflect.String:
+		return src.String()
+	case reflect.Bool:
+		return strconv.FormatBool(src.Bool())
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return strconv.FormatInt(src.Int(), 10)
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return strconv.FormatUint(src.Uint(), 10)
+	case reflect.Float32, reflect.Float64:
+		return strconv.FormatFloat(src.Float(), 'f', -1, 64)
+	default:
+		return ""
+	}
+}
+
+func (c *ConfigProvider) panicInjectAssign(configKey, detail string) {
+	keyPart := "空键"
+	if configKey != "" {
+		keyPart = "键 " + strconv.Quote(configKey)
+	}
+	panic("注入 " + keyPart + " 失败：无法写入字段（" + detail + "）")
 }

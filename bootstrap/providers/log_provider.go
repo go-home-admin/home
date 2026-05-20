@@ -71,7 +71,7 @@ func (l *LogProvider) Init() {
 				rotatelogs.WithRotationTime(time.Duration(24)*time.Hour),
 			)
 			if err != nil {
-				panic(fmt.Errorf("log file: err", err))
+				panic(fmt.Errorf("log file: %w", err))
 			}
 			logrus.SetOutput(writer)
 		} else {
