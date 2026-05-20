@@ -1,8 +1,9 @@
 package providers
 
 import (
-	"github.com/go-home-admin/home/bootstrap/services/app"
 	"strings"
+
+	"github.com/go-home-admin/home/bootstrap/services/app"
 )
 
 // GetBean 只能返回指针的值
@@ -35,4 +36,8 @@ func AfterProvider(bean interface{}, alias string) {
 type Bean interface {
 	// GetBean 只能返回指针的值
 	GetBean(alias string) interface{}
+}
+
+type SetValue interface {
+	SetValue(alias string, value interface{})
 }
