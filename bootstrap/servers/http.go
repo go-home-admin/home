@@ -1,6 +1,8 @@
 package servers
 
 import (
+	"os"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-home-admin/home/app"
 	"github.com/go-home-admin/home/bootstrap/providers"
@@ -96,6 +98,7 @@ func (http *Http) Run() {
 	err := http.Engine.Run(":" + http.Port)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{"port": http.Port}).Error("http发生错误")
+		os.Exit(1)
 	}
 }
 
