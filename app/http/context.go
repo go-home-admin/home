@@ -118,20 +118,20 @@ type Context interface {
 	PostForm(key string) string
 	BindJSON(obj interface{}) error
 	Status(code int)
-	Set(key string, value interface{})
-	Get(key string) (value interface{}, exists bool)
+	Set(key any, value any)
+	Get(key any) (value any, exists bool)
 	AbortWithStatus(code int)
 	Next()
 
-	GetString(key string) string
-	GetBool(key string) bool
-	GetInt(key string) int
-	GetInt64(key string) int64
-	GetFloat64(key string) float64
-	GetTime(key string) time.Time
-	GetDuration(key string) time.Duration
-	GetStringSlice(key string) []string
-	GetStringMap(key string) map[string]interface{}
-	GetStringMapString(key string) map[string]string
-	GetStringMapStringSlice(key string) map[string][]string
+	GetString(key any) string
+	GetBool(key any) bool
+	GetInt(key any) int
+	GetInt64(key any) int64
+	GetFloat64(key any) float64
+	GetTime(key any) time.Time
+	GetDuration(key any) time.Duration
+	GetStringSlice(key any) []string
+	GetStringMap(key any) map[string]interface{}
+	GetStringMapString(key any) map[string]string
+	GetStringMapStringSlice(key any) map[string][]string
 }

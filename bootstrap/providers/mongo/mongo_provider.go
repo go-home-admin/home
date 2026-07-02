@@ -3,8 +3,8 @@ package mongo
 import (
 	"context"
 	"github.com/go-home-admin/home/bootstrap/services"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"log"
 	"time"
 )
@@ -42,9 +42,9 @@ func (m *MongoProvider) Init() {
 				Username:   config.GetString("username"),
 				Password:   config.GetString("password"),
 			}
-			client, err = mongo.Connect(ctx, options.Client().ApplyURI("mongodb://"+host+":"+port).SetAuth(auth))
+			client, err = mongo.Connect(options.Client().ApplyURI("mongodb://" + host + ":" + port).SetAuth(auth))
 		} else {
-			client, err = mongo.Connect(ctx, options.Client().ApplyURI("mongodb://"+host+":"+port))
+			client, err = mongo.Connect(options.Client().ApplyURI("mongodb://" + host + ":" + port))
 		}
 		if err != nil {
 			panic("mongodb 连接格式错误")

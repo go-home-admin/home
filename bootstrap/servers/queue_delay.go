@@ -6,7 +6,7 @@ import (
 	"github.com/go-home-admin/home/bootstrap/constraint"
 	"github.com/go-home-admin/home/bootstrap/services/app"
 	"github.com/go-home-admin/home/bootstrap/services/database"
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"reflect"
@@ -156,9 +156,9 @@ func (d *DelayQueueForMysql) RunDelayJob(delayMsg *OrmDelayQueue) bool {
 }
 
 func (d *DelayQueueForMysql) Push(task DelayTask) string {
-	uuid := uuid.NewV4().String()
+	id := uuid.NewString()
 	delayMsg := &OrmDelayQueue{
-		Id:        uuid,
+		Id:        id,
 		Fail:      0,
 		Route:     jobToRoute(task.message),
 		Job:       database.NewJSON(task.message),
@@ -178,7 +178,7 @@ func (d *DelayQueueForMysql) Push(task DelayTask) string {
 	if delayMsg.InCache == 1 {
 		d.RunAfterFunc(delayMsg)
 	}
-	return uuid
+	return id
 }
 
 func (d *DelayQueueForMysql) Del(id string) bool {
